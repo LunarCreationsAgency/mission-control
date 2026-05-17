@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const activeGoals = goals.filter((g) => (g as Record<string, unknown>).status === "active").length;
 
   return (
-    <div className="space-y-8 page-enter">
+    <div className="space-y-8 page-enter pt-2 lg:pt-0">
       {/* Header */}
       <div>
         <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">

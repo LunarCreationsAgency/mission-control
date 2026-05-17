@@ -82,7 +82,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="space-y-8 page-enter">
+    <div className="space-y-8 page-enter pt-2 lg:pt-0">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import "./globals.css";
-import Sidebar from "@/components/layout/sidebar";
+import Navbar from "@/components/layout/navbar";
 
 export const metadata = {
   title: "Mission Control",
@@ -11,14 +11,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="ml-72 flex-1 p-8">
-            <div className="mx-auto max-w-7xl">
-              {children}
-            </div>
-          </main>
-        </div>
+        <Navbar />
+        <main className="min-h-screen lg:pl-20">
+          <div className="mx-auto max-w-7xl p-4 lg:p-8">
+            {children}
+          </div>
+        </main>
       </body>
     </html>
   );
