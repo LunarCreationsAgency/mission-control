@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { type Task } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
-import { ListTodo, Loader2 } from "lucide-react";
+import { ListTodo, Loader2, Plus } from "lucide-react";
 
 const columns: { status: Task["status"]; title: string; accent: string }[] = [
   { status: "todo", title: "To Do", accent: "#94a3b8" },
@@ -44,11 +44,9 @@ export default function TasksPage() {
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      // Optimistically update
       setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     } catch (e) {
       console.error("Failed to update task:", e);
-      // Re-fetch to sync
       fetchTasks();
     }
   }, [fetchTasks]);
@@ -56,19 +54,28 @@ export default function TasksPage() {
   const tasksByStatus = (status: Task["status"]) => tasks.filter((t) => t.status === status);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">Tasks</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">Manage and track your AI agent tasks</p>
+          <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
+            Task Management
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Tasks</h1>
+          <p className="mt-1 text-sm text-[var(--foreground-secondary)]">
+            Manage and track your AI agent tasks
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="liquid-glass-subtle flex items-center gap-2 px-3 py-2">
-            <ListTodo className="h-4 w-4 text-[var(--primary)]" />
-            <span className="text-sm font-medium text-[var(--foreground)]">{tasks.length}</span>
-            <span className="text-xs text-[var(--muted)]">total</span>
+        <div className="flex items-center gap-3">
+          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+            <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />
+            <span className="text-sm font-semibold text-[var(--foreground)]">{tasks.length}</span>
+            <span className="text-xs text-[var(--foreground-tertiary)]">total</span>
           </div>
+          <button className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[var(--foreground-secondary)] transition-colors hover:text-[var(--foreground)]">
+            <Plus className="h-4 w-4" />
+            New
+          </button>
         </div>
       </div>
 
@@ -81,11 +88,11 @@ export default function TasksPage() {
 
       {/* Error */}
       {error && !loading && (
-        <div className="liquid-glass border-red-500/30 p-6 text-center">
+        <div className="liquid-glass border-red-500/20 p-8 text-center">
           <p className="text-sm text-red-400">Failed to load tasks</p>
           <button
             onClick={fetchTasks}
-            className="mt-3 text-xs text-[var(--primary)] hover:underline"
+            className="mt-3 text-xs text-[var(--primary-light)] hover:underline"
           >
             Retry
           </button>

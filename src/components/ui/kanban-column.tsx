@@ -38,15 +38,17 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
   }, [status, onUpdate]);
 
   return (
-    <div className="flex min-w-[280px] flex-1 flex-col">
+    <div className="flex min-w-[270px] flex-1 flex-col">
       {/* Column Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white/10" style={{ background: accent }} />
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
-          <span className="liquid-glass-subtle px-2 py-0.5 text-xs font-medium text-[var(--muted)]">{tasks.length}</span>
+      <div className="mb-3 flex items-center justify-between px-1">
+        <div className="flex items-center gap-2.5">
+          <div className="h-2 w-2 rounded-full" style={{ background: accent }} />
+          <h3 className="text-[13px] font-semibold text-[var(--foreground)] tracking-tight">{title}</h3>
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/[0.04] px-1.5 text-[10px] font-semibold text-[var(--foreground-tertiary)] border border-white/[0.06]">
+            {tasks.length}
+          </span>
         </div>
-        <button className="liquid-glass-subtle flex h-6 w-6 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
+        <button className="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-white/[0.04] hover:text-[var(--foreground-secondary)] transition-colors">
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -57,16 +59,16 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          flex flex-1 flex-col gap-2 rounded-xl border p-2 transition-all duration-200 min-h-[200px]
+          flex flex-1 flex-col gap-2 rounded-[18px] border p-2.5 transition-all duration-200 min-h-[200px]
           ${isOver 
-            ? "border-white/25 bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
-            : "border-white/[0.04] bg-white/[0.02]"
+            ? "border-white/15 bg-white/[0.04] shadow-[0_0_30px_rgba(255,255,255,0.03)]" 
+            : "border-white/[0.03] bg-white/[0.01]"
           }
         `}
       >
         {tasks.length === 0 && !isOver ? (
           <div className="flex flex-1 items-center justify-center py-8">
-            <p className="text-xs text-[var(--muted)]">Drop tasks here</p>
+            <p className="text-[11px] text-[var(--foreground-tertiary)]">Drop tasks here</p>
           </div>
         ) : (
           tasks.map((task) => (

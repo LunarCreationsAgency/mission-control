@@ -10,32 +10,18 @@ interface TaskCardProps {
   onUpdate: (id: string, status: Task["status"]) => void;
 }
 
-const priorityColors: Record<string, string> = {
-  low: "bg-blue-500/20 text-blue-400",
-  medium: "bg-yellow-500/20 text-yellow-400",
-  high: "bg-orange-500/20 text-orange-400",
-  critical: "bg-red-500/20 text-red-400",
+const priorityConfig: Record<string, { bg: string; text: string; dot: string }> = {
+  low: { bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400" },
+  medium: { bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+  high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400" },
+  critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
 };
 
 const statusColors: Record<string, string> = {
-  todo: "border-l-slate-500",
+  todo: "border-l-zinc-500",
   in_progress: "border-l-[var(--primary)]",
   review: "border-l-[var(--warning)]",
   done: "border-l-[var(--success)]",
-};
-
-const statusBgColors: Record<string, string> = {
-  todo: "bg-slate-500/15 text-slate-400",
-  in_progress: "bg-[var(--primary)]/15 text-[var(--primary)]",
-  review: "bg-[var(--warning)]/15 text-[var(--warning)]",
-  done: "bg-[var(--success)]/15 text-[var(--success)]",
-};
-
-const statusLabels: Record<string, string> = {
-  todo: "To Do",
-  in_progress: "In Progress",
-  review: "Review",
-  done: "Done",
 };
 
 export default function TaskCard({ task }: TaskCardProps) {
@@ -75,6 +61,8 @@ export default function TaskCard({ task }: TaskCardProps) {
     }
   }, []);
 
+  const priority = priorityConfig[task.priority] || priorityConfig.medium;
+
   return (
     <Link
       href={`/tasks/${task.id}`}
@@ -84,30 +72,34 @@ export default function TaskCard({ task }: TaskCardProps) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       className={`
-        liquid-glass-subtle group block cursor-grab border-l-[3px] p-4 transition-all duration-200 hover:bg-white/5
-        active:cursor-grabbing
+        group block cursor-grab border-l-[2.5px] rounded-[14px] p-3.5 
+        bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06]
+        hover:bg-white/[0.04] hover:border-white/[0.08]
+        active:cursor-grabbing transition-all duration-200
         ${statusColors[task.status] || statusColors.todo}
       `}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className={`text-[9px] font-bold uppercase tracking-wider rounded px-1.5 py-0.5 ${priorityColors[task.priority] || priorityColors.medium}`}>
+          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider rounded-lg px-2 py-0.5 ${priority.bg} ${priority.text}`}>
+            <span className={`h-1 w-1 rounded-full ${priority.dot}`} />
             {task.priority}
           </span>
-          <span className={`text-[9px] font-semibold uppercase tracking-wider rounded px-1.5 py-0.5 ${statusBgColors[task.status] || statusBgColors.todo}`}>
-            {statusLabels[task.status] || task.status}
-          </span>
         </div>
-        <GripVertical className="h-3.5 w-3.5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        <GripVertical className="h-3 w-3 text-[var(--foreground-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
       </div>
-      
-      <h4 className="mb-1 text-sm font-medium text-[var(--foreground)]">{task.title}</h4>
-      
+
+      <h4 className="mb-1 text-[13px] font-medium text-[var(--foreground)] leading-snug">
+        {task.title}
+      </h4>
+
       {task.description && (
-        <p className="mb-3 text-xs text-[var(--muted)] line-clamp-2">{task.description}</p>
+        <p className="mb-3 text-[11px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed">
+          {task.description}
+        </p>
       )}
-      
-      <div className="flex items-center gap-3 text-[10px] text-[var(--muted)]">
+
+      <div className="flex items-center gap-3 text-[10px] text-[var(--foreground-tertiary)]">
         {task.assignee && (
           <div className="flex items-center gap-1">
             <User className="h-3 w-3" />
@@ -117,7 +109,7 @@ export default function TaskCard({ task }: TaskCardProps) {
         {task.due_date && (
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            <span>{new Date(task.due_date).toLocaleDateString()}</span>
+            <span>{new Date(task.due_date).toLocaleDateString("de-DE")}</span>
           </div>
         )}
       </div>

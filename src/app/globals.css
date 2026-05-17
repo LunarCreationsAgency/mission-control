@@ -1,132 +1,113 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f5f5f7;
-  --card: rgba(255, 255, 255, 0.04);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --primary: #2997ff;
-  --primary-hover: #1a7de0;
-  --success: #30d158;
-  --warning: #ff9f0a;
-  --destructive: #ff375f;
-  --muted: rgba(255, 255, 255, 0.5);
-  --border: rgba(255, 255, 255, 0.08);
-  --radius: 20px;
-  --radius-sm: 12px;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --background: #0a0a0f;
+  --surface: #12121a;
+  --surface-elevated: #1a1a28;
+  --foreground: #fafafa;
+  --foreground-secondary: #a1a1aa;
+  --foreground-tertiary: #71717a;
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #2563eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --destructive: #ef4444;
+  --info: #06b6d4;
+  --radius: 24px;
+  --radius-sm: 16px;
+  --radius-xs: 10px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-image:
-    radial-gradient(circle at 20% 0%, rgba(41, 151, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 100%, rgba(48, 209, 88, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 197, 94, 0.08), transparent);
   background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* Liquid Glass */
+/* Modern Liquid Glass */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(40px) saturate(140%);
-  -webkit-backdrop-filter: blur(40px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.2),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.1),
-    0 8px 32px rgba(0, 0, 0, 0.2);
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liquid-glass-strong {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(60px) saturate(160%);
-  -webkit-backdrop-filter: blur(60px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius);
+.liquid-glass:hover {
+  border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.3),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.15),
-    0 12px 40px rgba(0, 0, 0, 0.3);
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .liquid-glass-subtle {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top-color: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-subtle:hover {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Sidebar */
 .sidebar-glass {
-  background: rgba(10, 10, 12, 0.7);
-  backdrop-filter: blur(40px) saturate(140%);
-  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  background: rgba(10, 10, 18, 0.85);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
 }
 
-/* Status animations */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0); }
-  50% { box-shadow: 0 0 0 4px rgba(41, 151, 255, 0.15); }
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.status-in-progress {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* Modern focus ring */
+.focus-ring:focus-visible {
+  outline: none;
+  ring: 2px solid var(--primary);
+  ring-offset: 2px;
+  ring-offset-color: var(--background);
 }
-
-/* Task card hover lift */
-.task-card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.task-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-/* Priority glow effects */
-.priority-critical {
-  box-shadow: 0 0 12px rgba(255, 55, 95, 0.15);
-}
-.priority-high {
-  box-shadow: 0 0 8px rgba(255, 159, 10, 0.1);
-}
-
-/* Status bar accent */
-.status-bar {
-  position: relative;
-  overflow: hidden;
-}
-.status-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  border-radius: 3px 0 0 3px;
-}
-.status-bar-todo::after { background: #94a3b8; }
-.status-bar-in-progress::after { background: var(--primary); }
-.status-bar-review::after { background: var(--warning); }
-.status-bar-done::after { background: var(--success); }
