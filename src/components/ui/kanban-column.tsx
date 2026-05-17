@@ -3,6 +3,7 @@
 import { type Task } from "@/types";
 import TaskCard from "./task-card";
 import { Plus } from "lucide-react";
+import { useState, useCallback } from "react";
 
 interface KanbanColumnProps {
   title: string;
@@ -12,26 +13,29 @@ interface KanbanColumnProps {
   onUpdate: (id: string, status: Task["status"]) => void;
 }
 
-const statusLabels: Record<string, string> = {
-  todo: "To Do",
-  in_progress: "In Progress",
-  review: "Review",
-  done: "Done",
-};
-
 export default function KanbanColumn({ title, status, tasks, accent, onUpdate }: KanbanColumnProps) {
-  const nextStatus: Record<string, Task["status"]> = {
-    todo: "in_progress",
-    in_progress: "review",
-    review: "done",
-    done: "done",
-  };
+  const [isOver, setIsOver] = useState(false);
 
-  const handleCardClick = (task: Task) => {
-    if (task.status !== "done") {
-      onUpdate(task.id, nextStatus[task.status]);
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setIsOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsOver(false);
+    const taskId = e.dataTransfer.getData("taskId");
+    const currentStatus = e.dataTransfer.getData("currentStatus");
+    if (taskId && currentStatus !== status) {
+      onUpdate(taskId, status);
     }
-  };
+  }, [status, onUpdate]);
 
   return (
     <div className="flex min-w-[280px] flex-1 flex-col">
@@ -48,16 +52,25 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
       </div>
 
       {/* Column Body */}
-      <div className="flex flex-1 flex-col gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-2">
-        {tasks.length === 0 ? (
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`
+          flex flex-1 flex-col gap-2 rounded-xl border p-2 transition-all duration-200 min-h-[200px]
+          ${isOver 
+            ? "border-white/20 bg-white/[0.06]" 
+            : "border-white/[0.04] bg-white/[0.02]"
+          }
+        `}
+      >
+        {tasks.length === 0 && !isOver ? (
           <div className="flex flex-1 items-center justify-center py-8">
-            <p className="text-xs text-[var(--muted)]">No tasks</p>
+            <p className="text-xs text-[var(--muted)]">Drop tasks here</p>
           </div>
         ) : (
           tasks.map((task) => (
-            <div key={task.id} onClick={() => handleCardClick(task)}>
-              <TaskCard task={task} onUpdate={onUpdate} />
-            </div>
+            <TaskCard key={task.id} task={task} onUpdate={onUpdate} />
           ))
         )}
       </div>
