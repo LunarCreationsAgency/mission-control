@@ -17,6 +17,27 @@ const priorityColors: Record<string, string> = {
   critical: "bg-red-500/20 text-red-400",
 };
 
+const statusColors: Record<string, string> = {
+  todo: "border-l-slate-500",
+  in_progress: "border-l-[var(--primary)]",
+  review: "border-l-[var(--warning)]",
+  done: "border-l-[var(--success)]",
+};
+
+const statusBgColors: Record<string, string> = {
+  todo: "bg-slate-500/15 text-slate-400",
+  in_progress: "bg-[var(--primary)]/15 text-[var(--primary)]",
+  review: "bg-[var(--warning)]/15 text-[var(--warning)]",
+  done: "bg-[var(--success)]/15 text-[var(--success)]",
+};
+
+const statusLabels: Record<string, string> = {
+  todo: "To Do",
+  in_progress: "In Progress",
+  review: "Review",
+  done: "Done",
+};
+
 export default function TaskCard({ task }: TaskCardProps) {
   const isDraggingRef = useRef(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -31,25 +52,21 @@ export default function TaskCard({ task }: TaskCardProps) {
     e.dataTransfer.setData("currentStatus", task.status);
     e.dataTransfer.effectAllowed = "move";
     isDraggingRef.current = true;
-    // Don't propagate to parent link
     e.stopPropagation();
   }, [task.id, task.status]);
 
   const handleDragEnd = useCallback(() => {
-    // Delay reset so click handler can check
     setTimeout(() => {
       isDraggingRef.current = false;
     }, 50);
   }, []);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
-    // If this was a drag operation, prevent navigation
     if (isDraggingRef.current) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-    // Also check if mouse moved significantly (drag threshold)
     const dx = Math.abs(e.clientX - dragStartPos.current.x);
     const dy = Math.abs(e.clientY - dragStartPos.current.y);
     if (dx > 5 || dy > 5) {
@@ -67,15 +84,21 @@ export default function TaskCard({ task }: TaskCardProps) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       className={`
-        liquid-glass-subtle group block cursor-grab p-4 transition-all duration-200 hover:bg-white/5
+        liquid-glass-subtle group block cursor-grab border-l-[3px] p-4 transition-all duration-200 hover:bg-white/5
         active:cursor-grabbing
+        ${statusColors[task.status] || statusColors.todo}
       `}
     >
-      <div className="mb-2 flex items-center justify-between">
-        <span className={`text-[10px] font-semibold uppercase tracking-wider rounded-md px-2 py-0.5 ${priorityColors[task.priority] || priorityColors.medium}`}>
-          {task.priority}
-        </span>
-        <GripVertical className="h-3.5 w-3.5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <span className={`text-[9px] font-bold uppercase tracking-wider rounded px-1.5 py-0.5 ${priorityColors[task.priority] || priorityColors.medium}`}>
+            {task.priority}
+          </span>
+          <span className={`text-[9px] font-semibold uppercase tracking-wider rounded px-1.5 py-0.5 ${statusBgColors[task.status] || statusBgColors.todo}`}>
+            {statusLabels[task.status] || task.status}
+          </span>
+        </div>
+        <GripVertical className="h-3.5 w-3.5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
       </div>
       
       <h4 className="mb-1 text-sm font-medium text-[var(--foreground)]">{task.title}</h4>

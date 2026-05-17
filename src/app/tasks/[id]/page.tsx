@@ -4,18 +4,18 @@ import { notFound } from "next/navigation";
 import { pbGetTasks } from "@/lib/pocketbase";
 import { type Task } from "@/types";
 
-const priorityColors: Record<string, string> = {
-  low: "text-blue-400",
-  medium: "text-yellow-400",
-  high: "text-orange-400",
-  critical: "text-red-400",
+const priorityBgColors: Record<string, string> = {
+  low: "bg-blue-500/15 text-blue-400",
+  medium: "bg-yellow-500/15 text-yellow-400",
+  high: "bg-orange-500/15 text-orange-400",
+  critical: "bg-red-500/15 text-red-400",
 };
 
-const statusColors: Record<string, string> = {
-  todo: "text-slate-400",
-  in_progress: "text-[var(--primary)]",
-  review: "text-[var(--warning)]",
-  done: "text-[var(--success)]",
+const statusBgColors: Record<string, string> = {
+  todo: "bg-slate-500/15 text-slate-400",
+  in_progress: "bg-[var(--primary)]/15 text-[var(--primary)]",
+  review: "bg-[var(--warning)]/15 text-[var(--warning)]",
+  done: "bg-[var(--success)]/15 text-[var(--success)]",
 };
 
 const statusLabels: Record<string, string> = {
@@ -46,6 +46,14 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <ArrowLeft className="h-4 w-4" />
           Back to Tasks
         </Link>
+        <div className="flex items-center gap-2 mb-4">
+          <span className={`text-[10px] font-bold uppercase tracking-wider rounded-md px-2.5 py-1 ${statusBgColors[task.status] || statusBgColors.todo}`}>
+            {statusLabels[task.status] || task.status}
+          </span>
+          <span className={`text-[10px] font-bold uppercase tracking-wider rounded-md px-2.5 py-1 ${priorityBgColors[task.priority] || priorityBgColors.medium}`}>
+            {task.priority}
+          </span>
+        </div>
         <h1 className="text-3xl font-bold text-[var(--foreground)]">{task.title}</h1>
       </div>
 
@@ -81,7 +89,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                   <Flag className="h-4 w-4" />
                   Status
                 </div>
-                <span className={`text-sm font-medium ${statusColors[task.status] || statusColors.todo}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider rounded-md px-2 py-0.5 ${statusBgColors[task.status] || statusBgColors.todo}`}>
                   {statusLabels[task.status] || task.status}
                 </span>
               </div>
@@ -92,7 +100,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                   <Flag className="h-4 w-4" />
                   Priority
                 </div>
-                <span className={`text-sm font-medium capitalize ${priorityColors[task.priority] || priorityColors.medium}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider rounded-md px-2 py-0.5 ${priorityBgColors[task.priority] || priorityBgColors.medium}`}>
                   {task.priority}
                 </span>
               </div>

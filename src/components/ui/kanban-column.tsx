@@ -42,9 +42,9 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
       {/* Column Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full" style={{ background: accent }} />
+          <div className="h-2.5 w-2.5 rounded-full ring-2 ring-white/10" style={{ background: accent }} />
           <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
-          <span className="text-xs text-[var(--muted)]">({tasks.length})</span>
+          <span className="liquid-glass-subtle px-2 py-0.5 text-xs font-medium text-[var(--muted)]">{tasks.length}</span>
         </div>
         <button className="liquid-glass-subtle flex h-6 w-6 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--foreground)]">
           <Plus className="h-3.5 w-3.5" />
@@ -59,7 +59,7 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
         className={`
           flex flex-1 flex-col gap-2 rounded-xl border p-2 transition-all duration-200 min-h-[200px]
           ${isOver 
-            ? "border-white/20 bg-white/[0.06]" 
+            ? "border-white/25 bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
             : "border-white/[0.04] bg-white/[0.02]"
           }
         `}

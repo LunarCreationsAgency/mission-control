@@ -84,3 +84,49 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Status animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(41, 151, 255, 0.15); }
+}
+
+.status-in-progress {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Task card hover lift */
+.task-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.task-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Priority glow effects */
+.priority-critical {
+  box-shadow: 0 0 12px rgba(255, 55, 95, 0.15);
+}
+.priority-high {
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.1);
+}
+
+/* Status bar accent */
+.status-bar {
+  position: relative;
+  overflow: hidden;
+}
+.status-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  border-radius: 3px 0 0 3px;
+}
+.status-bar-todo::after { background: #94a3b8; }
+.status-bar-in-progress::after { background: var(--primary); }
+.status-bar-review::after { background: var(--warning); }
+.status-bar-done::after { background: var(--success); }
