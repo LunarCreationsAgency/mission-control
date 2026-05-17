@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const activeGoals = goals.filter((g) => (g as Record<string, unknown>).status === "active").length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 page-enter">
       {/* Header */}
       <div>
         <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
@@ -35,6 +35,7 @@ export default async function DashboardPage() {
           subtitle={`${inProgressTasks} in progress`}
           icon={<ListTodo className="h-5 w-5" />}
           accent="var(--primary)"
+          delay={0}
         />
         <KpiCard
           title="Agents Online"
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
           subtitle={`of ${agents.length} total`}
           icon={<Bot className="h-5 w-5" />}
           accent="var(--success)"
+          delay={0.1}
         />
         <KpiCard
           title="Active Goals"
@@ -49,6 +51,7 @@ export default async function DashboardPage() {
           subtitle={`of ${goals.length} total`}
           icon={<Target className="h-5 w-5" />}
           accent="var(--warning)"
+          delay={0.2}
         />
         <KpiCard
           title="Projects"
@@ -56,12 +59,15 @@ export default async function DashboardPage() {
           subtitle="Active missions"
           icon={<FolderKanban className="h-5 w-5" />}
           accent="#a855f7"
+          delay={0.3}
         />
       </div>
 
       {/* Coming soon */}
-      <div className="liquid-glass p-8 text-center">
-        <p className="text-sm text-[var(--foreground-secondary)]">More dashboard widgets coming soon... 🚀</p>
+      <div className="liquid-glass p-8 text-center animated-card" style={{ animationDelay: "0.4s" }}>
+        <p className="text-sm text-[var(--foreground-secondary)]">
+          More dashboard widgets coming soon... 🚀
+        </p>
       </div>
     </div>
   );

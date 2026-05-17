@@ -41,7 +41,7 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-0.5">
+      <nav className="flex-1 space-y-0.5 stagger-children">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
@@ -53,7 +53,7 @@ export default function Sidebar() {
                 group flex items-center gap-3 rounded-[14px] px-3.5 py-2.5 text-[13px] transition-all duration-200
                 ${
                   isActive
-                    ? "bg-white/[0.06] text-[var(--foreground)] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                    ? "bg-white/[0.06] text-[var(--foreground)] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] active-pulse"
                     : "text-[var(--foreground-secondary)] hover:bg-white/[0.03] hover:text-[var(--foreground)]"
                 }
               `}
@@ -61,7 +61,7 @@ export default function Sidebar() {
               <Icon className={`h-[18px] w-[18px] transition-colors ${isActive ? "text-[var(--primary-light)]" : "text-[var(--foreground-tertiary)] group-hover:text-[var(--foreground-secondary)]"}`} />
               {item.label}
               {isActive && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--primary-light)]" />
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--primary-light)] animate-pulse" />
               )}
             </Link>
           );

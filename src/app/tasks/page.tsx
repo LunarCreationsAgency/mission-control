@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { type Task } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
-import { ListTodo, Loader2, Plus } from "lucide-react";
+import { ListTodo, Plus } from "lucide-react";
 
 const columns: { status: Task["status"]; title: string; accent: string }[] = [
   { status: "todo", title: "To Do", accent: "#94a3b8" },
@@ -53,8 +53,36 @@ export default function TasksPage() {
 
   const tasksByStatus = (status: Task["status"]) => tasks.filter((t) => t.status === status);
 
+  if (loading) {
+    return <TasksSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8 page-enter">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
+              Task Management
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Tasks</h1>
+          </div>
+        </div>
+        <div className="liquid-glass border-red-500/20 p-8 text-center animated-card">
+          <p className="text-sm text-red-400">Failed to load tasks</p>
+          <button
+            onClick={fetchTasks}
+            className="mt-3 text-xs text-[var(--primary-light)] hover:underline"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 page-enter">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
@@ -79,41 +107,44 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
-        </div>
-      )}
-
-      {/* Error */}
-      {error && !loading && (
-        <div className="liquid-glass border-red-500/20 p-8 text-center">
-          <p className="text-sm text-red-400">Failed to load tasks</p>
-          <button
-            onClick={fetchTasks}
-            className="mt-3 text-xs text-[var(--primary-light)] hover:underline"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
       {/* Kanban Board */}
-      {!loading && !error && (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((col) => (
-            <KanbanColumn
-              key={col.status}
-              title={col.title}
-              status={col.status}
-              tasks={tasksByStatus(col.status)}
-              accent={col.accent}
-              onUpdate={handleUpdate}
-            />
-          ))}
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {columns.map((col, i) => (
+          <KanbanColumn
+            key={col.status}
+            title={col.title}
+            status={col.status}
+            tasks={tasksByStatus(col.status)}
+            accent={col.accent}
+            onUpdate={handleUpdate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TasksSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-end justify-between">
+        <div>
+          <div className="skeleton h-3 w-24 mb-2" />
+          <div className="skeleton h-8 w-32" />
         </div>
-      )}
+        <div className="skeleton h-9 w-28" />
+      </div>
+      <div className="flex gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex min-w-[270px] flex-1 flex-col">
+            <div className="skeleton h-5 w-24 mb-3" />
+            <div className="flex flex-1 flex-col gap-2 rounded-[18px] border border-white/[0.03] bg-white/[0.01] p-2.5 min-h-[200px]">
+              <div className="skeleton h-24 w-full" />
+              <div className="skeleton h-24 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
