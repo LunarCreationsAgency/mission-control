@@ -185,6 +185,10 @@ body {
 }
 
 /* Page Transition */
+.animate-fadeInScale {
+  animation: fadeInScale 0.3s ease forwards;
+}
+
 .page-enter {
   opacity: 0;
   transform: translateY(10px);

@@ -2,7 +2,7 @@
 
 import { type Task } from "@/types";
 import TaskCard from "./task-card";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useState, useCallback } from "react";
 
 interface KanbanColumnProps {
@@ -10,10 +10,24 @@ interface KanbanColumnProps {
   status: Task["status"];
   tasks: Task[];
   accent: string;
-  onUpdate: (id: string, status: Task["status"]) => void;
+  onUpdate: (id: string, updates: Partial<Task>) => void;
+  onDelete: (id: string) => void;
+  onDragStart: (id: string) => void;
+  onDragEnd: () => void;
+  draggingId: string | null;
 }
 
-export default function KanbanColumn({ title, status, tasks, accent, onUpdate }: KanbanColumnProps) {
+export default function KanbanColumn({
+  title,
+  status,
+  tasks,
+  accent,
+  onUpdate,
+  onDelete,
+  onDragStart,
+  onDragEnd,
+  draggingId,
+}: KanbanColumnProps) {
   const [isOver, setIsOver] = useState(false);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -24,18 +38,27 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setIsOver(false);
+    // Only set isOver false if leaving the column (not entering a child)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsOver(false);
+    }
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsOver(false);
-    const taskId = e.dataTransfer.getData("taskId");
-    const currentStatus = e.dataTransfer.getData("currentStatus");
-    if (taskId && currentStatus !== status) {
-      onUpdate(taskId, status);
-    }
-  }, [status, onUpdate]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsOver(false);
+      const taskId = e.dataTransfer.getData("taskId");
+      const currentStatus = e.dataTransfer.getData("currentStatus");
+      if (taskId && currentStatus !== status) {
+        onUpdate(taskId, { status });
+      }
+    },
+    [status, onUpdate]
+  );
 
   return (
     <div className="flex min-w-[270px] flex-1 flex-col">
@@ -59,9 +82,9 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          flex flex-1 flex-col gap-2 rounded-[18px] border p-2.5 transition-all duration-200 min-h-[200px]
-          ${isOver 
-            ? "border-white/15 bg-white/[0.04] shadow-[0_0_30px_rgba(255,255,255,0.03)]" 
+          flex flex-1 flex-col gap-2 rounded-[18px] border p-2.5 transition-all duration-300 min-h-[200px]
+          ${isOver
+            ? "border-[var(--primary)]/30 bg-[var(--primary)]/5 shadow-[0_0_40px_rgba(59,130,246,0.08)] scale-[1.01]"
             : "border-white/[0.03] bg-white/[0.01]"
           }
         `}
@@ -72,7 +95,15 @@ export default function KanbanColumn({ title, status, tasks, accent, onUpdate }:
           </div>
         ) : (
           tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onUpdate={onUpdate} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              isDragging={draggingId === task.id}
+            />
           ))
         )}
       </div>

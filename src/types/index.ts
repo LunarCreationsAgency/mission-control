@@ -1,13 +1,13 @@
 export interface Task {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   status: "todo" | "in_progress" | "review" | "done";
   priority: "low" | "medium" | "high" | "critical";
-  project: string | null;
-  goal: string | null;
-  due_date: string | null;
-  assignee: string | null;
+  project?: string;
+  goal?: string;
+  due_date?: string;
+  assignee?: string;
   created: string;
   updated: string;
 }

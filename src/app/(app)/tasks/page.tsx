@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { type Task } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
 import TaskListCard from "@/components/ui/task-list-card";
-import { ListTodo, Plus, LayoutGrid, List, Loader2 } from "lucide-react";
+import TaskModal from "@/components/ui/task-modal";
+import { ListTodo, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 const statuses: { status: Task["status"]; label: string; accent: string }[] = [
   { status: "todo", label: "To Do", accent: "#94a3b8" },
@@ -18,6 +19,9 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -38,20 +42,41 @@ export default function TasksPage() {
     fetchTasks();
   }, [fetchTasks]);
 
-  const handleUpdate = useCallback(async (id: string, status: Task["status"]) => {
-    try {
-      const res = await fetch(`/api/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
-    } catch (e) {
-      console.error("Failed to update task:", e);
-      fetchTasks();
-    }
-  }, [fetchTasks]);
+  const handleCreate = useCallback(async (taskData: Partial<Task>) => {
+    const res = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(taskData),
+    });
+    if (!res.ok) throw new Error("Failed to create task");
+    const data = await res.json();
+    setTasks((prev) => [data.task, ...prev]);
+  }, []);
+
+  const handleUpdate = useCallback(async (id: string, updates: Partial<Task>) => {
+    const res = await fetch(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error("Failed to update task");
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+  }, []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete task");
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setDeleteConfirm(null);
+  }, []);
+
+  const handleDragStart = useCallback((id: string) => {
+    setDraggingId(id);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingId(null);
+  }, []);
 
   const tasksByStatus = (status: Task["status"]) => tasks.filter((t) => t.status === status);
   const filteredTasks = tasksByStatus(activeStatus);
@@ -90,7 +115,10 @@ export default function TasksPage() {
             <span className="text-sm font-semibold text-[var(--foreground)]">{tasks.length}</span>
             <span className="text-xs text-[var(--foreground-tertiary)]">total</span>
           </div>
-          <button className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[var(--foreground-secondary)] transition-colors hover:text-[var(--foreground)]">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04] active:scale-[0.98]"
+          >
             <Plus className="h-4 w-4" />New
           </button>
         </div>
@@ -106,6 +134,10 @@ export default function TasksPage() {
             tasks={tasksByStatus(col.status)}
             accent={col.accent}
             onUpdate={handleUpdate}
+            onDelete={handleDelete}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            draggingId={draggingId}
           />
         ))}
       </div>
@@ -145,11 +177,58 @@ export default function TasksPage() {
             </div>
           ) : (
             filteredTasks.map((task) => (
-              <TaskListCard key={task.id} task={task} />
+              <TaskListCard
+                key={task.id}
+                task={task}
+                onDelete={handleDelete}
+              />
             ))
           )}
         </div>
       </div>
+
+      {/* Create Modal */}
+      <TaskModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleCreate}
+        mode="create"
+      />
+
+      {/* Delete Confirm */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+          <div className="relative w-full max-w-sm animate-fadeInScale">
+            <div className="liquid-glass p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
+                  <AlertTriangle className="h-5 w-5 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--foreground)]">Delete Task?</h3>
+                  <p className="text-xs text-[var(--foreground-tertiary)]">This action cannot be undone.</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.04]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteConfirm)}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-4 py-2.5 text-sm transition-all"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -164,7 +243,6 @@ function TasksSkeleton() {
         </div>
         <div className="skeleton h-9 w-28" />
       </div>
-      {/* Desktop skeleton */}
       <div className="hidden lg:flex gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex min-w-[270px] flex-1 flex-col">
@@ -176,7 +254,6 @@ function TasksSkeleton() {
           </div>
         ))}
       </div>
-      {/* Mobile skeleton */}
       <div className="lg:hidden space-y-3">
         <div className="flex gap-2 overflow-x-auto pb-2">
           {[1, 2, 3, 4].map((i) => (
