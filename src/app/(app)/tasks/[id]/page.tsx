@@ -1,8 +1,12 @@
-import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { pbGetTasks, pbGetProjects } from "@/lib/pocketbase";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useData } from "@/lib/use-data";
+import { getTasks, getProjects } from "@/lib/data";
 import { type Task, type Project } from "@/types";
+import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string }> = {
   low: { bg: "bg-blue-500/15", text: "text-blue-400", label: "Low" },
@@ -18,21 +22,45 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; do
   done: { bg: "bg-[var(--success)]/15", text: "text-[var(--success)]", label: "Done", dot: "bg-[var(--success)]" },
 };
 
-export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const [tasksResult, projectsResult] = await Promise.all([
-    pbGetTasks(),
-    pbGetProjects(),
-  ]);
-  const tasks = (tasksResult.items as Task[]) || [];
-  const projects = (projectsResult.items as Project[]) || [];
+export default function TaskDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  
+  const { data: tasks = [], loading: tasksLoading } = useData<Task[]>("tasks", getTasks);
+  const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
+  
+  const loading = tasksLoading || projectsLoading;
   const task = tasks.find((t) => t.id === id);
+  const project = task?.project ? projects.find((p) => p.id === task.project) : undefined;
 
-  if (!task) {
-    notFound();
+  if (loading) {
+    return (
+      <div className="space-y-6 pt-2 lg:pt-0">
+        <div className="skeleton h-8 w-48" />
+        <div className="skeleton h-4 w-32" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="skeleton h-32 rounded-[20px]" />
+            <div className="skeleton h-48 rounded-[20px]" />
+          </div>
+          <div className="skeleton h-64 rounded-[20px]" />
+        </div>
+      </div>
+    );
   }
 
-  const project = task.project ? projects.find((p) => p.id === task.project) : undefined;
+  if (!task) {
+    return (
+      <div className="space-y-6 pt-2 lg:pt-0">
+        <Link href="/tasks" className="inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)]">
+          <ArrowLeft className="h-4 w-4" /> Back to Tasks
+        </Link>
+        <div className="liquid-glass p-12 text-center">
+          <p className="text-[var(--foreground-secondary)]">Task not found.</p>
+        </div>
+      </div>
+    );
+  }
 
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const status = statusConfig[task.status] || statusConfig.todo;
@@ -42,25 +70,19 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
     <div className="space-y-6 pt-2 lg:pt-0">
       {/* Header */}
       <div>
-        <Link
-          href="/tasks"
-          className="mb-4 inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] transition-colors hover:text-[var(--foreground)]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Tasks
+        <Link href="/tasks" className="mb-4 inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] transition-colors hover:text-[var(--foreground)]">
+          <ArrowLeft className="h-4 w-4" /> Back to Tasks
         </Link>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${status.bg} ${status.text}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            {status.label}
+            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
           </span>
           <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${priority.bg} ${priority.text}`}>
             {priority.label}
           </span>
           {isOverdue && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 bg-red-500/15 text-red-400">
-              <Clock className="h-3 w-3" />
-              Overdue
+              <Clock className="h-3 w-3" /> Overdue
             </span>
           )}
         </div>
@@ -69,105 +91,57 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
       {/* Main Content */}
       <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-3">
-        {/* Left Column - Details */}
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           <div className="liquid-glass p-5 lg:p-6">
             <h2 className="mb-3 lg:mb-4 text-base lg:text-lg font-semibold text-[var(--foreground)]">Description</h2>
-            <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
-              {task.description || "No description provided."}
-            </p>
+            <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">{task.description || "No description provided."}</p>
           </div>
-
-          {/* Activity placeholder */}
           <div className="liquid-glass p-5 lg:p-6">
             <h2 className="mb-3 lg:mb-4 text-base lg:text-lg font-semibold text-[var(--foreground)]">Activity</h2>
             <p className="text-sm text-[var(--foreground-tertiary)]">Activity feed coming soon...</p>
           </div>
         </div>
 
-        {/* Right Column - Meta */}
         <div className="space-y-4">
           <div className="liquid-glass p-5">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-              Details
-            </h3>
-
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Details</h3>
             <div className="space-y-4">
-              {/* Status */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                  <Flag className="h-4 w-4" />
-                  Status
-                </div>
+                <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><Flag className="h-4 w-4" /> Status</div>
                 <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${status.bg} ${status.text}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                  {status.label}
+                  <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
                 </span>
               </div>
-
-              {/* Priority */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                  <Flag className="h-4 w-4" />
-                  Priority
-                </div>
-                <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${priority.bg} ${priority.text}`}>
-                  {priority.label}
-                </span>
+                <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><Flag className="h-4 w-4" /> Priority</div>
+                <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${priority.bg} ${priority.text}`}>{priority.label}</span>
               </div>
-
-              {/* Assignee */}
               {task.assignee && (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                    <User className="h-4 w-4" />
-                    Assignee
-                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><User className="h-4 w-4" /> Assignee</div>
                   <span className="text-sm text-[var(--foreground)]">Agent</span>
                 </div>
               )}
-
-              {/* Due Date */}
               {task.due_date && (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                    <Calendar className="h-4 w-4" />
-                    Due Date
-                  </div>
-                  <span className={`text-sm ${isOverdue ? "text-red-400 font-medium" : "text-[var(--foreground)]"}`}>
-                    {new Date(task.due_date).toLocaleDateString("de-DE")}
-                  </span>
+                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><Calendar className="h-4 w-4" /> Due Date</div>
+                  <span className={`text-sm ${isOverdue ? "text-red-400 font-medium" : "text-[var(--foreground)]"}`}>{new Date(task.due_date).toLocaleDateString("de-DE")}</span>
                 </div>
               )}
-
-              {/* Project */}
               {project && (
-                <Link
-                  href={`/projects/${project.id}`}
-                  className="flex items-center justify-between hover:bg-white/[0.02] -mx-2 px-2 py-1 rounded-lg transition-colors"
-                >
-                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                    <FolderKanban className="h-4 w-4" />
-                    Project
-                  </div>
+                <Link href={`/projects/${project.id}`} className="flex items-center justify-between hover:bg-white/[0.02] -mx-2 px-2 py-1 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><FolderKanban className="h-4 w-4" /> Project</div>
                   <span className="text-sm text-[var(--primary-light)]">{project.name}</span>
                 </Link>
               )}
-
-              {/* Goal */}
               {task.goal && (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
-                    <Target className="h-4 w-4" />
-                    Goal
-                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]"><Target className="h-4 w-4" /> Goal</div>
                   <span className="text-sm text-[var(--foreground)]">{task.goal}</span>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Dates */}
           <div className="liquid-glass-subtle p-4">
             <div className="space-y-2 text-xs text-[var(--foreground-tertiary)]">
               <p>Created: {new Date(task.created).toLocaleDateString("de-DE")}</p>

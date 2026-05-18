@@ -1,11 +1,41 @@
-import { Settings, Building2, Globe, Coins } from "lucide-react";
-import { pbGetCompanySettings } from "@/lib/pocketbase";
-import { type CompanySettings } from "@/types";
+"use client";
 
-export default async function SettingsPage() {
-  const result = await pbGetCompanySettings();
-  const settingsList = (result.items as CompanySettings[]) || [];
+import { useState } from "react";
+import { useData } from "@/lib/use-data";
+import { getCompanySettings } from "@/lib/data";
+import { type CompanySettings } from "@/types";
+import { Settings, Building2, Globe, Coins, Loader2 } from "lucide-react";
+
+export default function SettingsPage() {
+  const { data: settingsList = [], loading, error } = useData<CompanySettings[]>("settings", getCompanySettings);
   const settings = settingsList[0] || null;
+
+  if (loading) {
+    return (
+      <div className="space-y-8 pt-2 lg:pt-0">
+        <div>
+          <div className="skeleton h-3 w-20 mb-2" />
+          <div className="skeleton h-8 w-32" />
+        </div>
+        <div className="skeleton h-64 rounded-[20px]" />
+        <div className="skeleton h-64 rounded-[20px]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8 pt-2 lg:pt-0">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Configuration</p>
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
+        </div>
+        <div className="liquid-glass border-red-500/20 p-8 text-center">
+          <p className="text-sm text-red-400">Failed to load settings</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 page-enter pt-2 lg:pt-0">
@@ -34,21 +64,9 @@ export default async function SettingsPage() {
 
         {settings ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SettingCard
-              icon={<Building2 className="h-4 w-4" />}
-              label="Company Name"
-              value={settings.company_name}
-            />
-            <SettingCard
-              icon={<Coins className="h-4 w-4" />}
-              label="Currency"
-              value={settings.currency}
-            />
-            <SettingCard
-              icon={<Globe className="h-4 w-4" />}
-              label="Timezone"
-              value={settings.timezone}
-            />
+            <SettingCard icon={<Building2 className="h-4 w-4" />} label="Company Name" value={settings.company_name} />
+            <SettingCard icon={<Coins className="h-4 w-4" />} label="Currency" value={settings.currency} />
+            <SettingCard icon={<Globe className="h-4 w-4" />} label="Timezone" value={settings.timezone} />
           </div>
         ) : (
           <div className="text-center py-8">
@@ -70,21 +88,9 @@ export default async function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SettingCard
-            icon={<Settings className="h-4 w-4" />}
-            label="Version"
-            value="2.0.0"
-          />
-          <SettingCard
-            icon={<Globe className="h-4 w-4" />}
-            label="Framework"
-            value="Next.js 15"
-          />
-          <SettingCard
-            icon={<Globe className="h-4 w-4" />}
-            label="Database"
-            value="PocketBase"
-          />
+          <SettingCard icon={<Settings className="h-4 w-4" />} label="Version" value="2.0.0" />
+          <SettingCard icon={<Globe className="h-4 w-4" />} label="Framework" value="Next.js 15" />
+          <SettingCard icon={<Globe className="h-4 w-4" />} label="Database" value="PocketBase" />
         </div>
       </div>
 
@@ -114,15 +120,7 @@ export default async function SettingsPage() {
   );
 }
 
-function SettingCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function SettingCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06]">
       <div className="text-[var(--foreground-tertiary)]">{icon}</div>
