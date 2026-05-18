@@ -11,9 +11,10 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -41,6 +43,16 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+      router.refresh();
+    } catch (e) {
+      console.error("Logout failed:", e);
+    }
+  };
 
   return (
     <>
@@ -69,7 +81,6 @@ export default function Navbar() {
                 `}
               >
                 <Icon className="h-[20px] w-[20px]" />
-                {/* Tooltip */}
                 <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
                   {item.label}
                 </span>
@@ -80,6 +91,17 @@ export default function Navbar() {
             );
           })}
         </nav>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="mt-2 group relative flex items-center justify-center rounded-[14px] p-3 transition-all duration-300 text-[var(--foreground-tertiary)] hover:bg-red-500/10 hover:text-red-400"
+        >
+          <LogOut className="h-[20px] w-[20px]" />
+          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
+            Logout
+          </span>
+        </button>
       </aside>
 
       {/* Mobile: Top Bar */}
@@ -123,6 +145,13 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-[14px] px-3.5 py-3 text-sm text-red-400 transition-all duration-200 hover:bg-red-500/10"
+            >
+              <LogOut className="h-5 w-5" />
+              Logout
+            </button>
           </div>
         </div>
       </header>
