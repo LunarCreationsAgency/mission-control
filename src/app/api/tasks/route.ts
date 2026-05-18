@@ -20,16 +20,18 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const task = await pbCreateTask({
+    const payload: Record<string, unknown> = {
       title: body.title?.trim(),
-      description: body.description?.trim() || null,
       status: body.status || "todo",
       priority: body.priority || "medium",
-      project: body.project || null,
-      goal: body.goal || null,
-      due_date: body.due_date || null,
-      assignee: body.assignee || null,
-    });
+    };
+    if (body.description) payload.description = body.description.trim();
+    if (body.project) payload.project = body.project;
+    if (body.goal) payload.goal = body.goal;
+    if (body.due_date) payload.due_date = body.due_date;
+    if (body.assignee) payload.assignee = body.assignee;
+
+    const task = await pbCreateTask(payload);
     return NextResponse.json({ task }, { status: 201 });
   } catch (e) {
     console.error("POST /api/tasks:", e);
