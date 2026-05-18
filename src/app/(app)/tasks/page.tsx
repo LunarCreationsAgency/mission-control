@@ -197,23 +197,31 @@ export default function TasksPage() {
 
       {/* Delete Confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative w-full max-w-sm animate-fadeInScale">
-            <div className="liquid-glass p-5 space-y-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={() => setDeleteConfirm(null)} />
+          <div className="relative w-full max-w-sm z-10" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+            <div
+              className="p-5 space-y-4"
+              style={{
+                background: "#16161e",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "24px",
+                boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+              }}
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
                   <AlertTriangle className="h-5 w-5 text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-[var(--foreground)]">Delete Task?</h3>
+                  <h3 className="text-base font-semibold text-white">Delete Task?</h3>
                   <p className="text-xs text-[var(--foreground-tertiary)]">This action cannot be undone.</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.04]"
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
