@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useData } from "@/lib/use-data";
+import { getTasks, getProjects, createTask, updateTask, deleteTask } from "@/lib/data";
 import { type Task, type Project } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
 import TaskListCard from "@/components/ui/task-list-card";
@@ -15,80 +17,54 @@ const statuses: { status: Task["status"]; label: string; accent: string }[] = [
 ];
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: tasksRaw = [],
+    loading: tasksLoading,
+    error: tasksError,
+    refetch: refetchTasks,
+  } = useData<Task[]>("/api/tasks", getTasks);
+
+  const {
+    data: projectsRaw = [],
+    loading: projectsLoading,
+  } = useData<Project[]>("/api/projects", getProjects);
+
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [tasksRes, projectsRes] = await Promise.all([
-        fetch("/api/tasks", { cache: "no-store" }),
-        fetch("/api/projects", { cache: "no-store" }),
-      ]);
-      if (!tasksRes.ok || !projectsRes.ok) throw new Error(`HTTP error`);
-      const tasksData = await tasksRes.json();
-      const projectsData = await projectsRes.json();
-      setTasks(tasksData.tasks || []);
-      setProjects(projectsData.projects || []);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load tasks");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loading = tasksLoading || projectsLoading;
+  const error = tasksError;
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const tasks = tasksRaw || [];
 
-  const getProjectName = useCallback((projectId?: string) => {
+  const getProjectName = (projectId?: string) => {
     if (!projectId) return undefined;
     const project = projects.find((p) => p.id === projectId);
     return project?.name;
-  }, [projects]);
+  };
 
-  const handleCreate = useCallback(async (taskData: Partial<Task>) => {
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(taskData),
-    });
-    if (!res.ok) throw new Error("Failed to create task");
-    const data = await res.json();
-    setTasks((prev) => [data.task, ...prev]);
-  }, []);
+  const projects = projectsRaw || [];
 
-  const handleUpdate = useCallback(async (id: string, updates: Partial<Task>) => {
-    const res = await fetch(`/api/tasks/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    if (!res.ok) throw new Error("Failed to update task");
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
-  }, []);
+  const handleCreate = async (taskData: Partial<Task>) => {
+    await createTask(taskData as Record<string, unknown>);
+    refetchTasks();
+  };
 
-  const handleDelete = useCallback(async (id: string) => {
-    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Failed to delete task");
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const handleUpdate = async (id: string, updates: Partial<Task>) => {
+    await updateTask(id, updates as Record<string, unknown>);
+    refetchTasks();
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteTask(id);
+    refetchTasks();
     setDeleteConfirm(null);
-  }, []);
+  };
 
-  const handleDragStart = useCallback((id: string) => {
-    setDraggingId(id);
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    setDraggingId(null);
-  }, []);
+  const handleDragStart = (id: string) => setDraggingId(id);
+  const handleDragEnd = () => setDraggingId(null);
 
   const tasksByStatus = (status: Task["status"]) => tasks.filter((t) => t.status === status);
   const filteredTasks = tasksByStatus(activeStatus);
@@ -106,7 +82,7 @@ export default function TasksPage() {
         </div>
         <div className="liquid-glass border-red-500/20 p-8 text-center animated-card">
           <p className="text-sm text-red-400">Failed to load tasks</p>
-          <button onClick={fetchData} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">Retry</button>
+          <button onClick={refetchTasks} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">Retry</button>
         </div>
       </div>
     );

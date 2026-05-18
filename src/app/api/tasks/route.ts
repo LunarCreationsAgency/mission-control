@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { pbGetTasks, pbCreateTask } from "@/lib/pocketbase";
 import { logActivity } from "@/lib/activity";
+import { getCachedOrFetch, invalidateApiCache } from "@/lib/api-cache";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const result = await pbGetTasks();
+    const result = await getCachedOrFetch("tasks", () => pbGetTasks(), 3000);
     return NextResponse.json({ tasks: (result.items as unknown[]) || [] });
   } catch (e) {
     console.error("GET /api/tasks:", e);
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
     if (body.assignee) payload.assignee = body.assignee;
 
     const task = await pbCreateTask(payload);
+    invalidateApiCache("tasks");
 
     logActivity({
       action: "created",
