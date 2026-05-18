@@ -74,7 +74,9 @@ export default function GoalsPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {goals.map((goal, i) => (
-            <GoalCard key={goal.id} goal={goal} delay={i * 0.05} />
+            <Link key={goal.id} href={`/goals/${goal.id}`} className="block">
+              <GoalCard goal={goal} delay={i * 0.05} />
+            </Link>
           ))}
         </div>
       )}
