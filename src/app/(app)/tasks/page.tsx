@@ -197,8 +197,8 @@ export default function TasksPage() {
 
       {/* Delete Confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setDeleteConfirm(null)} />
           <div className="relative w-full max-w-sm animate-fadeInScale">
             <div className="liquid-glass p-5 space-y-4">
               <div className="flex items-center gap-3">
