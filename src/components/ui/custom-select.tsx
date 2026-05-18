@@ -31,6 +31,7 @@ export default function CustomSelect({
   const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const selected = options.find((o) => o.value === value);
 
@@ -46,14 +47,18 @@ export default function CustomSelect({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+      const target = e.target as Node;
+      // Don't close if click is inside the trigger OR inside the menu
+      if (
+        containerRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
       }
+      setIsOpen(false);
     }
     function handleScroll() {
-      if (isOpen) {
-        updatePosition();
-      }
+      if (isOpen) updatePosition();
     }
     function handleEscape(e: KeyboardEvent) {
       if (e.key === "Escape") setIsOpen(false);
@@ -78,6 +83,50 @@ export default function CustomSelect({
     onChange(optValue);
     setIsOpen(false);
   };
+
+  const dropdown = (
+    <div
+      ref={menuRef}
+      className="z-[99999]"
+      style={{
+        position: "fixed",
+        top: menuPos?.top ?? 0,
+        left: menuPos?.left ?? 0,
+        width: menuPos?.width ?? 0,
+      }}
+    >
+      <div
+        className="overflow-hidden rounded-[16px] border border-white/[0.08]"
+        style={{
+          background: "#16161e",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+        }}
+      >
+        <div className="max-h-[240px] overflow-y-auto py-1">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => handleSelect(option.value)}
+              className={`
+                flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
+                ${option.value === value
+                  ? "bg-[var(--primary)]/10 text-white"
+                  : "text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-white"
+                }
+              `}
+            >
+              {option.icon && <span className="shrink-0">{option.icon}</span>}
+              <span className="flex-1 text-left truncate">{option.label}</span>
+              {option.value === value && (
+                <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-light)]" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div ref={containerRef} className="relative">
@@ -119,52 +168,8 @@ export default function CustomSelect({
         />
       </button>
 
-      {/* Dropdown — portaled to body with fixed positioning */}
-      {isOpen && menuPos &&
-        typeof window !== "undefined" &&
-        createPortal(
-          <div
-            className="z-[99999]"
-            style={{
-              position: "fixed",
-              top: menuPos.top,
-              left: menuPos.left,
-              width: menuPos.width,
-            }}
-          >
-            <div
-              className="overflow-hidden rounded-[16px] border border-white/[0.08]"
-              style={{
-                background: "#16161e",
-                boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-              }}
-            >
-              <div className="max-h-[240px] overflow-y-auto py-1">
-                {options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    className={`
-                      flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
-                      ${option.value === value
-                        ? "bg-[var(--primary)]/10 text-white"
-                        : "text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-white"
-                      }
-                    `}
-                  >
-                    {option.icon && <span className="shrink-0">{option.icon}</span>}
-                    <span className="flex-1 text-left truncate">{option.label}</span>
-                    {option.value === value && (
-                      <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-light)]" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
+      {/* Dropdown — portaled to body */}
+      {isOpen && menuPos && typeof window !== "undefined" && createPortal(dropdown, document.body)}
     </div>
   );
 }
