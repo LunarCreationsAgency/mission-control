@@ -28,6 +28,8 @@ export interface Goal {
   description: string;
   status: string;
   progress: number;
+  created: string;
+  updated: string;
   target_date: string | null;
   project: string | null;
 }

@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useData } from "@/lib/use-data";
-import { getGoals } from "@/lib/data";
+import { getGoals, updateGoal, deleteGoal } from "@/lib/data";
 import { type Goal } from "@/types";
-import { ArrowLeft, Target, Calendar, FolderKanban, Flag, TrendingUp, Loader2 } from "lucide-react";
+import { ArrowLeft, Target, Calendar, FolderKanban, Flag, TrendingUp, Pencil, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import GoalModal from "@/components/ui/goal-modal";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   active: { label: "Active", color: "text-[var(--primary-light)]", bg: "bg-[var(--primary)]/15", dot: "bg-[var(--primary)]" },
@@ -15,10 +17,27 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
 
 export default function GoalDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
-  const { data: goals = [], loading } = useData<Goal[]>("goals", getGoals);
+  const { data: goals = [], loading, refetch } = useData<Goal[]>("goals", getGoals);
   const goal = goals.find((g) => g.id === id);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleEdit = async (data: Partial<Goal>) => {
+    await updateGoal(id, data as Record<string, unknown>);
+    setEditModalOpen(false);
+    refetch();
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    await deleteGoal(id);
+    router.push("/goals");
+  };
 
   if (loading) {
     return (
@@ -54,12 +73,37 @@ export default function GoalDetailPage() {
         <Link href="/goals" className="mb-4 inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] transition-colors hover:text-[var(--foreground)]">
           <ArrowLeft className="h-4 w-4" /> Back to Goals
         </Link>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${status.bg} ${status.color}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
-          </span>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${status.bg} ${status.color}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
+              </span>
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{goal.name}</h1>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setEditModalOpen(true)}
+              className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all">
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </button>
+            {!deleteConfirm ? (
+              <button onClick={() => setDeleteConfirm(true)}
+                className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all">
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button onClick={() => setDeleteConfirm(false)}
+                  className="rounded-xl border border-white/[0.08] px-3 py-2 text-xs text-[var(--foreground-secondary)] hover:bg-white/[0.06]">Cancel</button>
+                <button onClick={handleDelete} disabled={deleting}
+                  className="flex items-center gap-2 rounded-xl bg-red-500 px-3 py-2 text-xs font-medium text-white hover:bg-red-600 transition-all disabled:opacity-50">
+                  {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Confirm
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{goal.name}</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-3">
@@ -111,13 +155,15 @@ export default function GoalDetailPage() {
             </div>
           </div>
           <div className="liquid-glass-subtle p-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-[var(--foreground-tertiary)]"><span>Goal ID</span><span>{goal.id.slice(0, 8)}...</span></div>
-              <div className="flex items-center justify-between text-xs text-[var(--foreground-tertiary)]"><span>Project Link</span><span>{goal.project || "None"}</span></div>
+            <div className="space-y-2 text-xs text-[var(--foreground-tertiary)]">
+              <p>Created: {new Date(goal.created).toLocaleDateString("de-DE")}</p>
+              <p>Updated: {new Date(goal.updated).toLocaleDateString("de-DE")}</p>
             </div>
           </div>
         </div>
       </div>
+
+      <GoalModal isOpen={editModalOpen} onClose={() => setEditModalOpen(false)} onSubmit={handleEdit} goal={goal} />
     </div>
   );
 }

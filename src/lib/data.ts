@@ -121,6 +121,24 @@ export async function getGoals(): Promise<Goal[]> {
   });
 }
 
+export async function createGoal(body: Record<string, unknown>) {
+  const result = await apiPost("/api/goals", body);
+  invalidateCache("goals");
+  return result;
+}
+
+export async function updateGoal(id: string, body: Record<string, unknown>) {
+  const result = await apiPatch(`/api/goals/${id}`, body);
+  invalidateCache("goals");
+  return result;
+}
+
+export async function deleteGoal(id: string) {
+  const result = await apiDelete(`/api/goals/${id}`);
+  invalidateCache("goals");
+  return result;
+}
+
 // --- AGENTS ---
 export async function getAgents(): Promise<Agent[]> {
   return cachedGet<Agent[]>("agents", async () => {

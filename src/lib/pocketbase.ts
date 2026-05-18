@@ -141,6 +141,16 @@ export async function pbCreateGoal(data: Record<string, unknown>) {
   return apiCall("/api/collections/goals/records", { method: "POST", body: data, token });
 }
 
+export async function pbUpdateGoal(id: string, data: Record<string, unknown>) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/goals/records/${id}`, { method: "PATCH", body: data, token });
+}
+
+export async function pbDeleteGoal(id: string) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/goals/records/${id}`, { method: "DELETE", token });
+}
+
 // --- AGENTS ---
 export async function pbGetAgents() {
   const token = await getAdminToken();
