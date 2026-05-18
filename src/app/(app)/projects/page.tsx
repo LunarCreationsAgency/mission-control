@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { type Project } from "@/types";
-import { FolderKanban, ListTodo, TrendingUp, Loader2 } from "lucide-react";
+import { type Project, type Task } from "@/types";
+import { FolderKanban, ListTodo, TrendingUp, Plus, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
+import ProjectModal from "@/components/ui/project-modal";
+import { getProjects, getTasks, createProject, deleteProject } from "@/lib/data";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [tasks, setTasks] = useState<Record<string, unknown>[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [projectsRes, tasksRes] = await Promise.all([
-        fetch("/api/projects", { cache: "no-store" }),
-        fetch("/api/tasks", { cache: "no-store" }),
+      const [projectsData, tasksData] = await Promise.all([
+        getProjects(),
+        getTasks(),
       ]);
-      if (!projectsRes.ok || !tasksRes.ok) throw new Error("HTTP error");
-      const projectsData = await projectsRes.json();
-      const tasksData = await tasksRes.json();
-      setProjects(projectsData.projects || []);
-      setTasks(tasksData.tasks || []);
+      setProjects(projectsData as Project[]);
+      setTasks(tasksData as Task[]);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load projects");
@@ -35,15 +36,27 @@ export default function ProjectsPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleCreate = async (project: Partial<Project>) => {
+    await createProject(project as Record<string, unknown>);
+    await fetchData();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (deletingId === id) {
+      await deleteProject(id);
+      setDeletingId(null);
+      await fetchData();
+    } else {
+      setDeletingId(id);
+      setTimeout(() => setDeletingId((prev) => (prev === id ? null : prev)), 3000);
+    }
+  };
+
   const getTaskCount = (projectId: string) =>
-    tasks.filter((t) => (t as Record<string, unknown>).project === projectId).length;
+    tasks.filter((t) => t.project === projectId).length;
 
   const getDoneTaskCount = (projectId: string) =>
-    tasks.filter(
-      (t) =>
-        (t as Record<string, unknown>).project === projectId &&
-        (t as Record<string, unknown>).status === "done"
-    ).length;
+    tasks.filter((t) => t.project === projectId && t.status === "done").length;
 
   if (loading) return <ProjectsSkeleton />;
 
@@ -79,10 +92,19 @@ export default function ProjectsPage() {
             Manage your mission portfolios
           </p>
         </div>
-        <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
-          <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
-          <span className="text-sm font-semibold text-[var(--foreground)]">{projects.length}</span>
-          <span className="text-xs text-[var(--foreground-tertiary)]">total</span>
+        <div className="flex items-center gap-3">
+          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+            <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
+            <span className="text-sm font-semibold text-[var(--foreground)]">{projects.length}</span>
+            <span className="text-xs text-[var(--foreground-tertiary)]">total</span>
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="liquid-glass-subtle flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-white/[0.06] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            New Project
+          </button>
         </div>
       </div>
 
@@ -91,21 +113,36 @@ export default function ProjectsPage() {
         <div className="liquid-glass p-12 text-center animated-card">
           <FolderKanban className="h-12 w-12 text-[var(--foreground-tertiary)] mx-auto mb-4" />
           <p className="text-sm text-[var(--foreground-secondary)]">No projects yet. Create one to get started.</p>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-hover)] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Create Project
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project, i) => (
-            <Link key={project.id} href={`/projects/${project.id}`} className="block">
-              <ProjectCard
-                project={project}
-                taskCount={getTaskCount(project.id)}
-                doneCount={getDoneTaskCount(project.id)}
-                delay={i * 0.05}
-              />
-            </Link>
+            <ProjectCard
+              key={project.id}
+              project={project}
+              taskCount={getTaskCount(project.id)}
+              doneCount={getDoneTaskCount(project.id)}
+              delay={i * 0.05}
+              onDelete={handleDelete}
+              isDeleting={deletingId === project.id}
+            />
           ))}
         </div>
       )}
+
+      {/* Modal */}
+      <ProjectModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleCreate}
+      />
     </div>
   );
 }
@@ -115,11 +152,15 @@ function ProjectCard({
   taskCount,
   doneCount,
   delay,
+  onDelete,
+  isDeleting,
 }: {
   project: Project;
   taskCount: number;
   doneCount: number;
   delay: number;
+  onDelete: (id: string) => void;
+  isDeleting: boolean;
 }) {
   const progress = Math.min(100, Math.max(0, project.progress || 0));
   const progressColor =
@@ -134,65 +175,87 @@ function ProjectCard({
 
   return (
     <div
-      className="liquid-glass group p-6 animated-card hover-lift"
+      className="liquid-glass group p-6 animated-card hover-lift relative"
       style={{ animationDelay: `${delay}s` }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span
-              className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-0.5 ${status.bg} ${status.color}`}
-            >
-              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-              {status.label}
+      {/* Delete button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete(project.id);
+        }}
+        className={`absolute top-3 right-3 z-10 flex items-center justify-center h-7 w-7 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
+          isDeleting
+            ? "bg-red-500/20 text-red-400 opacity-100"
+            : "bg-white/[0.04] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-red-400"
+        }`}
+      >
+        {isDeleting ? (
+          <span className="text-[10px] font-bold">OK?</span>
+        ) : (
+          <Trash2 className="h-3.5 w-3.5" />
+        )}
+      </button>
+
+      <Link href={`/projects/${project.id}`} className="block">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1 min-w-0 pr-8">
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-0.5 ${status.bg} ${status.color}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                {status.label}
+              </span>
+            </div>
+            <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug truncate">
+              {project.name}
+            </h3>
+          </div>
+          <div className="liquid-glass-subtle flex items-center justify-center h-11 w-11 shrink-0">
+            <FolderKanban className="h-5 w-5 text-[var(--primary-light)]" />
+          </div>
+        </div>
+
+        {/* Description */}
+        {project.description && (
+          <p className="text-[12px] text-[var(--foreground-tertiary)] line-clamp-2 mb-4 leading-relaxed">
+            {project.description}
+          </p>
+        )}
+
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] text-[var(--foreground-tertiary)]">Progress</span>
+            <span className="text-[11px] font-semibold text-[var(--foreground)]">{progress}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor}`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 text-[11px] text-[var(--foreground-tertiary)]">
+            <ListTodo className="h-3 w-3" />
+            <span>
+              {doneCount}/{taskCount} tasks
             </span>
           </div>
-          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug truncate">
-            {project.name}
-          </h3>
+          {project.budget > 0 && (
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--foreground-tertiary)]">
+              <TrendingUp className="h-3 w-3" />
+              <span>€{project.budget.toLocaleString()}</span>
+            </div>
+          )}
         </div>
-        <div className="liquid-glass-subtle flex items-center justify-center h-11 w-11 shrink-0 ml-3">
-          <FolderKanban className="h-5 w-5 text-[var(--primary-light)]" />
-        </div>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <p className="text-[12px] text-[var(--foreground-tertiary)] line-clamp-2 mb-4 leading-relaxed">
-          {project.description}
-        </p>
-      )}
-
-      {/* Progress Bar */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] text-[var(--foreground-tertiary)]">Progress</span>
-          <span className="text-[11px] font-semibold text-[var(--foreground)]">{progress}%</span>
-        </div>
-        <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor}`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 text-[11px] text-[var(--foreground-tertiary)]">
-          <ListTodo className="h-3 w-3" />
-          <span>
-            {doneCount}/{taskCount} tasks
-          </span>
-        </div>
-        {project.budget > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--foreground-tertiary)]">
-            <TrendingUp className="h-3 w-3" />
-            <span>€{project.budget.toLocaleString()}</span>
-          </div>
-        )}
-      </div>
+      </Link>
     </div>
   );
 }
@@ -205,7 +268,10 @@ function ProjectsSkeleton() {
           <div className="skeleton h-3 w-20 mb-2" />
           <div className="skeleton h-8 w-28" />
         </div>
-        <div className="skeleton h-9 w-24 rounded-xl" />
+        <div className="flex gap-3">
+          <div className="skeleton h-9 w-24 rounded-xl" />
+          <div className="skeleton h-9 w-28 rounded-xl" />
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (

@@ -1,8 +1,8 @@
 import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { pbGetTasks } from "@/lib/pocketbase";
-import { type Task } from "@/types";
+import { pbGetTasks, pbGetProjects } from "@/lib/pocketbase";
+import { type Task, type Project } from "@/types";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string }> = {
   low: { bg: "bg-blue-500/15", text: "text-blue-400", label: "Low" },
@@ -20,13 +20,19 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; do
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = await pbGetTasks();
-  const tasks = (result.items as Task[]) || [];
+  const [tasksResult, projectsResult] = await Promise.all([
+    pbGetTasks(),
+    pbGetProjects(),
+  ]);
+  const tasks = (tasksResult.items as Task[]) || [];
+  const projects = (projectsResult.items as Project[]) || [];
   const task = tasks.find((t) => t.id === id);
 
   if (!task) {
     notFound();
   }
+
+  const project = task.project ? projects.find((p) => p.id === task.project) : undefined;
 
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const status = statusConfig[task.status] || statusConfig.todo;
@@ -135,14 +141,17 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               )}
 
               {/* Project */}
-              {task.project && (
-                <div className="flex items-center justify-between">
+              {project && (
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="flex items-center justify-between hover:bg-white/[0.02] -mx-2 px-2 py-1 rounded-lg transition-colors"
+                >
                   <div className="flex items-center gap-2 text-sm text-[var(--foreground-tertiary)]">
                     <FolderKanban className="h-4 w-4" />
                     Project
                   </div>
-                  <span className="text-sm text-[var(--foreground)]">{task.project}</span>
-                </div>
+                  <span className="text-sm text-[var(--primary-light)]">{project.name}</span>
+                </Link>
               )}
 
               {/* Goal */}

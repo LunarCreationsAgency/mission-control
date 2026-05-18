@@ -1,11 +1,12 @@
 "use client";
 
-import { type Task } from "@/types";
-import { Calendar, User, ArrowRight, Clock, Trash2 } from "lucide-react";
+import { type Task, type Project } from "@/types";
+import { Calendar, User, ArrowRight, Clock, Trash2, FolderKanban } from "lucide-react";
 import Link from "next/link";
 
 interface TaskListCardProps {
   task: Task;
+  project?: Project;
   onDelete?: (id: string) => void;
 }
 
@@ -23,7 +24,7 @@ const statusConfig: Record<string, { dot: string; bg: string; label: string }> =
   done: { dot: "bg-[var(--success)]", bg: "bg-[var(--success)]/10", label: "Done" },
 };
 
-export default function TaskListCard({ task, onDelete }: TaskListCardProps) {
+export default function TaskListCard({ task, project, onDelete }: TaskListCardProps) {
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const status = statusConfig[task.status] || statusConfig.todo;
 
@@ -63,6 +64,12 @@ export default function TaskListCard({ task, onDelete }: TaskListCardProps) {
 
             {/* Meta row */}
             <div className="flex items-center gap-4 text-[11px] text-[var(--foreground-tertiary)]">
+              {project && (
+                <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded px-1.5 py-0.5 text-[var(--primary-light)]">
+                  <FolderKanban className="h-3 w-3" />
+                  <span>{project.name}</span>
+                </div>
+              )}
               {task.assignee && (
                 <div className="flex items-center gap-1">
                   <User className="h-3 w-3" />

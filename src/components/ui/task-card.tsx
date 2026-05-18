@@ -1,12 +1,13 @@
 "use client";
 
 import { type Task } from "@/types";
-import { Calendar, User, GripVertical, Trash2, Pencil } from "lucide-react";
+import { Calendar, User, GripVertical, Trash2, Pencil, FolderKanban } from "lucide-react";
 import { useRef, useCallback } from "react";
 import Link from "next/link";
 
 interface TaskCardProps {
   task: Task;
+  project?: string;
   onUpdate: (id: string, updates: Partial<Task>) => void;
   onDelete: (id: string) => void;
   onDragStart: (id: string) => void;
@@ -30,6 +31,7 @@ const statusColors: Record<string, string> = {
 
 export default function TaskCard({
   task,
+  project,
   onDelete,
   onDragStart,
   onDragEnd,
@@ -144,6 +146,12 @@ export default function TaskCard({
         )}
 
         <div className="flex items-center gap-3 text-[10px] text-[var(--foreground-tertiary)]">
+          {project && (
+            <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded px-1.5 py-0.5">
+              <FolderKanban className="h-3 w-3 text-[var(--primary-light)]" />
+              <span className="text-[var(--primary-light)]">{project}</span>
+            </div>
+          )}
           {task.assignee && (
             <div className="flex items-center gap-1">
               <User className="h-3 w-3" />

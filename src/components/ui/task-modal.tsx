@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Loader2, Flag, Calendar, ListTodo, AlertTriangle } from "lucide-react";
-import { type Task } from "@/types";
+import { X, Loader2, Flag, Calendar, ListTodo, AlertTriangle, FolderKanban } from "lucide-react";
+import { type Task, type Project } from "@/types";
+import { getProjects } from "@/lib/data";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -33,8 +34,16 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
   const [status, setStatus] = useState<Task["status"]>(initialTask?.status || "todo");
   const [priority, setPriority] = useState<Task["priority"]>(initialTask?.priority || "medium");
   const [dueDate, setDueDate] = useState(initialTask?.due_date ? new Date(initialTask.due_date).toISOString().split("T")[0] : "");
+  const [projectId, setProjectId] = useState(initialTask?.project || "");
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getProjects().then((data) => setProjects(data as Project[])).catch(() => {});
+    }
+  }, [isOpen]);
 
   const resetForm = () => {
     setTitle(initialTask?.title || "");
@@ -42,6 +51,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
     setStatus(initialTask?.status || "todo");
     setPriority(initialTask?.priority || "medium");
     setDueDate(initialTask?.due_date ? new Date(initialTask.due_date).toISOString().split("T")[0] : "");
+    setProjectId(initialTask?.project || "");
     setError(null);
   };
 
@@ -67,6 +77,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
         status,
         priority,
         due_date: dueDate || undefined,
+        project: projectId || undefined,
       });
       handleClose();
     } catch (e) {
@@ -80,14 +91,9 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
 
   const modal = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
-      {/* Solid dark backdrop */}
-      <div
-        className="absolute inset-0 bg-[#0a0a0f]/95"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={handleClose} />
 
-      {/* Modal card - solid background, no transparency */}
-      <div className="relative w-full max-w-lg z-10" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+      <div className="relative w-full max-w-lg z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
         <div
           className="overflow-hidden rounded-[24px]"
           style={{
@@ -211,19 +217,40 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
               </div>
             </div>
 
-            {/* Due Date */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-                Due Date
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-tertiary)]" />
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
-                />
+            {/* Project + Due Date */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
+                  Project
+                </label>
+                <div className="relative">
+                  <FolderKanban className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-tertiary)]" />
+                  <select
+                    value={projectId}
+                    onChange={(e) => setProjectId(e.target.value)}
+                    className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all appearance-none"
+                  >
+                    <option value="">No project</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
+                  Due Date
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-tertiary)]" />
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                  />
+                </div>
               </div>
             </div>
 
@@ -251,7 +278,6 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
     </div>
   );
 
-  // Portal renders outside the page layout to avoid z-index issues
   if (typeof window !== "undefined") {
     return createPortal(modal, document.body);
   }

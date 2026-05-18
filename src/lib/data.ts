@@ -58,6 +58,20 @@ export async function getProjects() {
   return (data.projects || []) as unknown[];
 }
 
+export async function createProject(body: Record<string, unknown>) {
+  return apiPost("/api/projects", body);
+}
+
+export async function updateProject(id: string, body: Record<string, unknown>) {
+  return apiPatch(`/api/projects/${id}`, body);
+}
+
+export async function deleteProject(id: string) {
+  const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`DELETE /api/projects/${id} failed: ${res.status}`);
+  return res.json();
+}
+
 // --- GOALS ---
 export async function getGoals() {
   const data = await apiGet("/api/goals");

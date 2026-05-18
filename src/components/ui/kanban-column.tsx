@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   onDragStart: (id: string) => void;
   onDragEnd: () => void;
   draggingId: string | null;
+  getProjectName?: (projectId?: string) => string | undefined;
 }
 
 export default function KanbanColumn({
@@ -27,6 +28,7 @@ export default function KanbanColumn({
   onDragStart,
   onDragEnd,
   draggingId,
+  getProjectName,
 }: KanbanColumnProps) {
   const [isOver, setIsOver] = useState(false);
 
@@ -98,6 +100,7 @@ export default function KanbanColumn({
             <TaskCard
               key={task.id}
               task={task}
+              project={getProjectName?.(task.project)}
               onUpdate={onUpdate}
               onDelete={onDelete}
               onDragStart={onDragStart}

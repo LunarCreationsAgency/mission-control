@@ -120,6 +120,16 @@ export async function pbCreateProject(data: Record<string, unknown>) {
   return apiCall("/api/collections/projects/records", { method: "POST", body: data, token });
 }
 
+export async function pbUpdateProject(id: string, data: Record<string, unknown>) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/projects/records/${id}`, { method: "PATCH", body: data, token });
+}
+
+export async function pbDeleteProject(id: string) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/projects/records/${id}`, { method: "DELETE", token });
+}
+
 // --- GOALS ---
 export async function pbGetGoals() {
   const token = await getAdminToken();

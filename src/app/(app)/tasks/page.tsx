@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { type Task } from "@/types";
+import { type Task, type Project } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
 import TaskListCard from "@/components/ui/task-list-card";
 import TaskModal from "@/components/ui/task-modal";
@@ -16,6 +16,7 @@ const statuses: { status: Task["status"]; label: string; accent: string }[] = [
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
@@ -23,13 +24,18 @@ export default function TasksPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/tasks", { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setTasks(data.tasks || []);
+      const [tasksRes, projectsRes] = await Promise.all([
+        fetch("/api/tasks", { cache: "no-store" }),
+        fetch("/api/projects", { cache: "no-store" }),
+      ]);
+      if (!tasksRes.ok || !projectsRes.ok) throw new Error(`HTTP error`);
+      const tasksData = await tasksRes.json();
+      const projectsData = await projectsRes.json();
+      setTasks(tasksData.tasks || []);
+      setProjects(projectsData.projects || []);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load tasks");
@@ -39,8 +45,14 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchData();
+  }, [fetchData]);
+
+  const getProjectName = useCallback((projectId?: string) => {
+    if (!projectId) return undefined;
+    const project = projects.find((p) => p.id === projectId);
+    return project?.name;
+  }, [projects]);
 
   const handleCreate = useCallback(async (taskData: Partial<Task>) => {
     const res = await fetch("/api/tasks", {
@@ -94,7 +106,7 @@ export default function TasksPage() {
         </div>
         <div className="liquid-glass border-red-500/20 p-8 text-center animated-card">
           <p className="text-sm text-red-400">Failed to load tasks</p>
-          <button onClick={fetchTasks} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">Retry</button>
+          <button onClick={fetchData} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">Retry</button>
         </div>
       </div>
     );
@@ -138,13 +150,13 @@ export default function TasksPage() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             draggingId={draggingId}
+            getProjectName={getProjectName}
           />
         ))}
       </div>
 
       {/* Mobile: Tab Filter + List */}
       <div className="lg:hidden space-y-4">
-        {/* Status Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           {statuses.map((s) => {
             const count = tasksByStatus(s.status).length;
@@ -169,7 +181,6 @@ export default function TasksPage() {
           })}
         </div>
 
-        {/* Task List */}
         <div className="space-y-3">
           {filteredTasks.length === 0 ? (
             <div className="liquid-glass p-12 text-center">
@@ -180,6 +191,7 @@ export default function TasksPage() {
               <TaskListCard
                 key={task.id}
                 task={task}
+                project={task.project ? projects.find(p => p.id === task.project) : undefined}
                 onDelete={handleDelete}
               />
             ))
