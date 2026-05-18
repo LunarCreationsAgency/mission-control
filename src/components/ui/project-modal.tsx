@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, FolderKanban, Loader2 } from "lucide-react";
 import { type Project } from "@/types";
+import CustomSelect from "@/components/ui/custom-select";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -12,10 +13,16 @@ interface ProjectModalProps {
   project?: Project | null;
 }
 
+const statusOptions = [
+  { value: "active", label: "Active", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> },
+  { value: "completed", label: "Completed", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> },
+  { value: "archived", label: "Archived", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+];
+
 export default function ProjectModal({ isOpen, onClose, onSubmit, project }: ProjectModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<"active" | "completed" | "archived">("active");
+  const [status, setStatus] = useState<string>("active");
   const [budget, setBudget] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +30,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
     if (project) {
       setName(project.name || "");
       setDescription(project.description || "");
-      setStatus(project.status as "active" | "completed" | "archived");
+      setStatus(project.status || "active");
       setBudget(project.budget?.toString() || "");
     } else {
       setName("");
@@ -71,10 +78,8 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
 
   const modal = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
-      {/* Solid dark backdrop */}
       <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={onClose} />
 
-      {/* Modal card — centered, solid background, scrollable */}
       <div className="relative w-full max-w-md z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
         <div
           className="overflow-hidden rounded-[24px]"
@@ -141,20 +146,13 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
 
             {/* Status + Budget */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-                  Status
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as "active" | "completed" | "archived")}
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all appearance-none"
-                >
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
+              <CustomSelect
+                label="Status"
+                value={status}
+                options={statusOptions}
+                onChange={(v) => setStatus(v)}
+              />
+
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Budget (€)

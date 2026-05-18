@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Loader2, Flag, Calendar, ListTodo, AlertTriangle, FolderKanban } from "lucide-react";
 import { type Task, type Project } from "@/types";
 import { getProjects } from "@/lib/data";
+import CustomSelect from "@/components/ui/custom-select";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -14,18 +15,18 @@ interface TaskModalProps {
   mode: "create" | "edit";
 }
 
-const priorities: { value: Task["priority"]; label: string; color: string }[] = [
-  { value: "low", label: "Low", color: "text-blue-400" },
-  { value: "medium", label: "Medium", color: "text-amber-400" },
-  { value: "high", label: "High", color: "text-orange-400" },
-  { value: "critical", label: "Critical", color: "text-red-400" },
+const priorityOptions: { value: string; label: string; icon: React.ReactNode }[] = [
+  { value: "low", label: "Low", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+  { value: "medium", label: "Medium", icon: <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> },
+  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
+  { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
 ];
 
-const statuses: { value: Task["status"]; label: string; color: string }[] = [
-  { value: "todo", label: "To Do", color: "text-slate-400" },
-  { value: "in_progress", label: "In Progress", color: "text-[var(--primary-light)]" },
-  { value: "review", label: "Review", color: "text-[var(--warning)]" },
-  { value: "done", label: "Done", color: "text-[var(--success)]" },
+const statusOptions: { value: string; label: string; icon: React.ReactNode }[] = [
+  { value: "todo", label: "To Do", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "in_progress", label: "In Progress", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> },
+  { value: "review", label: "Review", icon: <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> },
+  { value: "done", label: "Done", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> },
 ];
 
 export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode }: TaskModalProps) {
@@ -164,79 +165,34 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
               />
             </div>
 
-            {/* Status + Priority */}
+            {/* Status + Priority dropdowns */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-                  Status
-                </label>
-                <div className="space-y-1">
-                  {statuses.map((s) => (
-                    <button
-                      key={s.value}
-                      type="button"
-                      onClick={() => setStatus(s.value)}
-                      className={`
-                        flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all
-                        ${status === s.value
-                          ? "bg-[var(--primary)]/15 text-white border border-[var(--primary)]/30"
-                          : "bg-white/[0.03] text-[var(--foreground-tertiary)] border border-white/[0.05] hover:bg-white/[0.06]"
-                        }
-                      `}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${s.color}`} />
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-                  Priority
-                </label>
-                <div className="space-y-1">
-                  {priorities.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => setPriority(p.value)}
-                      className={`
-                        flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all
-                        ${priority === p.value
-                          ? "bg-white/[0.08] text-white border border-white/[0.12]"
-                          : "bg-white/[0.03] text-[var(--foreground-tertiary)] border border-white/[0.05] hover:bg-white/[0.06]"
-                        }
-                      `}
-                    >
-                      <Flag className={`h-3 w-3 ${p.color}`} />
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <CustomSelect
+                label="Status"
+                value={status}
+                options={statusOptions}
+                onChange={(v) => setStatus(v as Task["status"])}
+              />
+              <CustomSelect
+                label="Priority"
+                value={priority}
+                options={priorityOptions}
+                onChange={(v) => setPriority(v as Task["priority"])}
+              />
             </div>
 
             {/* Project + Due Date */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
-                  Project
-                </label>
-                <div className="relative">
-                  <FolderKanban className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-tertiary)]" />
-                  <select
-                    value={projectId}
-                    onChange={(e) => setProjectId(e.target.value)}
-                    className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all appearance-none"
-                  >
-                    <option value="">No project</option>
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <CustomSelect
+                label="Project"
+                value={projectId}
+                options={[
+                  { value: "", label: "No project" },
+                  ...projects.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+                onChange={(v) => setProjectId(v)}
+                placeholder="Select a project"
+              />
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
