@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, FolderKanban } from "lucide-react";
+import { createPortal } from "react-dom";
+import { X, FolderKanban, Loader2 } from "lucide-react";
 import { type Project } from "@/types";
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (project: Partial<Project>) => void;
+  onSubmit: (project: Partial<Project>) => Promise<void>;
   project?: Project | null;
 }
 
@@ -68,53 +69,65 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+  const modal = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
+      {/* Solid dark backdrop */}
+      <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md animate-fadeInScale">
-        <div className="liquid-glass border-white/[0.08] p-6">
+      {/* Modal card — centered, solid background, scrollable */}
+      <div className="relative w-full max-w-md z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+        <div
+          className="overflow-hidden rounded-[24px]"
+          style={{
+            background: "#16161e",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderTopColor: "rgba(255,255,255,0.15)",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--primary)]/15">
-                <FolderKanban className="h-4.5 w-4.5 text-[var(--primary-light)]" />
+          <div className="flex items-center justify-between p-5 pb-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(59,130,246,0.1)" }}>
+                <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
               </div>
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">
-                {project ? "Edit Project" : "New Project"}
-              </h2>
+              <div>
+                <h2 className="text-base font-semibold text-white">
+                  {project ? "Edit Project" : "New Project"}
+                </h2>
+                <p className="text-xs text-[var(--foreground-tertiary)]">
+                  {project ? "Update project details" : "Create a new project"}
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-white/[0.06] hover:text-white transition-all"
             >
-              <X className="h-4 w-4 text-[var(--foreground-tertiary)]" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
             {/* Name */}
-            <div>
-              <label className="block text-xs font-medium text-[var(--foreground-tertiary)] mb-1.5">
-                Name <span className="text-red-400">*</span>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
+                Name *
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Project name"
-                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)]/30 transition-all"
-                required
                 autoFocus
+                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
               />
             </div>
 
             {/* Description */}
-            <div>
-              <label className="block text-xs font-medium text-[var(--foreground-tertiary)] mb-1.5">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                 Description
               </label>
               <textarea
@@ -122,28 +135,28 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What's this project about?"
                 rows={3}
-                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)]/30 transition-all resize-none"
+                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all resize-none"
               />
             </div>
 
             {/* Status + Budget */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-[var(--foreground-tertiary)] mb-1.5">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Status
                 </label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as "active" | "completed" | "archived")}
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)]/30 transition-all appearance-none"
+                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all appearance-none"
                 >
                   <option value="active">Active</option>
                   <option value="completed">Completed</option>
                   <option value="archived">Archived</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-[var(--foreground-tertiary)] mb-1.5">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Budget (€)
                 </label>
                 <input
@@ -153,26 +166,27 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                   placeholder="0"
                   min="0"
                   step="100"
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)]/30 transition-all"
+                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
                 />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] hover:bg-white/5 transition-colors"
+                className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.06]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="flex-1 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
               >
-                {loading ? "Saving..." : project ? "Update" : "Create"}
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {project ? "Update" : "Create"}
               </button>
             </div>
           </form>
@@ -180,4 +194,9 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
       </div>
     </div>
   );
+
+  if (typeof window !== "undefined") {
+    return createPortal(modal, document.body);
+  }
+  return modal;
 }
