@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { pbGetTasks, pbCreateTask } from "@/lib/pocketbase";
+import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -32,6 +33,15 @@ export async function POST(req: Request) {
     if (body.assignee) payload.assignee = body.assignee;
 
     const task = await pbCreateTask(payload);
+
+    logActivity({
+      action: "created",
+      entity_type: "task",
+      entity_id: (task as Record<string, unknown>).id as string,
+      entity_name: body.title?.trim() || "Task",
+      details: `Priority: ${body.priority || "medium"}, Status: ${body.status || "todo"}`,
+    });
+
     return NextResponse.json({ task }, { status: 201 });
   } catch (e) {
     console.error("POST /api/tasks:", e);

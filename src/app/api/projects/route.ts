@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { pbGetProjects, pbCreateProject } from "@/lib/pocketbase";
+import { pbGetProjects, pbCreateProject, pbGetProjects as pbGetProjects2 } from "@/lib/pocketbase";
+import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,6 +25,15 @@ export async function POST(req: Request) {
       progress: 0,
       budget: Number(body.budget) || 0,
     });
+
+    logActivity({
+      action: "created",
+      entity_type: "project",
+      entity_id: (project as Record<string, unknown>).id as string,
+      entity_name: body.name?.trim() || "Project",
+      details: `Status: ${body.status || "active"}`,
+    });
+
     return NextResponse.json({ project });
   } catch (e) {
     console.error("POST /api/projects:", e);
