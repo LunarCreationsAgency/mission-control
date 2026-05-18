@@ -8,7 +8,7 @@ import { getCached, setCached, isStale, subscribe } from "./data-cache";
 
 interface UseDataOptions {
   skip?: boolean;
-  refreshInterval?: number; // ms
+  refreshInterval?: number;
 }
 
 export function useData<T>(
@@ -17,8 +17,8 @@ export function useData<T>(
   options: UseDataOptions = {}
 ) {
   const { skip = false, refreshInterval } = options;
-  const [data, setData] = useState<T | null>(() => getCached<T>(endpoint));
-  const [loading, setLoading] = useState(!getCached<T>(endpoint));
+  const [data, setData] = useState<T | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async (silent = false) => {
@@ -40,23 +40,20 @@ export function useData<T>(
     if (skip) return;
 
     const cached = getCached<T>(endpoint);
-    if (cached) {
+    if (cached !== undefined) {
       setData(cached);
       setLoading(false);
     }
 
-    // Refetch if stale or no cache
-    if (!cached || isStale(endpoint)) {
-      fetchData(!!cached);
+    if (cached === undefined || isStale(endpoint)) {
+      fetchData(cached !== undefined);
     }
 
-    // Subscribe to cache updates
     const unsubscribe = subscribe(endpoint, () => {
       const fresh = getCached<T>(endpoint);
-      if (fresh) setData(fresh);
+      if (fresh !== undefined) setData(fresh);
     });
 
-    // Optional polling
     let intervalId: ReturnType<typeof setInterval>;
     if (refreshInterval) {
       intervalId = setInterval(() => fetchData(true), refreshInterval);

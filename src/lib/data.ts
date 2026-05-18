@@ -1,26 +1,18 @@
 /**
  * Frontend data layer — uses Next.js API routes with client-side caching.
- * Stale-while-revalidate: returns cached data immediately, then refetches.
+ * Each getter caches extracted data. apiGet is pure fetch (no caching).
  */
 
 import { type Task, type Project, type Goal, type Agent, type ActivityLog, type CompanySettings } from "@/types";
-import { setCached, getCached, isStale } from "./data-cache";
+import { getCached, setCached, isStale, invalidateCache } from "./data-cache";
 
-async function apiGet(path: string, useCache = true): Promise<Record<string, unknown>> {
-  if (useCache) {
-    const cached = getCached<Record<string, unknown>>(path);
-    if (cached && !isStale(path)) {
-      return cached;
-    }
-  }
+async function apiGet(path: string): Promise<Record<string, unknown>> {
   const res = await fetch(path, { cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`GET ${path} failed: ${res.status} ${text}`);
   }
-  const data = await res.json();
-  setCached(path, data);
-  return data;
+  return res.json();
 }
 
 async function apiPost(path: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -33,8 +25,7 @@ async function apiPost(path: string, body: Record<string, unknown>): Promise<Rec
     const text = await res.text();
     throw new Error(`POST ${path} failed: ${res.status} ${text}`);
   }
-  const data = await res.json();
-  return data;
+  return res.json();
 }
 
 async function apiPatch(path: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -47,8 +38,7 @@ async function apiPatch(path: string, body: Record<string, unknown>): Promise<Re
     const text = await res.text();
     throw new Error(`PATCH ${path} failed: ${res.status} ${text}`);
   }
-  const data = await res.json();
-  return data;
+  return res.json();
 }
 
 async function apiDelete(path: string): Promise<Record<string, unknown>> {
@@ -60,80 +50,96 @@ async function apiDelete(path: string): Promise<Record<string, unknown>> {
   return res.json();
 }
 
+// Helper: cache-aware getter
+async function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const cached = getCached<T>(key);
+  if (cached && !isStale(key)) {
+    return cached;
+  }
+  const data = await fetcher();
+  setCached(key, data);
+  return data;
+}
+
 // --- TASKS ---
 export async function getTasks(): Promise<Task[]> {
-  const data = await apiGet("/api/tasks");
-  return (data.tasks || []) as Task[];
+  return cachedGet<Task[]>("tasks", async () => {
+    const data = await apiGet("/api/tasks");
+    return (data.tasks || []) as Task[];
+  });
 }
 
 export async function createTask(body: Record<string, unknown>) {
   const result = await apiPost("/api/tasks", body);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/tasks");
+  invalidateCache("tasks");
   return result;
 }
 
 export async function updateTask(id: string, body: Record<string, unknown>) {
   const result = await apiPatch(`/api/tasks/${id}`, body);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/tasks");
+  invalidateCache("tasks");
   return result;
 }
 
 export async function deleteTask(id: string) {
   const result = await apiDelete(`/api/tasks/${id}`);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/tasks");
+  invalidateCache("tasks");
   return result;
 }
 
 // --- PROJECTS ---
 export async function getProjects(): Promise<Project[]> {
-  const data = await apiGet("/api/projects");
-  return (data.projects || []) as Project[];
+  return cachedGet<Project[]>("projects", async () => {
+    const data = await apiGet("/api/projects");
+    return (data.projects || []) as Project[];
+  });
 }
 
 export async function createProject(body: Record<string, unknown>) {
   const result = await apiPost("/api/projects", body);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/projects");
+  invalidateCache("projects");
   return result;
 }
 
 export async function updateProject(id: string, body: Record<string, unknown>) {
   const result = await apiPatch(`/api/projects/${id}`, body);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/projects");
+  invalidateCache("projects");
   return result;
 }
 
 export async function deleteProject(id: string) {
   const result = await apiDelete(`/api/projects/${id}`);
-  const { invalidateCache } = await import("./data-cache");
-  invalidateCache("/api/projects");
+  invalidateCache("projects");
   return result;
 }
 
 // --- GOALS ---
 export async function getGoals(): Promise<Goal[]> {
-  const data = await apiGet("/api/goals");
-  return (data.goals || []) as Goal[];
+  return cachedGet<Goal[]>("goals", async () => {
+    const data = await apiGet("/api/goals");
+    return (data.goals || []) as Goal[];
+  });
 }
 
 // --- AGENTS ---
 export async function getAgents(): Promise<Agent[]> {
-  const data = await apiGet("/api/agents");
-  return (data.agents || []) as Agent[];
+  return cachedGet<Agent[]>("agents", async () => {
+    const data = await apiGet("/api/agents");
+    return (data.agents || []) as Agent[];
+  });
 }
 
 // --- ACTIVITY ---
 export async function getActivityLogs(): Promise<ActivityLog[]> {
-  const data = await apiGet("/api/activity-logs", false);
+  // Always fresh — no cache
+  const data = await apiGet("/api/activity-logs");
   return (data.logs || []) as ActivityLog[];
 }
 
 // --- SETTINGS ---
 export async function getCompanySettings(): Promise<CompanySettings[]> {
-  const data = await apiGet("/api/company-settings");
-  return (data.settings || []) as CompanySettings[];
+  return cachedGet<CompanySettings[]>("settings", async () => {
+    const data = await apiGet("/api/company-settings");
+    return (data.settings || []) as CompanySettings[];
+  });
 }

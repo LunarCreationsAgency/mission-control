@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { pbGetProjects, pbCreateProject } from "@/lib/pocketbase";
 import { logActivity } from "@/lib/activity";
-import { getCachedOrFetch, invalidateApiCache } from "@/lib/api-cache";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const result = await getCachedOrFetch("projects", () => pbGetProjects(), 3000);
+    const result = await pbGetProjects();
     return NextResponse.json({ projects: (result.items as unknown[]) || [] });
   } catch (e) {
     console.error("GET /api/projects:", e);
@@ -26,7 +25,6 @@ export async function POST(req: Request) {
       progress: 0,
       budget: Number(body.budget) || 0,
     });
-    invalidateApiCache("projects");
 
     logActivity({
       action: "created",

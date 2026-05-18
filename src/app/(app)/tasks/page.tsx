@@ -17,17 +17,8 @@ const statuses: { status: Task["status"]; label: string; accent: string }[] = [
 ];
 
 export default function TasksPage() {
-  const {
-    data: tasksRaw = [],
-    loading: tasksLoading,
-    error: tasksError,
-    refetch: refetchTasks,
-  } = useData<Task[]>("/api/tasks", getTasks);
-
-  const {
-    data: projectsRaw = [],
-    loading: projectsLoading,
-  } = useData<Project[]>("/api/projects", getProjects);
+  const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks);
+  const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
 
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
   const [modalOpen, setModalOpen] = useState(false);
@@ -37,15 +28,10 @@ export default function TasksPage() {
   const loading = tasksLoading || projectsLoading;
   const error = tasksError;
 
-  const tasks = tasksRaw || [];
-
   const getProjectName = (projectId?: string) => {
     if (!projectId) return undefined;
-    const project = projects.find((p) => p.id === projectId);
-    return project?.name;
+    return (projects || []).find((p) => p.id === projectId)?.name;
   };
-
-  const projects = projectsRaw || [];
 
   const handleCreate = async (taskData: Partial<Task>) => {
     await createTask(taskData as Record<string, unknown>);

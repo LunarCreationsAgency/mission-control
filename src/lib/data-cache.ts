@@ -11,9 +11,9 @@ function getKey(endpoint: string) {
   return endpoint;
 }
 
-export function getCached<T>(endpoint: string): T | null {
+export function getCached<T>(endpoint: string): T | undefined {
   const entry = cache.get(getKey(endpoint));
-  if (!entry) return null;
+  if (!entry) return undefined;
   return entry.data as T;
 }
 
@@ -25,7 +25,6 @@ export function isStale(endpoint: string): boolean {
 
 export function setCached(endpoint: string, data: unknown) {
   cache.set(getKey(endpoint), { data, timestamp: Date.now() });
-  // Notify subscribers
   const subs = subscribers.get(endpoint);
   if (subs) {
     subs.forEach((cb) => cb());
