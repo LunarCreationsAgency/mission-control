@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 
 interface Option {
   value: string;
   label: string;
   icon?: React.ReactNode;
-  color?: string;
 }
 
 interface CustomSelectProps {
@@ -28,9 +28,21 @@ export default function CustomSelect({
   disabled = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const selected = options.find((o) => o.value === value);
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setMenuPos({
+      top: rect.bottom + 6,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -38,19 +50,29 @@ export default function CustomSelect({
         setIsOpen(false);
       }
     }
+    function handleScroll() {
+      if (isOpen) {
+        updatePosition();
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+
     if (isOpen) {
+      updatePosition();
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
+      window.addEventListener("scroll", handleScroll, true);
+      window.addEventListener("resize", handleScroll);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleScroll);
     };
-  }, [isOpen]);
-
-  function handleEscape(e: KeyboardEvent) {
-    if (e.key === "Escape") setIsOpen(false);
-  }
+  }, [isOpen, updatePosition]);
 
   const handleSelect = (optValue: string) => {
     onChange(optValue);
@@ -66,8 +88,14 @@ export default function CustomSelect({
       )}
       {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!disabled) {
+            if (!isOpen) updatePosition();
+            setIsOpen(!isOpen);
+          }
+        }}
         className={`
           flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-all
           ${disabled
@@ -91,39 +119,52 @@ export default function CustomSelect({
         />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div
-          className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-[16px] border border-white/[0.08]"
-          style={{
-            background: "#16161e",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-          }}
-        >
-          <div className="max-h-[240px] overflow-y-auto py-1">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleSelect(option.value)}
-                className={`
-                  flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
-                  ${option.value === value
-                    ? "bg-[var(--primary)]/10 text-white"
-                    : "text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-white"
-                  }
-                `}
-              >
-                {option.icon && <span className="shrink-0">{option.icon}</span>}
-                <span className="flex-1 text-left truncate">{option.label}</span>
-                {option.value === value && (
-                  <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-light)]" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Dropdown — portaled to body with fixed positioning */}
+      {isOpen && menuPos &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div
+            className="z-[99999]"
+            style={{
+              position: "fixed",
+              top: menuPos.top,
+              left: menuPos.left,
+              width: menuPos.width,
+            }}
+          >
+            <div
+              className="overflow-hidden rounded-[16px] border border-white/[0.08]"
+              style={{
+                background: "#16161e",
+                boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+              }}
+            >
+              <div className="max-h-[240px] overflow-y-auto py-1">
+                {options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleSelect(option.value)}
+                    className={`
+                      flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
+                      ${option.value === value
+                        ? "bg-[var(--primary)]/10 text-white"
+                        : "text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-white"
+                      }
+                    `}
+                  >
+                    {option.icon && <span className="shrink-0">{option.icon}</span>}
+                    <span className="flex-1 text-left truncate">{option.label}</span>
+                    {option.value === value && (
+                      <Check className="h-3.5 w-3.5 shrink-0 text-[var(--primary-light)]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
