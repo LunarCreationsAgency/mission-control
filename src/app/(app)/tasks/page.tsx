@@ -7,7 +7,8 @@ import { type Task, type Project } from "@/types";
 import KanbanColumn from "@/components/ui/kanban-column";
 import TaskListCard from "@/components/ui/task-list-card";
 import TaskModal from "@/components/ui/task-modal";
-import { ListTodo, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import CustomSelect from "@/components/ui/custom-select";
+import { ListTodo, Plus, Trash2, Loader2, AlertTriangle, Filter, X } from "lucide-react";
 
 const statuses: { status: Task["status"]; label: string; accent: string }[] = [
   { status: "todo", label: "To Do", accent: "#94a3b8" },
@@ -16,11 +17,23 @@ const statuses: { status: Task["status"]; label: string; accent: string }[] = [
   { status: "done", label: "Done", accent: "var(--success)" },
 ];
 
+const priorities = [
+  { value: "", label: "All Priorities", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "low", label: "Low", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+  { value: "medium", label: "Medium", icon: <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> },
+  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
+  { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
+];
+
 export default function TasksPage() {
   const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks);
   const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
 
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
+  const [filterProject, setFilterProject] = useState("");
+  const [filterPriority, setFilterPriority] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -28,10 +41,22 @@ export default function TasksPage() {
   const loading = tasksLoading || projectsLoading;
   const error = tasksError;
 
+  const hasFilters = filterProject || filterPriority;
+
   const getProjectName = (projectId?: string) => {
     if (!projectId) return undefined;
     return (projects || []).find((p) => p.id === projectId)?.name;
   };
+
+  // Apply filters
+  const filteredTasks = tasks.filter((t) => {
+    if (filterProject && t.project !== filterProject) return false;
+    if (filterPriority && t.priority !== filterPriority) return false;
+    return true;
+  });
+
+  const filteredByStatus = (status: Task["status"]) => filteredTasks.filter((t) => t.status === status);
+  const mobileFiltered = filteredByStatus(activeStatus);
 
   const handleCreate = async (taskData: Partial<Task>) => {
     await createTask(taskData as Record<string, unknown>);
@@ -52,8 +77,19 @@ export default function TasksPage() {
   const handleDragStart = (id: string) => setDraggingId(id);
   const handleDragEnd = () => setDraggingId(null);
 
-  const tasksByStatus = (status: Task["status"]) => tasks.filter((t) => t.status === status);
-  const filteredTasks = tasksByStatus(activeStatus);
+  const clearFilters = () => {
+    setFilterProject("");
+    setFilterPriority("");
+  };
+
+  const projectOptions = [
+    { value: "", label: "All Projects", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+    ...projects.map((p) => ({
+      value: p.id,
+      label: p.name,
+      icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)]" />,
+    })),
+  ];
 
   if (loading) return <TasksSkeleton />;
 
@@ -77,7 +113,7 @@ export default function TasksPage() {
   return (
     <div className="space-y-8 page-enter pt-2 lg:pt-0">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Task Management</p>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Tasks</h1>
@@ -86,9 +122,24 @@ export default function TasksPage() {
         <div className="flex items-center gap-3">
           <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
             <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />
-            <span className="text-sm font-semibold text-[var(--foreground)]">{tasks.length}</span>
-            <span className="text-xs text-[var(--foreground-tertiary)]">total</span>
+            <span className="text-sm font-semibold text-[var(--foreground)]">{filteredTasks.length}</span>
+            <span className="text-xs text-[var(--foreground-tertiary)]">
+              {hasFilters ? "filtered" : "total"}
+            </span>
           </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+              hasFilters ? "text-[var(--primary-light)] bg-[var(--primary)]/10" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            <Filter className="h-4 w-4" /> Filter
+            {hasFilters && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+                {[filterProject, filterPriority].filter(Boolean).length}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setModalOpen(true)}
             className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04] active:scale-[0.98]"
@@ -98,6 +149,36 @@ export default function TasksPage() {
         </div>
       </div>
 
+      {/* Filter Bar */}
+      {showFilters && (
+        <div className="flex flex-wrap items-end gap-3 animated-card" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+          <div className="w-full sm:w-auto sm:min-w-[200px] lg:min-w-[240px]">
+            <CustomSelect
+              label="Project"
+              value={filterProject}
+              options={projectOptions}
+              onChange={(v) => setFilterProject(v)}
+            />
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-[180px] lg:min-w-[200px]">
+            <CustomSelect
+              label="Priority"
+              value={filterPriority}
+              options={priorities}
+              onChange={(v) => setFilterPriority(v)}
+            />
+          </div>
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.06] transition-all"
+            >
+              <X className="h-3.5 w-3.5" /> Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Desktop: Kanban */}
       <div className="hidden lg:flex gap-4 overflow-x-auto pb-4">
         {statuses.map((col) => (
@@ -105,7 +186,7 @@ export default function TasksPage() {
             key={col.status}
             title={col.label}
             status={col.status}
-            tasks={tasksByStatus(col.status)}
+            tasks={filteredByStatus(col.status)}
             accent={col.accent}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
@@ -121,7 +202,7 @@ export default function TasksPage() {
       <div className="lg:hidden space-y-4">
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           {statuses.map((s) => {
-            const count = tasksByStatus(s.status).length;
+            const count = filteredByStatus(s.status).length;
             const isActive = activeStatus === s.status;
             return (
               <button
@@ -144,16 +225,25 @@ export default function TasksPage() {
         </div>
 
         <div className="space-y-3">
-          {filteredTasks.length === 0 ? (
+          {mobileFiltered.length === 0 ? (
             <div className="liquid-glass p-12 text-center">
-              <p className="text-sm text-[var(--foreground-tertiary)]">No tasks in {statuses.find(s => s.status === activeStatus)?.label}</p>
+              <p className="text-sm text-[var(--foreground-tertiary)]">
+                {hasFilters
+                  ? "No tasks match your filters"
+                  : `No tasks in ${statuses.find((s) => s.status === activeStatus)?.label}`}
+              </p>
+              {hasFilters && (
+                <button onClick={clearFilters} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : (
-            filteredTasks.map((task) => (
+            mobileFiltered.map((task) => (
               <TaskListCard
                 key={task.id}
                 task={task}
-                project={task.project ? projects.find(p => p.id === task.project) : undefined}
+                project={task.project ? projects.find((p) => p.id === task.project) : undefined}
                 onDelete={handleDelete}
               />
             ))
