@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Search, X, ArrowUp, ArrowDown, CornerDownLeft, Loader2, ListTodo, FolderKanban, Target } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface SearchResult {
   type: "task" | "project" | "goal";
@@ -22,6 +23,7 @@ export default function CommandPalette() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const router = useRouter();
 
   // CMD+K / Ctrl+K to open
   useEffect(() => {
@@ -98,8 +100,9 @@ export default function CommandPalette() {
         e.preventDefault();
         setSelectedIndex((i) => Math.max(i - 1, 0));
       } else if (e.key === "Enter" && results[selectedIndex]) {
+        e.preventDefault();
         setOpen(false);
-        // Let Link handle navigation
+        router.push(results[selectedIndex].href);
       }
     }
     document.addEventListener("keydown", handleKey);
