@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   LogOut,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -62,6 +63,17 @@ export default function Navbar() {
         <div className="mb-2 p-2">
           <Bot className="h-6 w-6 text-[var(--primary-light)]" />
         </div>
+
+        {/* Search */}
+        <button
+          onClick={() => document.dispatchEvent(new CustomEvent("openCommandPalette"))}
+          className="mb-1 group relative flex items-center justify-center rounded-[14px] p-3 transition-all duration-300 text-[var(--foreground-tertiary)] hover:bg-white/[0.04] hover:text-[var(--foreground-secondary)]"
+        >
+          <Search className="h-[20px] w-[20px]" />
+          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
+            Search (⌘K)
+          </span>
+        </button>
 
         {/* Nav Items */}
         <nav className="flex flex-col gap-1">
