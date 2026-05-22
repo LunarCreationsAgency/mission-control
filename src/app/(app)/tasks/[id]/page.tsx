@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useData } from "@/lib/use-data";
-import { getTasks, getProjects } from "@/lib/data";
+import { getTasks, getProjects, updateTask, deleteTask } from "@/lib/data";
 import { type Task, type Project } from "@/types";
-import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Pencil, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import TaskModal from "@/components/ui/task-modal";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string }> = {
   low: { bg: "bg-blue-500/15", text: "text-blue-400", label: "Low" },
@@ -24,14 +25,31 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; do
 
 export default function TaskDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   
-  const { data: tasks = [], loading: tasksLoading } = useData<Task[]>("tasks", getTasks);
+  const { data: tasks = [], loading: tasksLoading, refetch } = useData<Task[]>("tasks", getTasks);
   const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
   
   const loading = tasksLoading || projectsLoading;
   const task = tasks.find((t) => t.id === id);
   const project = task?.project ? projects.find((p) => p.id === task.project) : undefined;
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleEdit = async (data: Partial<Task>) => {
+    await updateTask(id, data as Record<string, unknown>);
+    setEditModalOpen(false);
+    refetch();
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    await deleteTask(id);
+    router.push("/tasks");
+  };
 
   if (loading) {
     return (
@@ -68,28 +86,51 @@ export default function TaskDetailPage() {
 
   return (
     <div className="space-y-6 pt-2 lg:pt-0">
-      {/* Header */}
       <div>
         <Link href="/tasks" className="mb-4 inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] transition-colors hover:text-[var(--foreground)]">
           <ArrowLeft className="h-4 w-4" /> Back to Tasks
         </Link>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${status.bg} ${status.text}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
-          </span>
-          <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${priority.bg} ${priority.text}`}>
-            {priority.label}
-          </span>
-          {isOverdue && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 bg-red-500/15 text-red-400">
-              <Clock className="h-3 w-3" /> Overdue
-            </span>
-          )}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${status.bg} ${status.text}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
+              </span>
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 ${priority.bg} ${priority.text}`}>
+                {priority.label}
+              </span>
+              {isOverdue && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 bg-red-500/15 text-red-400">
+                  <Clock className="h-3 w-3" /> Overdue
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{task.title}</h1>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setEditModalOpen(true)}
+              className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all">
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </button>
+            {!deleteConfirm ? (
+              <button onClick={() => setDeleteConfirm(true)}
+                className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all">
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button onClick={() => setDeleteConfirm(false)}
+                  className="rounded-xl border border-white/[0.08] px-3 py-2 text-xs text-[var(--foreground-secondary)] hover:bg-white/[0.06]">Cancel</button>
+                <button onClick={handleDelete} disabled={deleting}
+                  className="flex items-center gap-2 rounded-xl bg-red-500 px-3 py-2 text-xs font-medium text-white hover:bg-red-600 transition-all disabled:opacity-50">
+                  {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Confirm
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{task.title}</h1>
       </div>
 
-      {/* Main Content */}
       <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           <div className="liquid-glass p-5 lg:p-6">
@@ -150,6 +191,14 @@ export default function TaskDetailPage() {
           </div>
         </div>
       </div>
+
+      <TaskModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSubmit={handleEdit}
+        initialTask={task}
+        mode="edit"
+      />
     </div>
   );
 }
