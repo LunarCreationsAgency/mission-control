@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { type Agent } from "@/types";
-import { Bot, Pause, Play, Heart, Loader2 } from "lucide-react";
+import { Bot, Pause, Play, Heart, Loader2, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/components/ui/toast";
 
 export default function AgentsPage() {
+  const { success, error: toastError } = useToast();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,11 +42,13 @@ export default function AgentsPage() {
       setAgents((prev) =>
         prev.map((a) => (a.id === id ? { ...a, paused: !paused } : a))
       );
+      success(paused ? "Agent resumed" : "Agent paused");
     } catch (e) {
       console.error("Failed to toggle agent:", e);
+      toastError("Failed to update agent");
       fetchAgents();
     }
-  }, [fetchAgents]);
+  }, [fetchAgents, success, toastError]);
 
   if (loading) return <AgentsSkeleton />;
 
@@ -94,34 +99,32 @@ export default function AgentsPage() {
             className="liquid-glass group p-5 transition-all duration-300 hover-lift animated-card"
             style={{ animationDelay: `${i * 0.05}s` }}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                {/* Avatar */}
-                <div className="liquid-glass-subtle flex h-11 w-11 items-center justify-center">
-                  <Bot className="h-5 w-5 text-[var(--primary-light)]" />
+            <Link href={`/agents/${agent.id}`} className="block">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="liquid-glass-subtle flex h-11 w-11 items-center justify-center">
+                    <Bot className="h-5 w-5 text-[var(--primary-light)]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-[var(--foreground)]">{agent.name}</h3>
+                    <p className="text-[11px] text-[var(--foreground-tertiary)]">{agent.role}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--foreground)]">{agent.name}</h3>
-                  <p className="text-[11px] text-[var(--foreground-tertiary)]">{agent.role}</p>
-                </div>
+                <div className={`h-2 w-2 rounded-full ${agent.paused ? "bg-slate-500" : "bg-[var(--success)]"}`} />
               </div>
-              {/* Status dot */}
-              <div className={`h-2 w-2 rounded-full ${agent.paused ? "bg-slate-500" : "bg-[var(--success)]"}`} />
-            </div>
 
-            {/* Description */}
-            <p className="text-[12px] text-[var(--foreground-secondary)] leading-relaxed mb-4 line-clamp-2">
-              {agent.description || "No description"}
-            </p>
+              <p className="text-[12px] text-[var(--foreground-secondary)] leading-relaxed mb-4 line-clamp-2">
+                {agent.description || "No description"}
+              </p>
+            </Link>
 
-            {/* Meta */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[10px] text-[var(--foreground-tertiary)]">
                 <Heart className={`h-3 w-3 ${agent.paused ? "" : "text-red-400"}`} />
                 <span>{agent.last_heartbeat ? new Date(agent.last_heartbeat).toLocaleDateString("de-DE") : "Never"}</span>
               </div>
               <button
-                onClick={() => toggleAgent(agent.id, agent.paused)}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleAgent(agent.id, agent.paused); }}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 ${
                   agent.paused
                     ? "bg-[var(--primary)]/15 text-[var(--primary-light)] hover:bg-[var(--primary)]/25"
