@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Pencil, T
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import TaskModal from "@/components/ui/task-modal";
+import { useToast } from "@/components/ui/toast";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string }> = {
   low: { bg: "bg-blue-500/15", text: "text-blue-400", label: "Low" },
@@ -24,6 +25,7 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; do
 };
 
 export default function TaskDetailPage() {
+  const { success, error: toastError } = useToast();
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -40,15 +42,27 @@ export default function TaskDetailPage() {
   const [deleting, setDeleting] = useState(false);
 
   const handleEdit = async (data: Partial<Task>) => {
-    await updateTask(id, data as Record<string, unknown>);
-    setEditModalOpen(false);
-    refetch();
+    try {
+      await updateTask(id, data as Record<string, unknown>);
+      success("Task updated");
+      setEditModalOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to update task");
+      throw e;
+    }
   };
 
   const handleDelete = async () => {
-    setDeleting(true);
-    await deleteTask(id);
-    router.push("/tasks");
+    try {
+      setDeleting(true);
+      await deleteTask(id);
+      success("Task deleted");
+      router.push("/tasks");
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to delete task");
+      setDeleting(false);
+    }
   };
 
   if (loading) {

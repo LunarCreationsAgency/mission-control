@@ -7,7 +7,10 @@ import Link from "next/link";
 import ProjectModal from "@/components/ui/project-modal";
 import { getProjects, getTasks, createProject, deleteProject } from "@/lib/data";
 
+import { useToast } from "@/components/ui/toast";
+
 export default function ProjectsPage() {
+  const { success, error: toastError } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,15 +40,26 @@ export default function ProjectsPage() {
   }, [fetchData]);
 
   const handleCreate = async (project: Partial<Project>) => {
-    await createProject(project as Record<string, unknown>);
-    await fetchData();
+    try {
+      await createProject(project as Record<string, unknown>);
+      success("Project created");
+      await fetchData();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to create project");
+      throw e;
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (deletingId === id) {
-      await deleteProject(id);
-      setDeletingId(null);
-      await fetchData();
+      try {
+        await deleteProject(id);
+        success("Project deleted");
+        setDeletingId(null);
+        await fetchData();
+      } catch (e) {
+        toastError(e instanceof Error ? e.message : "Failed to delete project");
+      }
     } else {
       setDeletingId(id);
       setTimeout(() => setDeletingId((prev) => (prev === id ? null : prev)), 3000);

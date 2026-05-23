@@ -25,7 +25,10 @@ const priorities = [
   { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
 ];
 
+import { useToast } from "@/components/ui/toast";
+
 export default function TasksPage() {
+  const { success, error: toastError } = useToast();
   const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks);
   const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
 
@@ -59,19 +62,36 @@ export default function TasksPage() {
   const mobileFiltered = filteredByStatus(activeStatus);
 
   const handleCreate = async (taskData: Partial<Task>) => {
-    await createTask(taskData as Record<string, unknown>);
-    refetchTasks();
+    try {
+      await createTask(taskData as Record<string, unknown>);
+      success("Task created");
+      refetchTasks();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to create task");
+      throw e;
+    }
   };
 
   const handleUpdate = async (id: string, updates: Partial<Task>) => {
-    await updateTask(id, updates as Record<string, unknown>);
-    refetchTasks();
+    try {
+      await updateTask(id, updates as Record<string, unknown>);
+      success("Task updated");
+      refetchTasks();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to update task");
+      throw e;
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteTask(id);
-    refetchTasks();
-    setDeleteConfirm(null);
+    try {
+      await deleteTask(id);
+      success("Task deleted");
+      refetchTasks();
+      setDeleteConfirm(null);
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to delete task");
+    }
   };
 
   const handleDragStart = (id: string) => setDraggingId(id);

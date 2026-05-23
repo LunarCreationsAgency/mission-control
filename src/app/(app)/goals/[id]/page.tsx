@@ -8,6 +8,7 @@ import { ArrowLeft, Target, Calendar, FolderKanban, Flag, TrendingUp, Pencil, Tr
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import GoalModal from "@/components/ui/goal-modal";
+import { useToast } from "@/components/ui/toast";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   active: { label: "Active", color: "text-[var(--primary-light)]", bg: "bg-[var(--primary)]/15", dot: "bg-[var(--primary)]" },
@@ -16,6 +17,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
 };
 
 export default function GoalDetailPage() {
+  const { success, error: toastError } = useToast();
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -28,15 +30,27 @@ export default function GoalDetailPage() {
   const [deleting, setDeleting] = useState(false);
 
   const handleEdit = async (data: Partial<Goal>) => {
-    await updateGoal(id, data as Record<string, unknown>);
-    setEditModalOpen(false);
-    refetch();
+    try {
+      await updateGoal(id, data as Record<string, unknown>);
+      success("Goal updated");
+      setEditModalOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to update goal");
+      throw e;
+    }
   };
 
   const handleDelete = async () => {
-    setDeleting(true);
-    await deleteGoal(id);
-    router.push("/goals");
+    try {
+      setDeleting(true);
+      await deleteGoal(id);
+      success("Goal deleted");
+      router.push("/goals");
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to delete goal");
+      setDeleting(false);
+    }
   };
 
   if (loading) {

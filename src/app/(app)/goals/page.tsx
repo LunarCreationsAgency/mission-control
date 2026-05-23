@@ -14,7 +14,10 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
   paused: { label: "Paused", color: "text-[var(--foreground-tertiary)]", bg: "bg-white/5", dot: "bg-[var(--foreground-tertiary)]" },
 };
 
+import { useToast } from "@/components/ui/toast";
+
 export default function GoalsPage() {
+  const { success, error: toastError } = useToast();
   const { data: goals = [], loading, refetch } = useData<Goal[]>("goals", getGoals);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -22,21 +25,38 @@ export default function GoalsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleCreate = async (data: Partial<Goal>) => {
-    await createGoal(data as Record<string, unknown>);
-    refetch();
+    try {
+      await createGoal(data as Record<string, unknown>);
+      success("Goal created");
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to create goal");
+      throw e;
+    }
   };
 
   const handleEdit = async (data: Partial<Goal>) => {
     if (!editingGoal) return;
-    await updateGoal(editingGoal.id, data as Record<string, unknown>);
-    setEditingGoal(null);
-    refetch();
+    try {
+      await updateGoal(editingGoal.id, data as Record<string, unknown>);
+      success("Goal updated");
+      setEditingGoal(null);
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to update goal");
+      throw e;
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteGoal(id);
-    setDeletingId(null);
-    refetch();
+    try {
+      await deleteGoal(id);
+      success("Goal deleted");
+      setDeletingId(null);
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to delete goal");
+    }
   };
 
   if (loading) return <GoalsSkeleton />;
