@@ -5,7 +5,7 @@ import { type Task, type Project, type Goal, type Agent, type ActivityLog } from
 import {
   ListTodo, Bot, Target, FolderKanban, Plus, Clock,
   Play, Pause, CheckCircle2, AlertCircle, ArrowUpRight,
-  TrendingUp, Zap, CircleDot,
+  TrendingUp, Zap, CircleDot, CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
 import TaskModal from "@/components/ui/task-modal";
@@ -76,6 +76,14 @@ export default function DashboardPage() {
   const activeGoals = goals.filter((g) => g.status === "active");
   const recentLogs = logs.slice(0, 6);
   const overdueTasks = tasks.filter((t) => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done");
+  const completionRate = tasks.length > 0 ? Math.round((tasksByStatus("done").length / tasks.length) * 100) : 0;
+  const next7Days = new Date();
+  next7Days.setDate(next7Days.getDate() + 7);
+  const upcomingTasks = tasks.filter((t) => t.due_date && new Date(t.due_date) >= new Date() && new Date(t.due_date) <= next7Days && t.status !== "done");
+  const agentTaskCounts = agents.map((a) => ({
+    ...a,
+    taskCount: tasks.filter((t) => t.assignee === a.id).length,
+  })).sort((a, b) => b.taskCount - a.taskCount);
 
   const handleCreateTask = async (taskData: Partial<Task>) => {
     const res = await fetch("/api/tasks", {
@@ -246,6 +254,29 @@ export default function DashboardPage() {
 
         {/* Right Column — 1/3 */}
         <div className="space-y-4 lg:space-y-6">
+          {/* Completion Rate */}
+          <div className="liquid-glass p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="liquid-glass-subtle flex h-10 w-10 items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-[var(--success)]" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-[var(--foreground)]">Completion Rate</h2>
+                <p className="text-[11px] text-[var(--foreground-tertiary)]">All-time task throughput</p>
+              </div>
+            </div>
+            <div className="flex items-end gap-3">
+              <span className="text-4xl font-bold text-[var(--foreground)]">{completionRate}%</span>
+              <span className="text-[11px] text-[var(--foreground-tertiary)] mb-1">{tasksByStatus("done").length}/{tasks.length} done</span>
+            </div>
+            <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden mt-3">
+              <div
+                className="h-full rounded-full bg-[var(--success)] transition-all duration-1000"
+                style={{ width: `${completionRate}%` }}
+              />
+            </div>
+          </div>
+
           {/* Overdue Tasks Alert */}
           {overdueTasks.length > 0 && (
             <div className="liquid-glass border-red-500/20 p-5">
@@ -267,30 +298,60 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Agent Status */}
+          {/* Upcoming Deadlines */}
+          {upcomingTasks.length > 0 && (
+            <div className="liquid-glass p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--primary)]/15">
+                  <CalendarDays className="h-4 w-4 text-[var(--primary-light)]" />
+                </div>
+                <h2 className="text-sm font-semibold text-[var(--foreground)]">Upcoming</h2>
+                <span className="text-xs font-bold text-[var(--primary-light)]">{upcomingTasks.length}</span>
+              </div>
+              <div className="space-y-2">
+                {upcomingTasks.slice(0, 3).map((task) => (
+                  <Link key={task.id} href={`/tasks/${task.id}`} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)] shrink-0" />
+                    <span className="text-xs text-[var(--foreground-secondary)] truncate">{task.title}</span>
+                    <span className="text-[10px] text-[var(--foreground-tertiary)] shrink-0">
+                      {new Date(task.due_date!).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Agent Task Load */}
           <div className="liquid-glass p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Agents</h2>
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Agent Load</h2>
               <Link href="/agents" className="flex items-center gap-1 text-xs text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors">
                 View all <ArrowUpRight className="h-3 w-3" />
               </Link>
             </div>
-            {agents.length === 0 ? (
+            {agentTaskCounts.length === 0 ? (
               <p className="text-sm text-[var(--foreground-tertiary)]">No agents</p>
             ) : (
-              <div className="space-y-2.5">
-                {agents.slice(0, 5).map((agent) => (
-                  <div key={agent.id} className="flex items-center gap-3">
-                    <div className={`h-2 w-2 rounded-full shrink-0 ${agent.paused ? "bg-[var(--foreground-tertiary)]" : "bg-[var(--success)] animate-pulse"}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[var(--foreground)] truncate">{agent.name}</p>
-                      <p className="text-[10px] text-[var(--foreground-tertiary)] truncate">{agent.role}</p>
+              <div className="space-y-3">
+                {agentTaskCounts.slice(0, 5).map((agent) => {
+                  const maxTasks = Math.max(...agentTaskCounts.map((a) => a.taskCount), 1);
+                  const loadPct = (agent.taskCount / maxTasks) * 100;
+                  return (
+                    <div key={agent.id} className="flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-[var(--foreground)] truncate">{agent.name}</p>
+                        <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden mt-1">
+                          <div
+                            className="h-full rounded-full bg-[var(--primary)]/70 transition-all duration-500"
+                            style={{ width: `${loadPct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold text-[var(--foreground)]">{agent.taskCount}</span>
                     </div>
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${agent.paused ? "text-[var(--foreground-tertiary)]" : "text-[var(--success)]"}`}>
-                      {agent.paused ? "Paused" : "Live"}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
