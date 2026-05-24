@@ -161,3 +161,9 @@ export async function getCompanySettings(): Promise<CompanySettings[]> {
     return (data.settings || []) as CompanySettings[];
   });
 }
+
+export async function updateCompanySettings(id: string, body: Record<string, unknown>) {
+  const result = await apiPatch(`/api/company-settings/${id}`, body);
+  invalidateCache("settings");
+  return result;
+}

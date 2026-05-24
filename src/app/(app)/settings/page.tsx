@@ -2,13 +2,51 @@
 
 import { useState } from "react";
 import { useData } from "@/lib/use-data";
-import { getCompanySettings } from "@/lib/data";
+import { getCompanySettings, updateCompanySettings } from "@/lib/data";
 import { type CompanySettings } from "@/types";
-import { Settings, Building2, Globe, Coins, Loader2 } from "lucide-react";
+import { Settings, Building2, Globe, Coins, Loader2, Pencil, Check } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export default function SettingsPage() {
-  const { data: settingsList = [], loading, error } = useData<CompanySettings[]>("settings", getCompanySettings);
+  const { success, error: toastError } = useToast();
+  const { data: settingsList = [], loading, error, refetch } = useData<CompanySettings[]>("settings", getCompanySettings);
   const settings = settingsList[0] || null;
+
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    company_name: settings?.company_name || "",
+    currency: settings?.currency || "EUR",
+    timezone: settings?.timezone || "Europe/Berlin",
+  });
+
+  const handleSave = async () => {
+    if (!settings) return;
+    setSaving(true);
+    try {
+      await updateCompanySettings(settings.id, {
+        company_name: form.company_name.trim(),
+        currency: form.currency.trim().toUpperCase(),
+        timezone: form.timezone.trim(),
+      });
+      success("Settings saved");
+      setEditing(false);
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditing = () => {
+    setForm({
+      company_name: settings?.company_name || "",
+      currency: settings?.currency || "EUR",
+      timezone: settings?.timezone || "Europe/Berlin",
+    });
+    setEditing(true);
+  };
 
   if (loading) {
     return (
@@ -40,14 +78,25 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 page-enter pt-2 lg:pt-0">
       {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
-          Configuration
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
-        <p className="mt-1 text-sm text-[var(--foreground-secondary)]">
-          Manage your workspace preferences
-        </p>
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
+            Configuration
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
+          <p className="mt-1 text-sm text-[var(--foreground-secondary)]">
+            Manage your workspace preferences
+          </p>
+        </div>
+        {settings && !editing && (
+          <button
+            onClick={startEditing}
+            className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </button>
+        )}
       </div>
 
       {/* Company Settings */}
@@ -63,11 +112,62 @@ export default function SettingsPage() {
         </div>
 
         {settings ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <SettingCard icon={<Building2 className="h-4 w-4" />} label="Company Name" value={settings.company_name} />
-            <SettingCard icon={<Coins className="h-4 w-4" />} label="Currency" value={settings.currency} />
-            <SettingCard icon={<Globe className="h-4 w-4" />} label="Timezone" value={settings.timezone} />
-          </div>
+          editing ? (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Company Name</label>
+                <input
+                  type="text"
+                  value={form.company_name}
+                  onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Currency</label>
+                  <input
+                    type="text"
+                    value={form.currency}
+                    onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                    className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Timezone</label>
+                  <input
+                    type="text"
+                    value={form.timezone}
+                    onChange={(e) => setForm({ ...form, timezone: e.target.value })}
+                    className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.06]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <Check className="h-4 w-4" />
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <SettingCard icon={<Building2 className="h-4 w-4" />} label="Company Name" value={settings.company_name} />
+              <SettingCard icon={<Coins className="h-4 w-4" />} label="Currency" value={settings.currency} />
+              <SettingCard icon={<Globe className="h-4 w-4" />} label="Timezone" value={settings.timezone} />
+            </div>
+          )
         ) : (
           <div className="text-center py-8">
             <p className="text-sm text-[var(--foreground-tertiary)]">No company settings configured.</p>
@@ -91,29 +191,6 @@ export default function SettingsPage() {
           <SettingCard icon={<Settings className="h-4 w-4" />} label="Version" value="2.0.0" />
           <SettingCard icon={<Globe className="h-4 w-4" />} label="Framework" value="Next.js 15" />
           <SettingCard icon={<Globe className="h-4 w-4" />} label="Database" value="PocketBase" />
-        </div>
-      </div>
-
-      {/* Coming Soon */}
-      <div className="liquid-glass p-6 animated-card" style={{ animationDelay: "0.2s" }}>
-        <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">Coming Soon</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[
-            "User management",
-            "Email notifications",
-            "Webhook integrations",
-            "Dark/light mode toggle",
-            "Export data",
-            "API keys",
-          ].map((item) => (
-            <div
-              key={item}
-              className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] text-sm text-[var(--foreground-secondary)]"
-            >
-              <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-              {item}
-            </div>
-          ))}
         </div>
       </div>
     </div>

@@ -178,3 +178,8 @@ export async function pbGetCompanySettings() {
   const token = await getAdminToken();
   return apiCall("/api/collections/company_settings/records", { token });
 }
+
+export async function pbUpdateCompanySettings(id: string, data: Record<string, unknown>) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/company_settings/records/${id}`, { method: "PATCH", body: data, token });
+}
