@@ -27,6 +27,19 @@ const priorities = [
 
 import { useToast } from "@/components/ui/toast";
 
+const sortOptions = [
+  { value: "created", label: "Created", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "priority", label: "Priority", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
+  { value: "due_date", label: "Due Date", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+];
+
+const priorityValue: Record<string, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
 export default function TasksPage() {
   const { success, error: toastError } = useToast();
   const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks);
@@ -35,6 +48,7 @@ export default function TasksPage() {
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
   const [filterProject, setFilterProject] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
+  const [sortBy, setSortBy] = useState("created");
   const [showFilters, setShowFilters] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -51,14 +65,26 @@ export default function TasksPage() {
     return (projects || []).find((p) => p.id === projectId)?.name;
   };
 
-  // Apply filters
-  const filteredTasks = tasks.filter((t) => {
+  // Apply filters + sort
+  const sortedTasks = [...tasks].filter((t) => {
     if (filterProject && t.project !== filterProject) return false;
     if (filterPriority && t.priority !== filterPriority) return false;
     return true;
+  }).sort((a, b) => {
+    if (sortBy === "priority") {
+      return (priorityValue[b.priority] || 0) - (priorityValue[a.priority] || 0);
+    }
+    if (sortBy === "due_date") {
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    }
+    // default: created (newest first)
+    return new Date(b.created).getTime() - new Date(a.created).getTime();
   });
 
-  const filteredByStatus = (status: Task["status"]) => filteredTasks.filter((t) => t.status === status);
+  const filteredByStatus = (status: Task["status"]) => sortedTasks.filter((t) => t.status === status);
   const mobileFiltered = filteredByStatus(activeStatus);
 
   const handleCreate = async (taskData: Partial<Task>) => {
@@ -142,7 +168,7 @@ export default function TasksPage() {
         <div className="flex items-center gap-3">
           <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
             <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />
-            <span className="text-sm font-semibold text-[var(--foreground)]">{filteredTasks.length}</span>
+            <span className="text-sm font-semibold text-[var(--foreground)]">{sortedTasks.length}</span>
             <span className="text-xs text-[var(--foreground-tertiary)]">
               {hasFilters ? "filtered" : "total"}
             </span>
@@ -186,6 +212,14 @@ export default function TasksPage() {
               value={filterPriority}
               options={priorities}
               onChange={(v) => setFilterPriority(v)}
+            />
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-[180px] lg:min-w-[200px]">
+            <CustomSelect
+              label="Sort By"
+              value={sortBy}
+              options={sortOptions}
+              onChange={(v) => setSortBy(v)}
             />
           </div>
           {hasFilters && (
