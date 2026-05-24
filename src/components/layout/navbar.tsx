@@ -135,8 +135,15 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Overlay */}
-        <div className={`absolute top-full left-0 right-0 transition-all duration-300 ${mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
-          <div className="mx-4 mb-4 p-3 rounded-[24px] liquid-glass-strong space-y-1">
+        <div className={`absolute top-full left-0 right-0 transition-all duration-300 z-50 ${mobileOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
+          <div className="mx-4 mb-4 p-3 rounded-[24px] space-y-1"
+            style={{
+              background: "rgba(10,10,15,0.97)",
+              backdropFilter: "blur(40px) saturate(180%)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+            }}
+          >
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
