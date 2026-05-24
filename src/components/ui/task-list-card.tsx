@@ -34,7 +34,9 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
     <div className="group relative">
       <Link
         href={`/tasks/${task.id}`}
-        className="block rounded-[20px] p-5 bg-white/[0.02] border border-white/[0.04] border-t-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-200 active:scale-[0.98]"
+        className={`block rounded-[20px] p-5 bg-white/[0.02] border border-white/[0.04] border-t-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-200 active:scale-[0.98] ${
+          isOverdue ? "border-l-[3px] border-l-red-500 shadow-[inset_3px_0_0_rgba(239,68,68,0.2)]" : ""
+        }`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">

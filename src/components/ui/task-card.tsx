@@ -88,6 +88,8 @@ export default function TaskCard({
 
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
 
+  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
+
   return (
     <div
       draggable
@@ -99,7 +101,7 @@ export default function TaskCard({
         hover:bg-white/[0.04] hover:border-white/[0.08]
         transition-all duration-200 cursor-grab
         ${isDragging ? "opacity-30 scale-95 rotate-1" : ""}
-        ${priorityBorderColors[task.priority] || priorityBorderColors.medium}
+        ${isOverdue ? "border-l-red-500 shadow-[inset_2px_0_0_rgba(239,68,68,0.3)]" : priorityBorderColors[task.priority] || priorityBorderColors.medium}
       `}
     >
       {/* Hover actions */}
