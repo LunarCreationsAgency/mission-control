@@ -12,12 +12,38 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  Filter,
+  X,
 } from "lucide-react";
+import CustomSelect from "@/components/ui/custom-select";
+
+const entityOptions = [
+  { value: "", label: "All Types", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "task", label: "Tasks", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+  { value: "project", label: "Projects", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)]" /> },
+  { value: "goal", label: "Goals", icon: <span className="h-1.5 w-1.5 rounded-full bg-purple-400" /> },
+  { value: "agent", label: "Agents", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> },
+];
+
+const actionOptions = [
+  { value: "", label: "All Actions", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "created", label: "Created", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)]" /> },
+  { value: "updated", label: "Updated", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" /> },
+  { value: "deleted", label: "Deleted", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
+  { value: "completed", label: "Completed", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" /> },
+  { value: "paused", label: "Paused", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "resumed", label: "Resumed", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" /> },
+];
 
 export default function ActivityPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterEntity, setFilterEntity] = useState("");
+  const [filterAction, setFilterAction] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasFilters = filterEntity || filterAction;
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -38,6 +64,12 @@ export default function ActivityPage() {
     fetchLogs();
   }, [fetchLogs]);
 
+  const filteredLogs = logs.filter((log) => {
+    if (filterEntity && log.entity_type !== filterEntity) return false;
+    if (filterAction && log.action !== filterAction) return false;
+    return true;
+  });
+
   const groupByDate = (logs: ActivityLog[]) => {
     const groups: Record<string, ActivityLog[]> = {};
     const today = new Date().toDateString();
@@ -57,8 +89,13 @@ export default function ActivityPage() {
     return groups;
   };
 
-  const groupedLogs = groupByDate(logs);
+  const groupedLogs = groupByDate(filteredLogs);
   const sortedKeys = Object.keys(groupedLogs);
+
+  const clearFilters = () => {
+    setFilterEntity("");
+    setFilterAction("");
+  };
 
   if (loading) return <ActivitySkeleton />;
 
@@ -84,7 +121,7 @@ export default function ActivityPage() {
   return (
     <div className="space-y-8 page-enter pt-2 lg:pt-0">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
             Timeline
@@ -94,18 +131,72 @@ export default function ActivityPage() {
             Recent actions across your workspace
           </p>
         </div>
-        <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
-          <Activity className="h-4 w-4 text-[var(--primary-light)]" />
-          <span className="text-sm font-semibold text-[var(--foreground)]">{logs.length}</span>
-          <span className="text-xs text-[var(--foreground-tertiary)]">events</span>
+        <div className="flex items-center gap-3">
+          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+            <Activity className="h-4 w-4 text-[var(--primary-light)]" />
+            <span className="text-sm font-semibold text-[var(--foreground)]">{filteredLogs.length}</span>
+            <span className="text-xs text-[var(--foreground-tertiary)]">{hasFilters ? "filtered" : "events"}</span>
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+              hasFilters ? "text-[var(--primary-light)] bg-[var(--primary)]/10" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            <Filter className="h-4 w-4" />
+            Filter
+            {hasFilters && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+                {[filterEntity, filterAction].filter(Boolean).length}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
+      {/* Filter Bar */}
+      {showFilters && (
+        <div className="flex flex-wrap items-end gap-3 animated-card" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+          <div className="w-full sm:w-auto sm:min-w-[180px] lg:min-w-[200px]">
+            <CustomSelect
+              label="Entity Type"
+              value={filterEntity}
+              options={entityOptions}
+              onChange={(v) => setFilterEntity(v)}
+            />
+          </div>
+          <div className="w-full sm:w-auto sm:min-w-[180px] lg:min-w-[200px]">
+            <CustomSelect
+              label="Action"
+              value={filterAction}
+              options={actionOptions}
+              onChange={(v) => setFilterAction(v)}
+            />
+          </div>
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.06] transition-all"
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Activity Feed */}
-      {logs.length === 0 ? (
+      {filteredLogs.length === 0 ? (
         <div className="liquid-glass p-12 text-center animated-card">
           <Activity className="h-12 w-12 text-[var(--foreground-tertiary)] mx-auto mb-4" />
-          <p className="text-sm text-[var(--foreground-secondary)]">No activity yet. Actions will appear here.</p>
+          <p className="text-sm text-[var(--foreground-secondary)]">
+            {hasFilters ? "No activity matches your filters" : "No activity yet. Actions will appear here."}
+          </p>
+          {hasFilters && (
+            <button onClick={clearFilters} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">
+              Clear filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-8">
