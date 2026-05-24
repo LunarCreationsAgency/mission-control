@@ -22,11 +22,11 @@ const priorityConfig: Record<string, { bg: string; text: string; dot: string }> 
   critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
 };
 
-const statusColors: Record<string, string> = {
-  todo: "border-l-zinc-500",
-  in_progress: "border-l-[var(--primary)]",
-  review: "border-l-[var(--warning)]",
-  done: "border-l-[var(--success)]",
+const priorityBorderColors: Record<string, string> = {
+  low: "border-l-blue-400",
+  medium: "border-l-amber-400",
+  high: "border-l-orange-400",
+  critical: "border-l-red-400",
 };
 
 export default function TaskCard({
@@ -99,7 +99,7 @@ export default function TaskCard({
         hover:bg-white/[0.04] hover:border-white/[0.08]
         transition-all duration-200 cursor-grab
         ${isDragging ? "opacity-30 scale-95 rotate-1" : ""}
-        ${statusColors[task.status] || statusColors.todo}
+        ${priorityBorderColors[task.priority] || priorityBorderColors.medium}
       `}
     >
       {/* Hover actions */}
