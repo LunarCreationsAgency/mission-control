@@ -8,6 +8,7 @@ export interface Task {
   goal?: string;
   due_date?: string;
   assignee?: string;
+  required_skills?: string[];
   created: string;
   updated: string;
 }
@@ -38,11 +39,14 @@ export interface Agent {
   id: string;
   name: string;
   role: string;
-  status: string;
+  status: "idle" | "working" | "error" | "offline";
   description: string;
   avatar: string;
   paused: boolean;
   last_heartbeat: string | null;
+  skills?: string[];
+  department?: string;
+  current_task?: string;
 }
 
 export interface ActivityLog {
