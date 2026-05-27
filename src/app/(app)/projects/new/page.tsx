@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Sparkles, Check, Loader2, ArrowLeft, MessageSquare, FileText } from "lucide-react";
+import { Send, Sparkles, Check, Loader2, ArrowLeft, MessageSquare, FileText, AlertTriangle } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -53,38 +53,43 @@ export default function NewProjectWizard() {
   const [session, setSession] = useState<Session | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [creating, setCreating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Start session on mount
   useEffect(() => {
     startSession();
   }, []);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [session?.messages]);
 
-  // Focus input
   useEffect(() => {
     if (!loading) inputRef.current?.focus();
   }, [loading]);
 
   const startSession = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "start" }),
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setSession(data);
     } catch (e) {
       console.error("Failed to start session:", e);
+      setError(e instanceof Error ? e.message : "Failed to start planning session");
     } finally {
       setLoading(false);
     }
@@ -96,6 +101,7 @@ export default function NewProjectWizard() {
     const text = input.trim();
     setInput("");
     setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch("/api/planning", {
@@ -103,10 +109,16 @@ export default function NewProjectWizard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "message", sessionId: session.id, message: text }),
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setSession(data);
     } catch (e) {
       console.error("Failed to send message:", e);
+      setError(e instanceof Error ? e.message : "Failed to send message");
     } finally {
       setLoading(false);
     }
@@ -115,17 +127,24 @@ export default function NewProjectWizard() {
   const generatePlan = async () => {
     if (!session || loading) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "generate", sessionId: session.id }),
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setSession(data);
-      setPlan(data.plan);
+      setPlan(data.plan || null);
     } catch (e) {
       console.error("Failed to generate plan:", e);
+      setError(e instanceof Error ? e.message : "Failed to generate plan");
     } finally {
       setLoading(false);
     }
@@ -134,18 +153,27 @@ export default function NewProjectWizard() {
   const approvePlan = async () => {
     if (!session || creating) return;
     setCreating(true);
+    setError(null);
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "approve", sessionId: session.id }),
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (data.project?.id) {
         router.push(`/projects/${data.project.id}`);
+      } else {
+        throw new Error("Project created but no ID returned");
       }
     } catch (e) {
       console.error("Failed to approve plan:", e);
+      setError(e instanceof Error ? e.message : "Failed to create project");
       setCreating(false);
     }
   };
@@ -179,9 +207,27 @@ export default function NewProjectWizard() {
     return icons[type] || "📋";
   };
 
+  if (error && !session) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4"
+      >
+        <AlertTriangle className="h-12 w-12 text-red-400" />
+        <p className="text-sm text-red-400 max-w-md text-center">{error}</p>
+        <button
+          onClick={startSession}
+          className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-dark)] transition-all"
+        >
+          <Loader2 className="h-4 w-4" />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex items-center justify-center h-[60vh]"
+      >
         <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
       </div>
     );
@@ -191,11 +237,14 @@ export default function NewProjectWizard() {
   const hasPlan = !!plan;
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col lg:flex-row page-enter">
+    <div className="h-[calc(100vh-64px)] flex flex-col lg:flex-row page-enter"
+    >
       {/* Left Panel — Chat */}
-      <div className="flex-1 flex flex-col min-h-0 border-r border-white/[0.04]">
+      <div className="flex-1 flex flex-col min-h-0 border-r border-white/[0.04]"
+      >
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]"
+        >
           <button
             onClick={() => router.push("/projects")}
             className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
@@ -203,14 +252,26 @@ export default function NewProjectWizard() {
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
           <div className="h-4 w-px bg-white/[0.08]" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2"
+          >
             <MessageSquare className="h-4 w-4 text-[var(--primary-light)]" />
-            <span className="text-sm font-medium text-[var(--foreground)]">Planning Session</span>
+            <span className="text-sm font-medium text-[var(--foreground)]"
+            >Planning Session</span>
           </div>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"
+          >
+            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+            <p className="text-xs text-red-400">{error}</p>
+          </div>
+        )}
+
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4"
+        >
           {session.messages.map((msg, i) => (
             <div
               key={i}
@@ -221,17 +282,22 @@ export default function NewProjectWizard() {
                   msg.role === "user"
                     ? "bg-[var(--primary)]/20 text-[var(--foreground)] rounded-br-md"
                     : "bg-white/[0.04] text-[var(--foreground-secondary)] rounded-bl-md"
-                }`}>
+                }`}
+              >
                 {msg.text}
               </div>
             </div>
           ))}
           {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/[0.04] rounded-2xl rounded-bl-md px-4 py-3">
-                <div className="flex items-center gap-2">
+            <div className="flex justify-start"
+            >
+              <div className="bg-white/[0.04] rounded-2xl rounded-bl-md px-4 py-3"
+              >
+                <div className="flex items-center gap-2"
+                >
                   <Loader2 className="h-4 w-4 animate-spin text-[var(--primary-light)]" />
-                  <span className="text-xs text-[var(--foreground-tertiary)]">Thinking...</span>
+                  <span className="text-xs text-[var(--foreground-tertiary)]"
+                  >Thinking...</span>
                 </div>
               </div>
             </div>
@@ -240,9 +306,11 @@ export default function NewProjectWizard() {
         </div>
 
         {/* Input */}
-        <div className="px-5 py-4 border-t border-white/[0.04]">
+        <div className="px-5 py-4 border-t border-white/[0.04]"
+        >
           {isReadyToPlan && !hasPlan ? (
-            <div className="flex gap-3">
+            <div className="flex gap-3"
+            >
               <button
                 onClick={generatePlan}
                 disabled={loading}
@@ -260,7 +328,8 @@ export default function NewProjectWizard() {
               </button>
             </div>
           ) : hasPlan ? (
-            <div className="flex gap-3">
+            <div className="flex gap-3"
+            >
               <button
                 onClick={approvePlan}
                 disabled={creating}
@@ -286,7 +355,8 @@ export default function NewProjectWizard() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3"
+            >
               <input
                 ref={inputRef}
                 type="text"
@@ -309,42 +379,67 @@ export default function NewProjectWizard() {
       </div>
 
       {/* Right Panel — Plan Preview */}
-      <div className="w-full lg:w-[420px] xl:w-[480px] flex flex-col min-h-0 bg-white/[0.01]">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.04]">
+      <div className="w-full lg:w-[420px] xl:w-[480px] flex flex-col min-h-0 bg-white/[0.01]"
+      >
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.04]"
+        >
           <FileText className="h-4 w-4 text-[var(--primary-light)]" />
-          <span className="text-sm font-medium text-[var(--foreground)]">Plan Preview</span>
+          <span className="text-sm font-medium text-[var(--foreground)]"
+          >Plan Preview</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
-          {hasPlan ? (
-            <div className="space-y-4">
-              <div className="liquid-glass p-4">
-                <h3 className="text-sm font-semibold text-[var(--foreground)]">{plan.projectName}</h3>
-                <p className="text-xs text-[var(--foreground-secondary)] mt-1">{plan.description}</p>
-                <div className="flex gap-4 mt-3">
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{plan.tasks.length}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Tasks</p>
+        <div className="flex-1 overflow-y-auto px-5 py-4"
+        >
+          {hasPlan && plan ? (
+            <div className="space-y-4"
+            >
+              <div className="liquid-glass p-4"
+              >
+                <h3 className="text-sm font-semibold text-[var(--foreground)]"
+                >{plan.projectName}</h3>
+                <p className="text-xs text-[var(--foreground-secondary)] mt-1"
+                >{plan.description}</p>
+                <div className="flex gap-4 mt-3"
+                >
+                  <div className="text-center"
+                  >
+                    <p className="text-lg font-bold text-[var(--foreground)]"
+                    >{plan.tasks.length}</p>
+                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase"
+                    >Tasks</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{session.extracted.budget ? `€${session.extracted.budget}` : "—"}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Budget</p>
+                  <div className="text-center"
+                  >
+                    <p className="text-lg font-bold text-[var(--foreground)]"
+                    >{session.extracted.budget ? `€${session.extracted.budget}` : "—"}</p>
+                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase"
+                    >Budget</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{session.extracted.timeline || "—"}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Timeline</p>
+                  <div className="text-center"
+                  >
+                    <p className="text-lg font-bold text-[var(--foreground)]"
+                    >{session.extracted.timeline || "—"}</p>
+                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase"
+                    >Timeline</p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2"
+              >
                 {plan.tasks.map((task, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <span className="text-lg shrink-0">{getTypeIcon(task.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[var(--foreground)] truncate">{task.title}</p>
-                      <p className="text-[10px] text-[var(--foreground-tertiary)] mt-0.5 line-clamp-2">{task.description}</p>
-                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}>
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]"
+                  >
+                    <span className="text-lg shrink-0"
+                    >{getTypeIcon(task.type)}</span>
+                    <div className="flex-1 min-w-0"
+                    >
+                      <p className="text-xs font-medium text-[var(--foreground)] truncate"
+                      >{task.title}</p>
+                      <p className="text-[10px] text-[var(--foreground-tertiary)] mt-0.5 line-clamp-2"
+                      >{task.description}</p>
+                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}
+                      >
                         {task.type}
                       </span>
                     </div>
@@ -353,17 +448,22 @@ export default function NewProjectWizard() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="liquid-glass p-4 text-center">
+            <div className="space-y-4"
+            >
+              <div className="liquid-glass p-4 text-center"
+              >
                 <Sparkles className="h-8 w-8 text-[var(--primary-light)] mx-auto mb-2" />
-                <p className="text-sm text-[var(--foreground-secondary)]">
+                <p className="text-sm text-[var(--foreground-secondary)]"
+                >
                   Answer the questions in the chat to generate your project plan.
                 </p>
               </div>
 
               {session.extracted.projectType && (
-                <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Extracted Info</h4>
+                <div className="space-y-3"
+                >
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]"
+                  >Extracted Info</h4>
 
                   {session.extracted.projectType && (
                     <InfoRow label="Type" value={session.extracted.projectType} />
@@ -401,9 +501,12 @@ export default function NewProjectWizard() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
-      <span className="text-[11px] text-[var(--foreground-tertiary)]">{label}</span>
-      <span className="text-xs font-medium text-[var(--foreground)]">{value}</span>
+    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]"
+    >
+      <span className="text-[11px] text-[var(--foreground-tertiary)]"
+      >{label}</span>
+      <span className="text-xs font-medium text-[var(--foreground)]"
+      >{value}</span>
     </div>
   );
 }
