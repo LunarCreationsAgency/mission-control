@@ -14,8 +14,8 @@ export default function AgentDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data: agents = [], loading: agentsLoading, refetch: refetchAgents } = useData<Agent[]>("agents", getAgents);
-  const { data: tasks = [], loading: tasksLoading } = useData<Task[]>("tasks", getTasks);
+  const { data: agents = [], loading: agentsLoading, refetch: refetchAgents } = useData<Agent[]>("agents", getAgents, { refreshInterval: 30000 });
+  const { data: tasks = [], loading: tasksLoading } = useData<Task[]>("tasks", getTasks, { refreshInterval: 30000 });
 
   const loading = agentsLoading || tasksLoading;
   const agent = agents.find((a) => a.id === id);

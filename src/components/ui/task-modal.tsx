@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Loader2, Flag, Calendar, ListTodo, AlertTriangle, FolderKanban } from "lucide-react";
-import { type Task, type Project } from "@/types";
-import { getProjects } from "@/lib/data";
+import { X, Loader2, Flag, Calendar, ListTodo, AlertTriangle, FolderKanban, Bot, Wrench } from "lucide-react";
+import { type Task, type Project, type Agent } from "@/types";
+import { getProjects, getAgents } from "@/lib/data";
 import CustomSelect from "@/components/ui/custom-select";
 
 interface TaskModalProps {
@@ -29,20 +29,33 @@ const statusOptions: { value: string; label: string; icon: React.ReactNode }[] =
   { value: "done", label: "Done", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> },
 ];
 
+const typeOptions: { value: string; label: string; icon: React.ReactNode }[] = [
+  { value: "", label: "None", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "design", label: "🎨 Design", icon: <span className="h-1.5 w-1.5 rounded-full bg-purple-400" /> },
+  { value: "code", label: "💻 Code", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+  { value: "content", label: "📝 Content", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> },
+  { value: "deploy", label: "🚀 Deploy", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
+  { value: "planning", label: "📋 Planning", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+];
+
 export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode }: TaskModalProps) {
   const [title, setTitle] = useState(initialTask?.title || "");
   const [description, setDescription] = useState(initialTask?.description || "");
   const [status, setStatus] = useState<Task["status"]>(initialTask?.status || "todo");
   const [priority, setPriority] = useState<Task["priority"]>(initialTask?.priority || "medium");
+  const [type, setType] = useState<Task["type"]>(initialTask?.type || undefined);
   const [dueDate, setDueDate] = useState(initialTask?.due_date ? new Date(initialTask.due_date).toISOString().split("T")[0] : "");
   const [projectId, setProjectId] = useState(initialTask?.project || "");
+  const [assignee, setAssignee] = useState(initialTask?.assignee || "");
   const [projects, setProjects] = useState<Project[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       getProjects().then((data) => setProjects(data as Project[])).catch(() => {});
+      getAgents().then((data) => setAgents(data as Agent[])).catch(() => {});
     }
   }, [isOpen]);
 
@@ -51,8 +64,10 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
     setDescription(initialTask?.description || "");
     setStatus(initialTask?.status || "todo");
     setPriority(initialTask?.priority || "medium");
+    setType(initialTask?.type || undefined);
     setDueDate(initialTask?.due_date ? new Date(initialTask.due_date).toISOString().split("T")[0] : "");
     setProjectId(initialTask?.project || "");
+    setAssignee(initialTask?.assignee || "");
     setError(null);
   };
 
@@ -77,8 +92,10 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
         description: description.trim() || undefined,
         status,
         priority,
+        type,
         due_date: dueDate || undefined,
         project: projectId || undefined,
+        assignee: assignee || undefined,
       });
       handleClose();
     } catch (e) {
@@ -89,6 +106,15 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
   };
 
   if (!isOpen) return null;
+
+  const agentOptions = [
+    { value: "", label: "Unassigned", icon: <Bot className="h-3 w-3 text-[var(--foreground-tertiary)]" /> },
+    ...agents.map((a) => ({
+      value: a.id,
+      label: `${a.name}${a.skills ? ` (${a.skills.slice(0, 2).join(", ")})` : ""}`,
+      icon: <div className={`h-2 w-2 rounded-full ${a.paused ? "bg-slate-400" : "bg-emerald-400"}`} />,
+    })),
+  ];
 
   const modal = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
@@ -165,7 +191,24 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
               />
             </div>
 
-            {/* Status + Priority dropdowns */}
+            {/* Type + Assignee */}
+            <div className="grid grid-cols-2 gap-3">
+              <CustomSelect
+                label="Type"
+                value={type || ""}
+                options={typeOptions}
+                onChange={(v) => setType(v ? (v as Task["type"]) : undefined)}
+              />
+              <CustomSelect
+                label="Assignee"
+                value={assignee}
+                options={agentOptions}
+                onChange={(v) => setAssignee(v)}
+                placeholder="Select agent"
+              />
+            </div>
+
+            {/* Status + Priority */}
             <div className="grid grid-cols-2 gap-3">
               <CustomSelect
                 label="Status"

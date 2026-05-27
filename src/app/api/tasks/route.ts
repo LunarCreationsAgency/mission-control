@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     if (body.goal) payload.goal = body.goal;
     if (body.due_date) payload.due_date = body.due_date;
     if (body.assignee) payload.assignee = body.assignee;
+    if (body.type) payload.type = body.type;
 
     const task = await pbCreateTask(payload);
 

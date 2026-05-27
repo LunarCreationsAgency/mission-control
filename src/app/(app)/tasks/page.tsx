@@ -42,8 +42,8 @@ const priorityValue: Record<string, number> = {
 
 export default function TasksPage() {
   const { success, error: toastError } = useToast();
-  const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks);
-  const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects);
+  const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks, { refreshInterval: 30000 });
+  const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects, { refreshInterval: 30000 });
 
   const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
   const [filterProject, setFilterProject] = useState("");
