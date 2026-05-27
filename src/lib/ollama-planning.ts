@@ -18,7 +18,7 @@ interface OllamaResponse {
   message: { content: string };
 }
 
-const OLLAMA_TIMEOUT_MS = 15000; // 15s timeout
+const OLLAMA_TIMEOUT_MS = 8000; // 8s — must be under Vercel's 10s function limit
 
 function ollamaChat(messages: OllamaMessage[]): Promise<OllamaResponse> {
   const url = new URL("/api/chat", OLLAMA_URL);

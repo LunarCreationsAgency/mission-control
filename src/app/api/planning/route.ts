@@ -34,13 +34,228 @@ function createSession(): PlanningSession {
     id,
     messages: [{
       role: "assistant",
-      text: "Hey! Let's plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page, or tell me about an existing site you want to rebuild)",
+      text: "Hey! Let\'s plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page, or tell me about an existing site you want to rebuild)",
       timestamp: new Date().toISOString(),
     }],
     extracted: {},
     status: "discovering",
     created: new Date().toISOString(),
     updated: new Date().toISOString(),
+  };
+}
+
+// ─── FALLBACK: Scripted task generation when Ollama is unavailable ───
+
+function generateFallbackPlan(extracted: Record<string, unknown>): NonNullable<PlanningSession["plan"]> {
+  const projectType = (extracted.project_type as string) || "website";
+  const projectName = (extracted.project_name as string) || "New Project";
+  const isRebuild = !!(extracted.source_url as string);
+  const hasShop = projectType === "shop" || (extracted.payment as boolean);
+  const hasAuth = (extracted.auth as boolean) || projectType === "webapp" || projectType === "dashboard";
+
+  const tasks: Array<{ title: string; type: string; description: string; priority: string; estimated_hours: number }> = [];
+
+  // Phase 1: Foundation
+  if (isRebuild) {
+    tasks.push({
+      title: `Audit existing site: ${extracted.source_url}`,
+      type: "planning",
+      description: `Analyze the current site at ${extracted.source_url}. Document what to keep, what to change, and what to remove.`,
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Create redirect strategy",
+      type: "planning",
+      description: "Map old URLs to new pages. Ensure no broken links after launch.",
+      priority: "high",
+      estimated_hours: 2,
+    });
+  } else {
+    tasks.push({
+      title: "Define project scope and requirements",
+      type: "planning",
+      description: "Document all features, pages, and functionality needed. Confirm with stakeholder.",
+      priority: "high",
+      estimated_hours: 3,
+    });
+  }
+
+  tasks.push({
+    title: "Set up project repository and deployment pipeline",
+    type: "code",
+    description: "Initialize Next.js project with TypeScript, Tailwind, and shadcn. Configure Vercel deployment.",
+    priority: "high",
+    estimated_hours: 2,
+  });
+
+  // Phase 2: Design
+  tasks.push({
+    title: "Create design system and component library",
+    type: "design",
+    description: "Define colors, typography, spacing, and reusable components. Create Figma or code-based design tokens.",
+    priority: "high",
+    estimated_hours: 6,
+  });
+
+  if (projectType === "homepage" || projectType === "landing") {
+    tasks.push({
+      title: "Design hero section with headline and CTA",
+      type: "design",
+      description: "Create a compelling above-the-fold section that communicates value proposition and drives action.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Design features/benefits section",
+      type: "design",
+      description: "Showcase key offerings with icons, illustrations, or screenshots.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+  }
+
+  if (projectType === "shop") {
+    tasks.push({
+      title: "Design product catalog and product detail pages",
+      type: "design",
+      description: "Create layouts for browsing products and viewing individual product details with images, pricing, and variants.",
+      priority: "high",
+      estimated_hours: 6,
+    });
+    tasks.push({
+      title: "Design shopping cart and checkout flow",
+      type: "design",
+      description: "Create intuitive cart and multi-step checkout with payment integration.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+  }
+
+  // Phase 3: Build
+  if (projectType === "homepage" || projectType === "landing") {
+    tasks.push({
+      title: "Build responsive hero section",
+      type: "code",
+      description: "Implement the hero with headline, subtext, CTA button, and background. Mobile-first responsive.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Build features section with icons and descriptions",
+      type: "code",
+      description: "Create a grid or list of feature cards with icons, titles, and descriptions.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+    tasks.push({
+      title: "Build testimonials or social proof section",
+      type: "code",
+      description: "Add client logos, quotes, or case studies to build trust.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+  }
+
+  if (projectType === "shop") {
+    tasks.push({
+      title: "Build product catalog with filtering and search",
+      type: "code",
+      description: "Implement product grid with category filters, price range, and search functionality.",
+      priority: "high",
+      estimated_hours: 6,
+    });
+    tasks.push({
+      title: "Build shopping cart with add/remove/update",
+      type: "code",
+      description: "Create cart state management with add, remove, quantity update, and persist to localStorage.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+    tasks.push({
+      title: "Integrate payment gateway (Stripe/PayPal)",
+      type: "code",
+      description: "Set up payment processing with checkout session creation and webhook handling.",
+      priority: "high",
+      estimated_hours: 6,
+    });
+  }
+
+  if (hasAuth) {
+    tasks.push({
+      title: "Implement authentication system",
+      type: "code",
+      description: "Add login, signup, password reset with JWT or OAuth. Protect private routes.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+  }
+
+  tasks.push({
+      title: "Build navigation and footer",
+      type: "code",
+      description: "Create responsive navbar with mobile hamburger menu and footer with links/social.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+
+  // Phase 4: Content
+  tasks.push({
+    title: "Write and add all page content",
+    type: "content",
+    description: "Add headlines, body text, CTAs, meta descriptions, and alt text for all pages.",
+    priority: "medium",
+    estimated_hours: 4,
+  });
+
+  // Phase 5: Polish
+  tasks.push({
+    title: "Add animations and micro-interactions",
+    type: "code",
+    description: "Implement scroll animations, hover effects, loading states, and page transitions.",
+    priority: "low",
+    estimated_hours: 4,
+  });
+
+  tasks.push({
+    title: "Test responsiveness across devices",
+    type: "code",
+    description: "Verify layout on mobile, tablet, and desktop. Fix any breakpoints issues.",
+    priority: "medium",
+    estimated_hours: 2,
+  });
+
+  // Phase 6: Launch
+  tasks.push({
+    title: "Configure SEO and meta tags",
+    type: "code",
+    description: "Add title, description, Open Graph, Twitter cards, robots.txt, and sitemap.",
+    priority: "medium",
+    estimated_hours: 2,
+  });
+
+  tasks.push({
+    title: "Deploy to production and verify",
+    type: "deploy",
+    description: "Deploy to Vercel, verify all pages load, check console for errors, test all interactions.",
+    priority: "high",
+    estimated_hours: 2,
+  });
+
+  if (isRebuild) {
+    tasks.push({
+      title: "Implement 301 redirects from old URLs",
+      type: "deploy",
+      description: `Set up redirects from ${extracted.source_url} paths to new URLs to preserve SEO.`,
+      priority: "high",
+      estimated_hours: 2,
+    });
+  }
+
+  return {
+    project_name: projectName,
+    description: `A ${projectType} project${isRebuild ? ` (rebuild of ${extracted.source_url})` : ""} built with modern tech stack.`,
+    tasks,
   };
 }
 
@@ -68,13 +283,56 @@ export async function POST(req: Request) {
         timestamp: new Date().toISOString(),
       });
 
-      // Call Ollama AI
-      const aiResult = await callPlanningAI(session.messages);
+      // Try Ollama AI first
+      let aiResult;
+      let usedAI = false;
+      try {
+        aiResult = await callPlanningAI(session.messages);
+        usedAI = true;
+      } catch (e) {
+        console.warn("Ollama failed, using fallback:", e instanceof Error ? e.message : e);
+        // Fallback: scripted response
+        const msg = message.toLowerCase();
+        let reply = "";
+        let ready = false;
+
+        if (msg.includes("home") || msg.includes("landing")) {
+          session.extracted.project_type = "homepage";
+          reply = "Great! A homepage. Who is this for? (e.g., SaaS customers, local business, personal brand)";
+        } else if (msg.includes("shop") || msg.includes("store") || msg.includes("ecommerce")) {
+          session.extracted.project_type = "shop";
+          reply = "An online shop! What products are you selling?";
+        } else if (msg.includes("blog")) {
+          session.extracted.project_type = "blog";
+          reply = "A blog! What topics will you cover?";
+        } else if (msg.includes("app") || msg.includes("dashboard")) {
+          session.extracted.project_type = "webapp";
+          reply = "A web app! What problem does it solve?";
+        } else if (msg.includes("rebuild") || msg.includes("redesign") || msg.includes("update")) {
+          session.extracted.project_type = "rebuild";
+          reply = "A rebuild! What\'s the current site URL?";
+        } else {
+          reply = "Got it. What\'s the main goal of this project? (e.g., get leads, sell products, share content)";
+        }
+
+        // Check if we have enough info to generate plan
+        const msgs = session.messages;
+        const hasType = !!session.extracted.project_type;
+        const hasAudience = msgs.some(m => m.role === "user" && (m.text.includes("for") || m.text.includes("audience")));
+        const hasGoal = msgs.some(m => m.role === "user" && (m.text.includes("goal") || m.text.includes("purpose")));
+
+        if (hasType && msgs.length >= 6) {
+          ready = true;
+          reply = "I think I have enough to draft a plan. Ready to see it?";
+        }
+
+        aiResult = { reply, ready_to_plan: ready, extracted: session.extracted };
+      }
 
       // Add AI response
       session.messages.push({
         role: "assistant",
-        text: aiResult.reply,
+        text: usedAI ? aiResult.reply : aiResult.reply,
         timestamp: new Date().toISOString(),
       });
 
@@ -84,9 +342,8 @@ export async function POST(req: Request) {
       }
 
       // Check if ready to plan
-      if (aiResult.ready_to_plan && aiResult.plan) {
+      if (aiResult.ready_to_plan) {
         session.status = "ready_to_plan";
-        session.plan = aiResult.plan;
       }
 
       session.updated = new Date().toISOString();
@@ -97,27 +354,38 @@ export async function POST(req: Request) {
       const session = sessions.get(sessionId);
       if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
 
-      // Force AI to generate the plan
-      const generatePrompt = "The user has confirmed they want to see the plan. Generate the complete task list as JSON with ready_to_plan: true.";
-      session.messages.push({
-        role: "user",
-        text: generatePrompt,
-        timestamp: new Date().toISOString(),
-      });
+      // Try Ollama first for plan generation
+      let plan;
+      try {
+        const generatePrompt = "The user has confirmed they want to see the plan. Generate the complete task list as JSON with ready_to_plan: true.";
+        session.messages.push({
+          role: "user",
+          text: generatePrompt,
+          timestamp: new Date().toISOString(),
+        });
 
-      const aiResult = await callPlanningAI(session.messages);
+        const aiResult = await callPlanningAI(session.messages);
 
-      session.messages.push({
-        role: "assistant",
-        text: aiResult.reply,
-        timestamp: new Date().toISOString(),
-      });
+        session.messages.push({
+          role: "assistant",
+          text: aiResult.reply,
+          timestamp: new Date().toISOString(),
+        });
 
-      if (aiResult.plan) {
-        session.plan = aiResult.plan;
-        session.status = "plan_generated";
+        if (aiResult.plan) {
+          plan = aiResult.plan;
+        }
+      } catch (e) {
+        console.warn("Ollama plan generation failed, using fallback:", e instanceof Error ? e.message : e);
       }
 
+      // Fallback if Ollama didn't return a plan
+      if (!plan) {
+        plan = generateFallbackPlan(session.extracted);
+      }
+
+      session.plan = plan;
+      session.status = "plan_generated";
       session.updated = new Date().toISOString();
       return NextResponse.json(session);
     }
