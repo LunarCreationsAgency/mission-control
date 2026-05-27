@@ -32,6 +32,7 @@ interface ExtractedInfo {
   payment?: boolean;          // needs payments?
   domain?: string;            // existing domain?
   deadline?: string;
+  source_url?: string;        // URL of existing site being rebuilt
   questionsAsked?: string[];  // track which questions we've asked
 }
 
@@ -41,10 +42,10 @@ function createSession(): PlanningSession {
     id,
     messages: [{
       role: "assistant",
-      text: "Hey! Let's plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page)",
+      text: "Hey! Let's plan your project. Are you building something new, or rebuilding/changing an existing site?",
       timestamp: new Date().toISOString(),
     }],
-    extracted: { questionsAsked: ["project_type"] },
+    extracted: { questionsAsked: ["new_or_rebuild"] },
     status: "discovering",
     created: new Date().toISOString(),
     updated: new Date().toISOString(),
@@ -65,6 +66,11 @@ function extractInfoFromAnswer(answer: string, current: ExtractedInfo): Partial<
     else if (lower.includes("portfolio")) extracted.projectType = "portfolio";
     else if (lower.includes("dashboard")) extracted.projectType = "dashboard";
     else extracted.projectType = "website";
+  }
+
+  // Detect rebuild/change intent
+  if (lower.includes("rebuild") || lower.includes("redesign") || lower.includes("update") || lower.includes("change") || lower.includes("revamp") || lower.includes("refresh")) {
+    extracted.purpose = "rebuild";
   }
 
   // Detect audience
@@ -187,6 +193,18 @@ function generateNextQuestion(extracted: ExtractedInfo): string | null {
     }
   }
 
+  // Rebuild-specific questions
+  if (extracted.purpose === "rebuild") {
+    if (!asked.includes("source_url")) {
+      asked.push("source_url");
+      return "What's the URL of the existing site? I'll analyze it to plan the rebuild.";
+    }
+    if (!asked.includes("rebuild_scope")) {
+      asked.push("rebuild_scope");
+      return "What needs to change? (design only, new features, full rewrite, or just content updates?)";
+    }
+  }
+
   if (type === "webapp" || type === "dashboard") {
     if (!asked.includes("features")) {
       asked.push("features");
@@ -272,6 +290,31 @@ function generatePlan(extracted: ExtractedInfo): { tasks: Array<Partial<Record<s
 
   // Project name suggestion
   const projectName = `${extracted.audience || "Project"} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+  // --- REBUILD PHASE (if applicable) ---
+  if (extracted.purpose === "rebuild" && extracted.source_url) {
+    tasks.push({
+      title: "Audit existing site",
+      type: "planning",
+      description: `Analyze ${extracted.source_url} — structure, content, performance, SEO.`,
+      status: "todo",
+      priority: "high",
+    });
+    tasks.push({
+      title: "Document what to keep vs. change",
+      type: "planning",
+      description: "List pages, features, and content to preserve, update, or remove.",
+      status: "todo",
+      priority: "high",
+    });
+    tasks.push({
+      title: "Set up redirect strategy",
+      type: "deploy",
+      description: "Map old URLs to new ones to preserve SEO.",
+      status: "todo",
+      priority: "medium",
+    });
+  }
 
   // --- FOUNDATION PHASE ---
   tasks.push({

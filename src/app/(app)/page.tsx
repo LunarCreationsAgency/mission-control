@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { type Task, type Project, type Goal, type Agent, type ActivityLog } from "@/types";
 import {
   ListTodo, Bot, Target, FolderKanban, Plus, Clock,
@@ -9,7 +10,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import TaskModal from "@/components/ui/task-modal";
-import ProjectModal from "@/components/ui/project-modal";
 
 const statusColors: Record<string, string> = {
   todo: "#94a3b8",
@@ -34,6 +34,7 @@ const actionIcons: Record<string, { icon: React.ReactNode; color: string; bg: st
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -41,7 +42,6 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
-  const [projectModalOpen, setProjectModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -95,16 +95,6 @@ export default function DashboardPage() {
     await fetchData();
   };
 
-  const handleCreateProject = async (projectData: Partial<Project>) => {
-    const res = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(projectData),
-    });
-    if (!res.ok) throw new Error("Failed");
-    await fetchData();
-  };
-
   if (loading) return <DashboardSkeleton />;
 
   return (
@@ -122,11 +112,11 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setProjectModalOpen(true)}
+            onClick={() => router.push("/projects/new")}
             className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04] active:scale-[0.98]"
           >
             <FolderKanban className="h-4 w-4" />
-            <span className="hidden sm:inline">Project</span>
+            <span className="hidden sm:inline">New Project</span>
           </button>
           <button
             onClick={() => setTaskModalOpen(true)}
@@ -434,7 +424,6 @@ export default function DashboardPage() {
 
       {/* Modals */}
       <TaskModal isOpen={taskModalOpen} onClose={() => setTaskModalOpen(false)} onSubmit={handleCreateTask} mode="create" />
-      <ProjectModal isOpen={projectModalOpen} onClose={() => setProjectModalOpen(false)} onSubmit={handleCreateProject} />
     </div>
   );
 }

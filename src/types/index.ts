@@ -21,6 +21,8 @@ export interface Project {
   progress: number;
   icon: string;
   budget: number;
+  source_url?: string;        // URL to existing site being rebuilt
+  deployed_url?: string;     // Live deployed URL
 }
 
 export interface Goal {
