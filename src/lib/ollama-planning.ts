@@ -18,16 +18,23 @@ interface OllamaResponse {
   message: { content: string };
 }
 
+const OLLAMA_TIMEOUT_MS = 15000; // 15s timeout
+
 function ollamaChat(messages: OllamaMessage[]): Promise<OllamaResponse> {
   const url = new URL("/api/chat", OLLAMA_URL);
   const body = JSON.stringify({
     model: OLLAMA_MODEL,
     messages,
     stream: false,
-    options: { temperature: 0.7, num_predict: 4096 },
+    options: { temperature: 0.7, num_predict: 1024 },
   });
 
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      req.destroy();
+      reject(new Error("Ollama timeout — model is taking too long. Try a smaller model or retry."));
+    }, OLLAMA_TIMEOUT_MS);
+
     const req = request(
       {
         hostname: url.hostname,
@@ -44,6 +51,7 @@ function ollamaChat(messages: OllamaMessage[]): Promise<OllamaResponse> {
         let data = "";
         res.on("data", (chunk) => (data += chunk));
         res.on("end", () => {
+          clearTimeout(timer);
           try {
             const json = JSON.parse(data);
             if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
@@ -57,7 +65,10 @@ function ollamaChat(messages: OllamaMessage[]): Promise<OllamaResponse> {
         });
       }
     );
-    req.on("error", reject);
+    req.on("error", (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
     req.write(body);
     req.end();
   });

@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
-import { pbUpdateProject, pbDeleteProject } from "@/lib/pocketbase";
+import { pbGetProject, pbUpdateProject, pbDeleteProject } from "@/lib/pocketbase";
 import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const project = await pbGetProject(id);
+    return NextResponse.json({ project });
+  } catch (e) {
+    console.error("GET /api/projects/[id]:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Failed" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

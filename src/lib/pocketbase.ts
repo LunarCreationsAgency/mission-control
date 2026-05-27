@@ -115,6 +115,11 @@ export async function pbGetProjects() {
   return apiCall("/api/collections/projects/records", { token });
 }
 
+export async function pbGetProject(id: string) {
+  const token = await getAdminToken();
+  return apiCall(`/api/collections/projects/records/${id}`, { token });
+}
+
 export async function pbCreateProject(data: Record<string, unknown>) {
   const token = await getAdminToken();
   return apiCall("/api/collections/projects/records", { method: "POST", body: data, token });
