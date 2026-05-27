@@ -11,22 +11,526 @@ const sessions = new Map<string, PlanningSession>();
 interface PlanningSession {
   id: string;
   messages: Array<{ role: "user" | "assistant"; text: string; timestamp: string }>;
-  extracted: Record<string, unknown>;
+  extracted: ExtractedInfo;
   status: "discovering" | "ready_to_plan" | "plan_generated" | "approved";
-  plan?: {
-    project_name: string;
-    description: string;
-    tasks: Array<{
-      title: string;
-      type: string;
-      description: string;
-      priority: string;
-      estimated_hours: number;
-    }>;
-  };
+  plan?: ProjectPlan;
   created: string;
   updated: string;
 }
+
+interface ExtractedInfo {
+  project_type?: string;
+  project_name?: string;
+  audience?: string;
+  purpose?: string;
+  design_style?: string;
+  features?: string[];
+  timeline?: string;
+  budget?: number;
+  source_url?: string;
+  has_auth?: boolean;
+  has_payment?: boolean;
+  has_blog?: boolean;
+  has_contact?: boolean;
+  domain?: string;
+  competitor?: string;
+}
+
+interface ProjectPlan {
+  project_name: string;
+  description: string;
+  tasks: Array<{
+    title: string;
+    type: string;
+    description: string;
+    priority: string;
+    estimated_hours: number;
+  }>;
+}
+
+// ─── PROJECT TYPE DETECTION ───
+
+const PROJECT_TYPES = [
+  { keywords: ["homepage", "home page", "front page", "start page", "landing"], type: "homepage", name: "Homepage" },
+  { keywords: ["landing page", "single page", "one page", "sales page", "squeeze page"], type: "landing", name: "Landing Page" },
+  { keywords: ["shop", "store", "ecommerce", "e-commerce", "online shop", "product", "selling", "cart", "checkout"], type: "shop", name: "Online Shop" },
+  { keywords: ["blog", "article", "posts", "content", "news", "magazine"], type: "blog", name: "Blog" },
+  { keywords: ["webapp", "web app", "application", "dashboard", "portal", "tool", "saas", "platform"], type: "webapp", name: "Web Application" },
+  { keywords: ["portfolio", "showcase", "gallery", "work", "projects"], type: "portfolio", name: "Portfolio" },
+  { keywords: ["rebuild", "redesign", "update", "refresh", "revamp", "migrate", "modernize"], type: "rebuild", name: "Rebuild" },
+];
+
+function detectProjectType(text: string): { type: string; name: string } | null {
+  const lower = text.toLowerCase();
+  for (const pt of PROJECT_TYPES) {
+    for (const kw of pt.keywords) {
+      if (lower.includes(kw)) {
+        return { type: pt.type, name: pt.name };
+      }
+    }
+  }
+  return null;
+}
+
+// ─── SMART EXTRACTION ───
+
+function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInfo> {
+  const lower = text.toLowerCase();
+  const extracted: Partial<ExtractedInfo> = {};
+
+  // URL detection
+  const urlMatch = text.match(/https?:\/\/[^\s]+/);
+  if (urlMatch) {
+    extracted.source_url = urlMatch[0];
+    try {
+      extracted.domain = new URL(urlMatch[0]).hostname.replace(/^www\./, "");
+    } catch {}
+  }
+
+  // Budget detection
+  const budgetMatch = text.match(/(?:budget|cost|price|spend)[\s:]*(?:€|$|EUR)?\s*(\d[\d\s,.]*(?:k)?)/i);
+  if (budgetMatch) {
+    let budget = budgetMatch[1].replace(/[\s,]/g, "");
+    if (budget.endsWith("k")) budget = String(parseInt(budget) * 1000);
+    extracted.budget = parseInt(budget);
+  }
+
+  // Timeline detection
+  const timeMatch = text.match(/(\d+\s*(?:day|week|month|year)s?|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2})/i);
+  if (timeMatch) {
+    extracted.timeline = timeMatch[0];
+  }
+
+  // Audience detection
+  if (lower.includes("for ") || lower.includes("target") || lower.includes("audience")) {
+    const audienceMatch = text.match(/(?:for|target|audience)\s+([^,.]+)/i);
+    if (audienceMatch) extracted.audience = audienceMatch[1].trim();
+  }
+
+  // Auth detection
+  if (lower.includes("login") || lower.includes("sign in") || lower.includes("user account") || lower.includes("auth")) {
+    extracted.has_auth = true;
+  }
+
+  // Payment detection
+  if (lower.includes("payment") || lower.includes("stripe") || lower.includes("paypal") || lower.includes("checkout")) {
+    extracted.has_payment = true;
+  }
+
+  // Blog detection
+  if (lower.includes("article") || lower.includes("content") || lower.includes("cms")) {
+    extracted.has_blog = true;
+  }
+
+  // Purpose
+  const purposePatterns = [
+    /(?:goal|purpose|aim|objective|want to)\s+(.{10,100})/i,
+    /(?:to|for)\s+([^,.]{10,80})/i,
+  ];
+  for (const pattern of purposePatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      extracted.purpose = match[1].trim();
+      break;
+    }
+  }
+
+  return extracted;
+}
+
+// ─── CONVERSATION ENGINE ───
+
+function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { reply: string; ready: boolean } {
+  const type = extracted.project_type;
+
+  if (messageCount <= 2) {
+    if (!extracted.audience) {
+      return {
+        reply: `Got it — a ${type === "rebuild" ? "rebuild" : (type || "project")}! Who is this for? (e.g., small businesses, developers, fitness enthusiasts)`,
+        ready: false,
+      };
+    }
+    if (!extracted.purpose) {
+      return {
+        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., generate leads, sell products, build community)`,
+        ready: false,
+      };
+    }
+  }
+
+  if (messageCount === 3) {
+    if (type === "homepage" || type === "landing") {
+      return {
+        reply: "What sections do you need? (e.g., hero, features, testimonials, pricing, contact)",
+        ready: false,
+      };
+    }
+    if (type === "shop") {
+      return {
+        reply: "How many products are you starting with? And do you need categories/filtering?",
+        ready: false,
+      };
+    }
+    if (type === "blog") {
+      return {
+        reply: "Will you write the content yourself, or do you need a CMS for multiple authors?",
+        ready: false,
+      };
+    }
+    if (type === "webapp") {
+      return {
+        reply: "Do users need accounts/login? And what kind of data will you be managing?",
+        ready: false,
+      };
+    }
+    if (type === "rebuild") {
+      return {
+        reply: "What are the main pain points with the current site? (e.g., slow, outdated, not mobile-friendly)",
+        ready: false,
+      };
+    }
+    return {
+      reply: "What key features or sections should this include?",
+      ready: false,
+    };
+  }
+
+  if (messageCount === 4) {
+    if (!extracted.timeline) {
+      return {
+        reply: "What's your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
+        ready: false,
+      };
+    }
+    if (!extracted.budget) {
+      return {
+        reply: "Do you have a budget in mind? (e.g., €500, €2000, 'as cheap as possible')",
+        ready: false,
+      };
+    }
+  }
+
+  if (type && extracted.audience && extracted.purpose) {
+    return {
+      reply: `I have a good picture of this ${type}. Ready to generate your project plan?`,
+      ready: true,
+    };
+  }
+
+  return {
+    reply: "Tell me more about what you need — any specific features, integrations, or design preferences?",
+    ready: false,
+  };
+}
+
+// ─── TASK GENERATION ENGINE ───
+
+function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
+  const type = extracted.project_type || "website";
+  const audience = extracted.audience || "users";
+  const purpose = extracted.purpose || "online presence";
+
+  let projectName = extracted.project_name || "";
+  if (!projectName) {
+    if (extracted.domain) {
+      projectName = `${extracted.domain.charAt(0).toUpperCase() + extracted.domain.slice(1)} ${type === "rebuild" ? "Rebuild" : "Website"}`;
+    } else {
+      const typeLabel = type === "rebuild" ? "Rebuild" : (type.charAt(0).toUpperCase() + type.slice(1));
+      projectName = `${audience.charAt(0).toUpperCase() + audience.slice(1)} ${typeLabel}`;
+    }
+  }
+
+  const isRebuild = type === "rebuild";
+  const isShop = type === "shop";
+  const isBlog = type === "blog";
+  const isWebapp = type === "webapp";
+  const isLanding = type === "landing";
+  const isHomepage = type === "homepage";
+  const isPortfolio = type === "portfolio";
+
+  const tasks: ProjectPlan["tasks"] = [];
+
+  // Phase 1: Foundation & Planning
+  tasks.push({
+    title: isRebuild ? `Audit existing site: ${extracted.source_url || "current site"}` : "Define project scope and requirements",
+    type: "planning",
+    description: isRebuild
+      ? `Analyze the current site structure, content, and performance. Document what to keep, change, and remove for the rebuild.`
+      : `Document all features, pages, and functionality for ${audience}. Define success metrics and confirm scope.`,
+    priority: "high",
+    estimated_hours: 3,
+  });
+
+  if (isRebuild) {
+    tasks.push({
+      title: "Create content migration and redirect strategy",
+      type: "planning",
+      description: "Map old URLs to new structure. Plan content transfer and set up 301 redirects to preserve SEO.",
+      priority: "high",
+      estimated_hours: 2,
+    });
+  }
+
+  tasks.push({
+    title: "Set up Next.js project with TypeScript and Tailwind",
+    type: "code",
+    description: "Initialize repository with Next.js, TypeScript, Tailwind CSS, and shadcn/ui. Configure linting, formatting, and Git.",
+    priority: "high",
+    estimated_hours: 2,
+  });
+
+  // Phase 2: Design System
+  tasks.push({
+    title: "Create design system and component library",
+    type: "design",
+    description: `Define color palette, typography scale, spacing system, and reusable components aligned with ${audience} expectations.`,
+    priority: "high",
+    estimated_hours: 5,
+  });
+
+  // Phase 3: Page-specific Design & Build
+  if (isHomepage || isLanding) {
+    tasks.push({
+      title: "Design and build hero section with headline and CTA",
+      type: "design",
+      description: `Create compelling above-the-fold section communicating the value proposition for ${audience}. Include headline, subtext, and primary CTA.`,
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Build features/benefits section",
+      type: "code",
+      description: "Create grid of feature cards with icons, titles, and descriptions highlighting key offerings.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+    tasks.push({
+      title: "Build social proof section (testimonials, logos, stats)",
+      type: "code",
+      description: "Add client testimonials, company logos, or statistics to build credibility and trust.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+    if (isLanding) {
+      tasks.push({
+        title: "Build pricing or comparison section",
+        type: "code",
+        description: "Create pricing table or feature comparison to drive conversions.",
+        priority: "medium",
+        estimated_hours: 3,
+      });
+    }
+  }
+
+  if (isShop) {
+    tasks.push({
+      title: "Design product catalog layout with filtering",
+      type: "design",
+      description: "Create browseable product grid with category filters, search, and sorting options.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+    tasks.push({
+      title: "Build product detail pages with image gallery",
+      type: "code",
+      description: "Implement product pages with image carousel, variants, pricing, and add-to-cart functionality.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+    tasks.push({
+      title: "Build shopping cart with add/remove/update",
+      type: "code",
+      description: "Create cart drawer/page with quantity management, item removal, and persistence.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Design and build checkout flow",
+      type: "design",
+      description: "Create multi-step checkout with shipping, payment, and order confirmation.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+    tasks.push({
+      title: "Integrate Stripe payment processing",
+      type: "code",
+      description: "Set up Stripe checkout sessions, payment intents, and webhook handling for order fulfillment.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+  }
+
+  if (isBlog) {
+    tasks.push({
+      title: "Build blog post listing page with pagination",
+      type: "code",
+      description: "Create blog index with featured posts, category filtering, and pagination.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Build individual blog post layout with CMS integration",
+      type: "code",
+      description: "Create article pages with rich text content, author info, related posts, and social sharing.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Add category and tag filtering system",
+      type: "code",
+      description: "Implement category pages, tag clouds, and related content suggestions.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+  }
+
+  if (isWebapp) {
+    tasks.push({
+      title: "Implement user authentication and authorization",
+      type: "code",
+      description: "Build login, signup, password reset with JWT or OAuth. Add role-based access control.",
+      priority: "high",
+      estimated_hours: 5,
+    });
+    tasks.push({
+      title: "Build main dashboard layout and navigation",
+      type: "code",
+      description: "Create responsive dashboard shell with sidebar nav, header, and content area.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Build data tables with sorting and filtering",
+      type: "code",
+      description: "Implement sortable, filterable data tables with pagination and search.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Create CRUD forms for data management",
+      type: "code",
+      description: "Build create, read, update, delete forms with validation and error handling.",
+      priority: "medium",
+      estimated_hours: 4,
+    });
+  }
+
+  if (isPortfolio) {
+    tasks.push({
+      title: "Build project showcase gallery with filtering",
+      type: "code",
+      description: "Create filterable project grid with hover effects, categories, and case study links.",
+      priority: "high",
+      estimated_hours: 4,
+    });
+    tasks.push({
+      title: "Build about/bio section with skills",
+      type: "code",
+      description: "Create personal or team profile with bio, skills, experience timeline.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+  }
+
+  // Phase 4: Common Sections
+  tasks.push({
+    title: "Build responsive navigation with mobile menu",
+    type: "code",
+    description: "Create sticky navbar with logo, links, and hamburger menu for mobile. Add active state indicators.",
+    priority: "high",
+    estimated_hours: 3,
+  });
+
+  tasks.push({
+    title: "Build footer with links and social media",
+    type: "code",
+    description: "Create comprehensive footer with sitemap links, social icons, and copyright.",
+    priority: "low",
+    estimated_hours: 2,
+  });
+
+  if (extracted.has_contact !== false) {
+    tasks.push({
+      title: "Build contact section or page with form",
+      type: "code",
+      description: "Create contact form with name, email, message fields and form validation. Integrate with email service.",
+      priority: "medium",
+      estimated_hours: 3,
+    });
+  }
+
+  // Phase 5: Content
+  tasks.push({
+    title: "Write and integrate all page content",
+    type: "content",
+    description: `Write headlines, body copy, CTAs, and meta descriptions optimized for ${audience}. Ensure consistent tone and messaging.`,
+    priority: "medium",
+    estimated_hours: 4,
+  });
+
+  // Phase 6: Polish & Launch
+  tasks.push({
+    title: "Add scroll animations and micro-interactions",
+    type: "code",
+    description: "Implement fade-in scroll animations, hover effects, loading states, and page transitions.",
+    priority: "low",
+    estimated_hours: 4,
+  });
+
+  tasks.push({
+    title: "Test across devices and browsers",
+    type: "code",
+    description: "Verify responsive behavior on mobile, tablet, and desktop. Test Chrome, Safari, Firefox.",
+    priority: "high",
+    estimated_hours: 3,
+  });
+
+  tasks.push({
+    title: "Optimize performance and Core Web Vitals",
+    type: "code",
+    description: "Optimize images, implement lazy loading, improve LCP and CLS scores. Target 90+ Lighthouse score.",
+    priority: "medium",
+    estimated_hours: 3,
+  });
+
+  tasks.push({
+    title: "Configure SEO, Open Graph, and analytics",
+    type: "code",
+    description: "Add meta tags, structured data, sitemap, robots.txt. Integrate Google Analytics or Plausible.",
+    priority: "medium",
+    estimated_hours: 2,
+  });
+
+  tasks.push({
+    title: "Deploy to production and verify",
+    type: "deploy",
+    description: "Deploy to Vercel, verify all routes, test forms and interactions, check for console errors.",
+    priority: "high",
+    estimated_hours: 2,
+  });
+
+  if (isRebuild && extracted.source_url) {
+    tasks.push({
+      title: "Implement 301 redirects and update DNS",
+      type: "deploy",
+      description: `Set up redirects from ${extracted.source_url} paths. Update DNS and verify SSL certificate.`,
+      priority: "high",
+      estimated_hours: 2,
+    });
+  }
+
+  const description = isRebuild
+    ? `A complete rebuild of ${extracted.source_url || "the existing site"}, modernizing the design and functionality for ${audience} to better achieve ${purpose}.`
+    : `A ${type} designed for ${audience} to ${purpose}. Built with modern tech stack including responsive design, performance optimization, and SEO best practices.`;
+
+  return {
+    project_name: projectName,
+    description,
+    tasks,
+  };
+}
+
+// ─── API ROUTES ───
 
 function createSession(): PlanningSession {
   const id = Math.random().toString(36).substring(2, 15);
@@ -44,222 +548,6 @@ function createSession(): PlanningSession {
   };
 }
 
-// ─── FALLBACK: Scripted task generation when Groq is unavailable ───
-
-function generateFallbackPlan(extracted: Record<string, unknown>): NonNullable<PlanningSession["plan"]> {
-  const projectType = (extracted.project_type as string) || "website";
-  const projectName = (extracted.project_name as string) || "New Project";
-  const isRebuild = !!(extracted.source_url as string);
-  const hasAuth = (extracted.auth as boolean) || projectType === "webapp" || projectType === "dashboard";
-
-  const tasks: Array<{ title: string; type: string; description: string; priority: string; estimated_hours: number }> = [];
-
-  // Phase 1: Discovery
-  if (isRebuild) {
-    tasks.push({
-      title: `Audit existing site: ${extracted.source_url}`,
-      type: "planning",
-      description: `Analyze the current site at ${extracted.source_url}. Document what to keep, what to change, and what to remove.`,
-      priority: "high",
-      estimated_hours: 4,
-    });
-    tasks.push({
-      title: "Create redirect strategy",
-      type: "planning",
-      description: "Map old URLs to new pages. Ensure no broken links after launch.",
-      priority: "high",
-      estimated_hours: 2,
-    });
-  } else {
-    tasks.push({
-      title: "Define project scope and requirements",
-      type: "planning",
-      description: "Document all features, pages, and functionality needed. Confirm with stakeholder.",
-      priority: "high",
-      estimated_hours: 3,
-    });
-  }
-
-  tasks.push({
-    title: "Set up project repository and deployment pipeline",
-    type: "code",
-    description: "Initialize Next.js project with TypeScript, Tailwind, and shadcn. Configure Vercel deployment.",
-    priority: "high",
-    estimated_hours: 2,
-  });
-
-  // Phase 2: Design
-  tasks.push({
-    title: "Create design system and component library",
-    type: "design",
-    description: "Define colors, typography, spacing, and reusable components. Create Figma or code-based design tokens.",
-    priority: "high",
-    estimated_hours: 6,
-  });
-
-  if (projectType === "homepage" || projectType === "landing") {
-    tasks.push({
-      title: "Design hero section with headline and CTA",
-      type: "design",
-      description: "Create a compelling above-the-fold section that communicates value proposition and drives action.",
-      priority: "high",
-      estimated_hours: 4,
-    });
-    tasks.push({
-      title: "Design features/benefits section",
-      type: "design",
-      description: "Showcase key offerings with icons, illustrations, or screenshots.",
-      priority: "medium",
-      estimated_hours: 3,
-    });
-  }
-
-  if (projectType === "shop") {
-    tasks.push({
-      title: "Design product catalog and product detail pages",
-      type: "design",
-      description: "Create layouts for browsing products and viewing individual product details with images, pricing, and variants.",
-      priority: "high",
-      estimated_hours: 6,
-    });
-    tasks.push({
-      title: "Design shopping cart and checkout flow",
-      type: "design",
-      description: "Create intuitive cart and multi-step checkout with payment integration.",
-      priority: "high",
-      estimated_hours: 5,
-    });
-  }
-
-  // Phase 3: Build
-  if (projectType === "homepage" || projectType === "landing") {
-    tasks.push({
-      title: "Build responsive hero section",
-      type: "code",
-      description: "Implement the hero with headline, subtext, CTA button, and background. Mobile-first responsive.",
-      priority: "high",
-      estimated_hours: 4,
-    });
-    tasks.push({
-      title: "Build features section with icons and descriptions",
-      type: "code",
-      description: "Create a grid or list of feature cards with icons, titles, and descriptions.",
-      priority: "medium",
-      estimated_hours: 3,
-    });
-    tasks.push({
-      title: "Build testimonials or social proof section",
-      type: "code",
-      description: "Add client logos, quotes, or case studies to build trust.",
-      priority: "medium",
-      estimated_hours: 3,
-    });
-  }
-
-  if (projectType === "shop") {
-    tasks.push({
-      title: "Build product catalog with filtering and search",
-      type: "code",
-      description: "Implement product grid with category filters, price range, and search functionality.",
-      priority: "high",
-      estimated_hours: 6,
-    });
-    tasks.push({
-      title: "Build shopping cart with add/remove/update",
-      type: "code",
-      description: "Create cart state management with add, remove, quantity update, and persist to localStorage.",
-      priority: "high",
-      estimated_hours: 5,
-    });
-    tasks.push({
-      title: "Integrate payment gateway (Stripe/PayPal)",
-      type: "code",
-      description: "Set up payment processing with checkout session creation and webhook handling.",
-      priority: "high",
-      estimated_hours: 6,
-    });
-  }
-
-  if (hasAuth) {
-    tasks.push({
-      title: "Implement authentication system",
-      type: "code",
-      description: "Add login, signup, password reset with JWT or OAuth. Protect private routes.",
-      priority: "high",
-      estimated_hours: 5,
-    });
-  }
-
-  tasks.push({
-    title: "Build navigation and footer",
-    type: "code",
-    description: "Create responsive navbar with mobile hamburger menu and footer with links/social.",
-    priority: "medium",
-    estimated_hours: 3,
-  });
-
-  // Phase 4: Content
-  tasks.push({
-    title: "Write and add all page content",
-    type: "content",
-    description: "Add headlines, body text, CTAs, meta descriptions, and alt text for all pages.",
-    priority: "medium",
-    estimated_hours: 4,
-  });
-
-  // Phase 5: Polish
-  tasks.push({
-    title: "Add animations and micro-interactions",
-    type: "code",
-    description: "Implement scroll animations, hover effects, loading states, and page transitions.",
-    priority: "low",
-    estimated_hours: 4,
-  });
-
-  tasks.push({
-    title: "Test responsiveness across devices",
-    type: "code",
-    description: "Verify layout on mobile, tablet, and desktop. Fix any breakpoints issues.",
-    priority: "medium",
-    estimated_hours: 2,
-  });
-
-  // Phase 6: Launch
-  tasks.push({
-    title: "Configure SEO and meta tags",
-    type: "code",
-    description: "Add title, description, Open Graph, Twitter cards, robots.txt, and sitemap.",
-    priority: "medium",
-    estimated_hours: 2,
-  });
-
-  tasks.push({
-    title: "Deploy to production and verify",
-    type: "deploy",
-    description: "Deploy to Vercel, verify all pages load, check console for errors, test all interactions.",
-    priority: "high",
-    estimated_hours: 2,
-  });
-
-  if (isRebuild) {
-    tasks.push({
-      title: "Implement 301 redirects from old URLs",
-      type: "deploy",
-      description: `Set up redirects from ${extracted.source_url} paths to new URLs to preserve SEO.`,
-      priority: "high",
-      estimated_hours: 2,
-    });
-  }
-
-  return {
-    project_name: projectName,
-    description: `A ${projectType} project${isRebuild ? ` (rebuild of ${extracted.source_url})` : ""} built with modern tech stack.`,
-    tasks,
-  };
-}
-
-// ─── API ROUTES ───
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -275,64 +563,48 @@ export async function POST(req: Request) {
       const session = sessions.get(sessionId);
       if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
 
-      // Add user message
       session.messages.push({
         role: "user",
         text: message,
         timestamp: new Date().toISOString(),
       });
 
-      // Try Groq AI first, fallback to scripted
-      let aiResult;
+      // Extract info from message
+      const extracted = extractInfo(message, session.extracted);
+      session.extracted = { ...session.extracted, ...extracted };
+
+      // Detect project type if not already set
+      if (!session.extracted.project_type) {
+        const detected = detectProjectType(message);
+        if (detected) {
+          session.extracted.project_type = detected.type;
+        }
+      }
+
+      // Try Groq first, fallback to smart scripted engine
+      let reply: string;
+      let ready = false;
+
       try {
-        aiResult = await callGroqAI(session.messages);
-      } catch (e) {
-        console.warn("Groq failed, using fallback:", e instanceof Error ? e.message : e);
-        // Fallback: scripted response
-        const msg = message.toLowerCase();
-        let reply = "";
-        let ready = false;
-
-        if (msg.includes("home") || msg.includes("landing")) {
-          session.extracted.project_type = "homepage";
-          reply = "Great! A homepage. Who is this for? (e.g., SaaS customers, local business, personal brand)";
-        } else if (msg.includes("shop") || msg.includes("store") || msg.includes("ecommerce")) {
-          session.extracted.project_type = "shop";
-          reply = "An online shop! What products are you selling?";
-        } else if (msg.includes("blog")) {
-          session.extracted.project_type = "blog";
-          reply = "A blog! What topics will you cover?";
-        } else if (msg.includes("app") || msg.includes("dashboard")) {
-          session.extracted.project_type = "webapp";
-          reply = "A web app! What problem does it solve?";
-        } else if (msg.includes("rebuild") || msg.includes("redesign") || msg.includes("update")) {
-          session.extracted.project_type = "rebuild";
-          reply = "A rebuild! What's the current site URL?";
-        } else {
-          reply = "Got it. What's the main goal of this project? (e.g., get leads, sell products, share content)";
+        const aiResult = await callGroqAI(session.messages);
+        reply = aiResult.reply;
+        ready = aiResult.ready_to_plan || false;
+        if (aiResult.extracted) {
+          session.extracted = { ...session.extracted, ...aiResult.extracted };
         }
-
-        const msgs = session.messages;
-        const hasType = !!session.extracted.project_type;
-        if (hasType && msgs.length >= 6) {
-          ready = true;
-          reply = "I think I have enough to draft a plan. Ready to see it?";
-        }
-
-        aiResult = { reply, ready_to_plan: ready, extracted: session.extracted };
+      } catch {
+        const result = getNextQuestion(session.extracted, session.messages.filter(m => m.role === "assistant").length + 1);
+        reply = result.reply;
+        ready = result.ready;
       }
 
       session.messages.push({
         role: "assistant",
-        text: aiResult.reply,
+        text: reply,
         timestamp: new Date().toISOString(),
       });
 
-      if (aiResult.extracted) {
-        session.extracted = { ...session.extracted, ...aiResult.extracted };
-      }
-
-      if (aiResult.ready_to_plan) {
+      if (ready) {
         session.status = "ready_to_plan";
       }
 
@@ -344,13 +616,12 @@ export async function POST(req: Request) {
       const session = sessions.get(sessionId);
       if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
 
-      // Try Groq first for plan generation
-      let plan;
+      let plan: ProjectPlan;
+
       try {
-        const generatePrompt = "The user has confirmed they want to see the plan. Generate the complete task list as JSON with ready_to_plan: true.";
         session.messages.push({
           role: "user",
-          text: generatePrompt,
+          text: "Generate the complete project plan with specific tasks.",
           timestamp: new Date().toISOString(),
         });
 
@@ -358,20 +629,17 @@ export async function POST(req: Request) {
 
         session.messages.push({
           role: "assistant",
-          text: aiResult.reply,
+          text: aiResult.reply || "Here's your project plan!",
           timestamp: new Date().toISOString(),
         });
 
         if (aiResult.plan) {
           plan = aiResult.plan;
+        } else {
+          plan = generateSmartPlan(session.extracted);
         }
-      } catch (e) {
-        console.warn("Groq plan generation failed, using fallback:", e instanceof Error ? e.message : e);
-      }
-
-      // Fallback if Groq didn't return a plan
-      if (!plan) {
-        plan = generateFallbackPlan(session.extracted);
+      } catch {
+        plan = generateSmartPlan(session.extracted);
       }
 
       session.plan = plan;
@@ -387,7 +655,6 @@ export async function POST(req: Request) {
       const plan = session.plan;
       if (!plan) return NextResponse.json({ error: "No plan generated" }, { status: 400 });
 
-      // Create project in PocketBase
       const token = await getAdminToken();
       const project = await apiCall("/api/collections/projects/records", {
         method: "POST",
@@ -401,7 +668,6 @@ export async function POST(req: Request) {
         },
       });
 
-      // Create tasks in PocketBase
       const createdTasks = [];
       for (const task of plan.tasks) {
         const created = await apiCall("/api/collections/tasks/records", {
