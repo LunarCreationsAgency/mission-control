@@ -21,7 +21,7 @@ interface ApiOptions {
   token?: string;
 }
 
-async function apiCall(path: string, options: ApiOptions = {}): Promise<Record<string, unknown>> {
+export async function apiCall(path: string, options: ApiOptions = {}): Promise<Record<string, unknown>> {
   const url = `${PB_URL}${path}`;
   const method = options.method || "GET";
   const body = options.body ? JSON.stringify(options.body) : undefined;
@@ -65,7 +65,7 @@ async function apiCall(path: string, options: ApiOptions = {}): Promise<Record<s
   });
 }
 
-async function getAdminToken(): Promise<string> {
+export async function getAdminToken(): Promise<string> {
   if (cachedToken) return cachedToken;
 
   const identity = process.env.POCKETBASE_ADMIN_EMAIL || "";
