@@ -9,6 +9,7 @@ export interface Task {
   due_date?: string;
   assignee?: string;
   required_skills?: string[];
+  type?: "design" | "code" | "content" | "deploy" | "planning" | "shop";
   created: string;
   updated: string;
 }
