@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { callGroqAI } from "@/lib/groq-planning";
+import { callGeminiAI } from "@/lib/gemini-planning";
 import { apiCall, getAdminToken } from "@/lib/pocketbase";
 
 export const dynamic = "force-dynamic";
@@ -586,7 +586,7 @@ export async function POST(req: Request) {
       let ready = false;
 
       try {
-        const aiResult = await callGroqAI(session.messages);
+        const aiResult = await callGeminiAI(session.messages);
         reply = aiResult.reply;
         ready = aiResult.ready_to_plan || false;
         if (aiResult.extracted) {
@@ -625,7 +625,7 @@ export async function POST(req: Request) {
           timestamp: new Date().toISOString(),
         });
 
-        const aiResult = await callGroqAI(session.messages);
+        const aiResult = await callGeminiAI(session.messages);
 
         session.messages.push({
           role: "assistant",
