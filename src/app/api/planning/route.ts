@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { callGroqAI } from "@/lib/groq-planning";
 import { apiCall, getAdminToken } from "@/lib/pocketbase";
 
 export const dynamic = "force-dynamic";
@@ -43,9 +44,9 @@ function createSession(): PlanningSession {
   };
 }
 
-// ─── TASK GENERATION ENGINE ───
+// ─── FALLBACK: Scripted task generation when Groq is unavailable ───
 
-function generatePlan(extracted: Record<string, unknown>): NonNullable<PlanningSession["plan"]> {
+function generateFallbackPlan(extracted: Record<string, unknown>): NonNullable<PlanningSession["plan"]> {
   const projectType = (extracted.project_type as string) || "website";
   const projectName = (extracted.project_name as string) || "New Project";
   const isRebuild = !!(extracted.source_url as string);
@@ -257,46 +258,6 @@ function generatePlan(extracted: Record<string, unknown>): NonNullable<PlanningS
   };
 }
 
-// ─── CONVERSATION ENGINE ───
-
-function processMessage(session: PlanningSession, message: string) {
-  const msg = message.toLowerCase();
-  let reply = "";
-  let ready = false;
-
-  if (msg.includes("home") || msg.includes("landing")) {
-    session.extracted.project_type = "homepage";
-    reply = "Great! A homepage. Who is this for? (e.g., SaaS customers, local business, personal brand)";
-  } else if (msg.includes("shop") || msg.includes("store") || msg.includes("ecommerce")) {
-    session.extracted.project_type = "shop";
-    reply = "An online shop! What products are you selling?";
-  } else if (msg.includes("blog")) {
-    session.extracted.project_type = "blog";
-    reply = "A blog! What topics will you cover?";
-  } else if (msg.includes("app") || msg.includes("dashboard")) {
-    session.extracted.project_type = "webapp";
-    reply = "A web app! What problem does it solve?";
-  } else if (msg.includes("rebuild") || msg.includes("redesign") || msg.includes("update")) {
-    session.extracted.project_type = "rebuild";
-    reply = "A rebuild! What's the current site URL?";
-  } else if (msg.includes("http")) {
-    session.extracted.source_url = message.trim();
-    reply = "Got the URL. What's the main goal of this rebuild? (e.g., modernize design, add features, improve performance)";
-  } else {
-    reply = "Got it. What's the main goal of this project? (e.g., get leads, sell products, share content)";
-  }
-
-  // Check if we have enough info
-  const msgs = session.messages;
-  const hasType = !!session.extracted.project_type;
-  if (hasType && msgs.length >= 6) {
-    ready = true;
-    reply = "I think I have enough to draft a plan. Ready to see it?";
-  }
-
-  return { reply, ready_to_plan: ready };
-}
-
 // ─── API ROUTES ───
 
 export async function POST(req: Request) {
@@ -321,16 +282,57 @@ export async function POST(req: Request) {
         timestamp: new Date().toISOString(),
       });
 
-      // Process with conversation engine
-      const result = processMessage(session, message);
+      // Try Groq AI first, fallback to scripted
+      let aiResult;
+      try {
+        aiResult = await callGroqAI(session.messages);
+      } catch (e) {
+        console.warn("Groq failed, using fallback:", e instanceof Error ? e.message : e);
+        // Fallback: scripted response
+        const msg = message.toLowerCase();
+        let reply = "";
+        let ready = false;
+
+        if (msg.includes("home") || msg.includes("landing")) {
+          session.extracted.project_type = "homepage";
+          reply = "Great! A homepage. Who is this for? (e.g., SaaS customers, local business, personal brand)";
+        } else if (msg.includes("shop") || msg.includes("store") || msg.includes("ecommerce")) {
+          session.extracted.project_type = "shop";
+          reply = "An online shop! What products are you selling?";
+        } else if (msg.includes("blog")) {
+          session.extracted.project_type = "blog";
+          reply = "A blog! What topics will you cover?";
+        } else if (msg.includes("app") || msg.includes("dashboard")) {
+          session.extracted.project_type = "webapp";
+          reply = "A web app! What problem does it solve?";
+        } else if (msg.includes("rebuild") || msg.includes("redesign") || msg.includes("update")) {
+          session.extracted.project_type = "rebuild";
+          reply = "A rebuild! What's the current site URL?";
+        } else {
+          reply = "Got it. What's the main goal of this project? (e.g., get leads, sell products, share content)";
+        }
+
+        const msgs = session.messages;
+        const hasType = !!session.extracted.project_type;
+        if (hasType && msgs.length >= 6) {
+          ready = true;
+          reply = "I think I have enough to draft a plan. Ready to see it?";
+        }
+
+        aiResult = { reply, ready_to_plan: ready, extracted: session.extracted };
+      }
 
       session.messages.push({
         role: "assistant",
-        text: result.reply,
+        text: aiResult.reply,
         timestamp: new Date().toISOString(),
       });
 
-      if (result.ready_to_plan) {
+      if (aiResult.extracted) {
+        session.extracted = { ...session.extracted, ...aiResult.extracted };
+      }
+
+      if (aiResult.ready_to_plan) {
         session.status = "ready_to_plan";
       }
 
@@ -342,7 +344,36 @@ export async function POST(req: Request) {
       const session = sessions.get(sessionId);
       if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
 
-      const plan = generatePlan(session.extracted);
+      // Try Groq first for plan generation
+      let plan;
+      try {
+        const generatePrompt = "The user has confirmed they want to see the plan. Generate the complete task list as JSON with ready_to_plan: true.";
+        session.messages.push({
+          role: "user",
+          text: generatePrompt,
+          timestamp: new Date().toISOString(),
+        });
+
+        const aiResult = await callGroqAI(session.messages);
+
+        session.messages.push({
+          role: "assistant",
+          text: aiResult.reply,
+          timestamp: new Date().toISOString(),
+        });
+
+        if (aiResult.plan) {
+          plan = aiResult.plan;
+        }
+      } catch (e) {
+        console.warn("Groq plan generation failed, using fallback:", e instanceof Error ? e.message : e);
+      }
+
+      // Fallback if Groq didn't return a plan
+      if (!plan) {
+        plan = generateFallbackPlan(session.extracted);
+      }
+
       session.plan = plan;
       session.status = "plan_generated";
       session.updated = new Date().toISOString();
