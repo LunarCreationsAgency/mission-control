@@ -199,9 +199,9 @@ function ProjectCard({
           e.stopPropagation();
           onDelete(project.id);
         }}
-        className={`absolute top-3 right-3 z-10 flex items-center justify-center h-7 w-7 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
+        className={`absolute top-3 right-3 z-10 flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
           isDeleting
-            ? "bg-red-500/20 text-red-400 opacity-100"
+            ? "bg-red-500/20 text-red-400"
             : "bg-white/[0.04] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-red-400"
         }`}
       >

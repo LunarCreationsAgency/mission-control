@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pbGetProject, pbUpdateProject, pbDeleteProject } from "@/lib/pocketbase";
+import { pbGetProject, pbUpdateProject, pbDeleteProject, pbGetTasks, pbDeleteTask } from "@/lib/pocketbase";
 import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +49,20 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const { id: projectId } = await params;
+
+    // Cascade: delete all tasks belonging to this project first
+    const tasksResult = await pbGetTasks();
+    const tasks = (tasksResult.items || []) as Array<Record<string, unknown>>;
+    const projectTasks = tasks.filter((t) => t.project === projectId);
+    for (const task of projectTasks) {
+      try {
+        await pbDeleteTask(task.id as string);
+      } catch (taskErr) {
+        console.error(`Failed to delete task ${task.id} during project cascade:`, taskErr);
+      }
+    }
+
     await pbDeleteProject(id);
 
     logActivity({
@@ -56,9 +70,10 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       entity_type: "project",
       entity_id: id,
       entity_name: "Project",
+      details: `Deleted ${projectTasks.length} associated tasks`,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, tasksDeleted: projectTasks.length });
   } catch (e) {
     console.error("DELETE /api/projects/[id]:", e);
     return NextResponse.json(

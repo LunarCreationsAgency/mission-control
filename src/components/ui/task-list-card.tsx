@@ -94,7 +94,7 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
         </div>
       </Link>
 
-      {/* Delete button - visible on hover */}
+      {/* Delete button */}
       {onDelete && (
         <button
           onClick={(e) => {
@@ -102,7 +102,7 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
             e.stopPropagation();
             onDelete(task.id);
           }}
-          className="absolute top-3 right-12 flex h-7 w-7 items-center justify-center rounded-lg text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 transition-all duration-200"
+          className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-lg text-red-400 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-500/10 transition-all duration-200"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
