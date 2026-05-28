@@ -155,83 +155,91 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
 function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { reply: string; ready: boolean } {
   const type = extracted.project_type;
 
-  if (messageCount <= 2) {
-    if (!extracted.audience) {
+  // HARD RULE: never ready before at least 4 assistant messages (4 exchanges)
+  if (messageCount < 4) {
+    if (messageCount <= 2) {
+      if (!extracted.audience) {
+        return {
+          reply: `Got it — a ${type === "rebuild" ? "rebuild" : (type || "project")}! Who is this for? (e.g., members, customers, local community)`,
+          ready: false,
+        };
+      }
+      if (!extracted.purpose) {
+        return {
+          reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., modernize design, attract new members, improve SEO)`,
+          ready: false,
+        };
+      }
+      // Even with audience + purpose, force one more question at message 2
       return {
-        reply: `Got it — a ${type === "rebuild" ? "rebuild" : (type || "project")}! Who is this for? (e.g., members, customers, local community)`,
+        reply: "Great! Do you have any specific design preferences? (e.g., keep existing brand colors, mobile-first, dark mode)",
         ready: false,
       };
     }
-    if (!extracted.purpose) {
+
+    if (messageCount === 3) {
+      if (type === "rebuild") {
+        return {
+          reply: "Do you have the current website URL? And what are the main pain points? (e.g., slow, not mobile-friendly, outdated design)",
+          ready: false,
+        };
+      }
+      if (type === "homepage" || type === "landing") {
+        return {
+          reply: "What sections do you need? (e.g., hero, features, testimonials, pricing, contact)",
+          ready: false,
+        };
+      }
+      if (type === "shop") {
+        return {
+          reply: "How many products are you starting with? And do you need categories/filtering?",
+          ready: false,
+        };
+      }
+      if (type === "blog") {
+        return {
+          reply: "Will you write the content yourself, or do you need a CMS for multiple authors?",
+          ready: false,
+        };
+      }
+      if (type === "webapp") {
+        return {
+          reply: "Do users need accounts/login? And what kind of data will you be managing?",
+          ready: false,
+        };
+      }
       return {
-        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., modernize design, attract new members, improve SEO)`,
+        reply: "What key features or sections should this include?",
         ready: false,
       };
     }
   }
 
-  if (messageCount === 3) {
-    if (type === "rebuild") {
-      return {
-        reply: "Do you have the current website URL? And what are the main pain points? (e.g., slow, not mobile-friendly, outdated design)",
-        ready: false,
-      };
-    }
-    if (type === "homepage" || type === "landing") {
-      return {
-        reply: "What sections do you need? (e.g., hero, features, testimonials, pricing, contact)",
-        ready: false,
-      };
-    }
-    if (type === "shop") {
-      return {
-        reply: "How many products are you starting with? And do you need categories/filtering?",
-        ready: false,
-      };
-    }
-    if (type === "blog") {
-      return {
-        reply: "Will you write the content yourself, or do you need a CMS for multiple authors?",
-        ready: false,
-      };
-    }
-    if (type === "webapp") {
-      return {
-        reply: "Do users need accounts/login? And what kind of data will you be managing?",
-        ready: false,
-      };
-    }
-    return {
-      reply: "What key features or sections should this include?",
-      ready: false,
-    };
-  }
-
-  if (messageCount === 4) {
-    if (!extracted.timeline) {
-      return {
-        reply: "What's your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
-        ready: false,
-      };
-    }
-    if (!extracted.budget) {
-      return {
-        reply: "Do you have a budget in mind? (e.g., €500, €2000, 'as cheap as possible')",
-        ready: false,
-      };
-    }
-  }
-
-  if (type && extracted.audience && extracted.purpose) {
+  // After 4 exchanges, check if we have enough info
+  if (messageCount >= 4 && type && extracted.audience && extracted.purpose) {
     return {
       reply: `I have a good picture of this ${type === "rebuild" ? "rebuild" : type}. Ready to generate your project plan?`,
       ready: true,
     };
   }
 
+  // Default: keep asking
+  if (!extracted.timeline) {
+    return {
+      reply: "What's your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
+      ready: false,
+    };
+  }
+  if (!extracted.budget) {
+    return {
+      reply: "Do you have a budget in mind? (e.g., €500, €2000, 'as cheap as possible')",
+      ready: false,
+    };
+  }
+
   return {
-    reply: "I think I have enough to draft a plan. Ready to see it?",
-    ready: true,
+    reply: "Tell me more about what you need — any specific features, integrations, or design preferences?",
+    ready: false,
   };
 }
 

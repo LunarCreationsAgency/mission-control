@@ -82,14 +82,12 @@ export default function NewProjectWizard() {
     setLoading(true);
     setError(null);
 
-    const newMessages = [...session.messages, { role: "user" as const, text }];
-    const updatedSession = { ...session, messages: newMessages };
-
+    // Do NOT add the message here — let the API add it and return the full session
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "message", session: updatedSession, message: text }),
+        body: JSON.stringify({ action: "message", session, message: text }),
       });
       if (!res.ok) {
         const text = await res.text();

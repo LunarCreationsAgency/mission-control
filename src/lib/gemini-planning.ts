@@ -167,7 +167,8 @@ export async function callGeminiAI(
   const json = JSON.parse(content);
 
   // Override ready_to_plan if conversation is too short
-  const userMessages = messages.filter(m => m.role === "user");
+  // Count only actual user messages (exclude system prompt)
+  const userMessages = messages.filter(m => m.role === "user" && m.text !== SYSTEM_PROMPT);
   const actualReady = json.ready_to_plan && userMessages.length >= minMessages;
 
   return {
