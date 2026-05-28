@@ -5,18 +5,9 @@ import { apiCall, getAdminToken } from "@/lib/pocketbase";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-// In-memory sessions
-const sessions = new Map<string, PlanningSession>();
-
-interface PlanningSession {
-  id: string;
-  messages: Array<{ role: "user" | "assistant"; text: string; timestamp: string }>;
-  extracted: ExtractedInfo;
-  status: "discovering" | "ready_to_plan" | "plan_generated" | "approved";
-  plan?: ProjectPlan;
-  created: string;
-  updated: string;
-}
+// ─── STATELESS PLANNING API ───
+// Client sends full session state, server processes and returns updates.
+// Works with Vercel serverless (no shared memory needed).
 
 interface ExtractedInfo {
   project_type?: string;
@@ -46,6 +37,13 @@ interface ProjectPlan {
     priority: string;
     estimated_hours: number;
   }>;
+}
+
+interface PlanningSession {
+  messages: Array<{ role: "user" | "assistant"; text: string }>;
+  extracted: ExtractedInfo;
+  status: "discovering" | "ready_to_plan" | "plan_generated" | "approved";
+  plan?: ProjectPlan;
 }
 
 // ─── PROJECT TYPE DETECTION ───
@@ -87,7 +85,7 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
     } catch {}
   }
 
-  // Organization/audience detection (e.g., "my club", "Prenzlauer Carnevalclub")
+  // Organization/audience detection
   const orgMatch = text.match(/(?:my|our|the)\s+([A-Z][A-Za-z\s]+(?:club|e\.V\.|org|association|team|company|business))/);
   if (orgMatch && !current.audience) {
     extracted.audience = orgMatch[1].trim();
@@ -157,7 +155,6 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
 function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { reply: string; ready: boolean } {
   const type = extracted.project_type;
 
-  // First exchange — after detecting type, always ask for audience/purpose
   if (messageCount <= 2) {
     if (!extracted.audience) {
       return {
@@ -167,13 +164,12 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
     }
     if (!extracted.purpose) {
       return {
-        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., modernize design, improve SEO, attract new members)`,
+        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., modernize design, attract new members, improve SEO)`,
         ready: false,
       };
     }
   }
 
-  // Second exchange — type-specific questions
   if (messageCount === 3) {
     if (type === "rebuild") {
       return {
@@ -211,11 +207,10 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
     };
   }
 
-  // Third exchange — ask for timeline or any missing info
   if (messageCount === 4) {
     if (!extracted.timeline) {
       return {
-        reply: "What\'s your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
+        reply: "What's your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
         ready: false,
       };
     }
@@ -227,7 +222,6 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
     }
   }
 
-  // Ready when we have type + audience + purpose
   if (type && extracted.audience && extracted.purpose) {
     return {
       reply: `I have a good picture of this ${type === "rebuild" ? "rebuild" : type}. Ready to generate your project plan?`,
@@ -235,7 +229,6 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
     };
   }
 
-  // Catch-all to prevent infinite loops
   return {
     reply: "I think I have enough to draft a plan. Ready to see it?",
     ready: true,
@@ -253,9 +246,11 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
   if (!projectName) {
     if (extracted.domain) {
       projectName = `${extracted.domain.charAt(0).toUpperCase() + extracted.domain.slice(1)} ${type === "rebuild" ? "Rebuild" : "Website"}`;
-    } else {
+    } else if (audience) {
       const typeLabel = type === "rebuild" ? "Rebuild" : (type.charAt(0).toUpperCase() + type.slice(1));
-      projectName = `${audience.charAt(0).toUpperCase() + audience.slice(1)} ${typeLabel}`;
+      projectName = `${audience} ${typeLabel}`;
+    } else {
+      projectName = type === "rebuild" ? "Website Rebuild" : (type.charAt(0).toUpperCase() + type.slice(1));
     }
   }
 
@@ -269,7 +264,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
 
   const tasks: ProjectPlan["tasks"] = [];
 
-  // Phase 1: Foundation & Planning
   tasks.push({
     title: isRebuild ? `Audit existing site: ${extracted.source_url || "current site"}` : "Define project scope and requirements",
     type: "planning",
@@ -298,7 +292,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
     estimated_hours: 2,
   });
 
-  // Phase 2: Design System
   tasks.push({
     title: "Create design system and component library",
     type: "design",
@@ -307,7 +300,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
     estimated_hours: 5,
   });
 
-  // Phase 3: Page-specific Design & Build
   if (isHomepage || isLanding) {
     tasks.push({
       title: "Design and build hero section with headline and CTA",
@@ -451,7 +443,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
     });
   }
 
-  // Phase 4: Common Sections
   tasks.push({
     title: "Build responsive navigation with mobile menu",
     type: "code",
@@ -478,7 +469,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
     });
   }
 
-  // Phase 5: Content
   tasks.push({
     title: "Write and integrate all page content",
     type: "content",
@@ -487,7 +477,6 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
     estimated_hours: 4,
   });
 
-  // Phase 6: Polish & Launch
   tasks.push({
     title: "Add scroll animations and micro-interactions",
     type: "code",
@@ -551,127 +540,103 @@ function generateSmartPlan(extracted: ExtractedInfo): ProjectPlan {
 
 // ─── API ROUTES ───
 
-function createSession(): PlanningSession {
-  const id = Math.random().toString(36).substring(2, 15);
-  return {
-    id,
-    messages: [{
-      role: "assistant",
-      text: "Hey! Let's plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page, or tell me about an existing site you want to rebuild)",
-      timestamp: new Date().toISOString(),
-    }],
-    extracted: {},
-    status: "discovering",
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  };
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { action, sessionId, message } = body;
+    const { action, session, message } = body;
 
     if (action === "start") {
-      const session = createSession();
-      sessions.set(session.id, session);
-      return NextResponse.json(session);
+      const newSession: PlanningSession = {
+        messages: [{
+          role: "assistant",
+          text: "Hey! Let's plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page, or tell me about an existing site you want to rebuild)",
+        }],
+        extracted: {},
+        status: "discovering",
+      };
+      return NextResponse.json(newSession);
     }
 
-    if (action === "message" && sessionId) {
-      const session = sessions.get(sessionId);
-      if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    if (action === "message" && session) {
+      const currentSession: PlanningSession = session;
 
-      session.messages.push({
+      currentSession.messages.push({
         role: "user",
         text: message,
-        timestamp: new Date().toISOString(),
       });
 
-      // Extract info from message
-      const extracted = extractInfo(message, session.extracted);
-      session.extracted = { ...session.extracted, ...extracted };
+      const extracted = extractInfo(message, currentSession.extracted);
+      currentSession.extracted = { ...currentSession.extracted, ...extracted };
 
-      // Detect project type if not already set
-      if (!session.extracted.project_type) {
+      if (!currentSession.extracted.project_type) {
         const detected = detectProjectType(message);
         if (detected) {
-          session.extracted.project_type = detected.type;
+          currentSession.extracted.project_type = detected.type;
         }
       }
 
-      // Try Groq first, fallback to smart scripted engine
       let reply: string;
       let ready = false;
 
       try {
-        const aiResult = await callGeminiAI(session.messages);
+        const aiResult = await callGeminiAI(currentSession.messages);
         reply = aiResult.reply;
         ready = aiResult.ready_to_plan || false;
         if (aiResult.extracted) {
-          session.extracted = { ...session.extracted, ...aiResult.extracted };
+          currentSession.extracted = { ...currentSession.extracted, ...aiResult.extracted };
         }
       } catch {
-        const result = getNextQuestion(session.extracted, session.messages.filter(m => m.role === "assistant").length + 1);
+        const result = getNextQuestion(currentSession.extracted, currentSession.messages.filter(m => m.role === "assistant").length + 1);
         reply = result.reply;
         ready = result.ready;
       }
 
-      session.messages.push({
+      currentSession.messages.push({
         role: "assistant",
         text: reply,
-        timestamp: new Date().toISOString(),
       });
 
       if (ready) {
-        session.status = "ready_to_plan";
+        currentSession.status = "ready_to_plan";
       }
 
-      session.updated = new Date().toISOString();
-      return NextResponse.json(session);
+      return NextResponse.json(currentSession);
     }
 
-    if (action === "generate" && sessionId) {
-      const session = sessions.get(sessionId);
-      if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-
+    if (action === "generate" && session) {
+      const currentSession: PlanningSession = session;
       let plan: ProjectPlan;
 
       try {
-        session.messages.push({
+        currentSession.messages.push({
           role: "user",
           text: "Generate the complete project plan with specific tasks.",
-          timestamp: new Date().toISOString(),
         });
 
-        const aiResult = await callGeminiAI(session.messages);
+        const aiResult = await callGeminiAI(currentSession.messages);
 
-        session.messages.push({
+        currentSession.messages.push({
           role: "assistant",
           text: aiResult.reply || "Here's your project plan!",
-          timestamp: new Date().toISOString(),
         });
 
         if (aiResult.plan) {
           plan = aiResult.plan;
         } else {
-          plan = generateSmartPlan(session.extracted);
+          plan = generateSmartPlan(currentSession.extracted);
         }
       } catch {
-        plan = generateSmartPlan(session.extracted);
+        plan = generateSmartPlan(currentSession.extracted);
       }
 
-      session.plan = plan;
-      session.status = "plan_generated";
-      session.updated = new Date().toISOString();
-      return NextResponse.json(session);
+      currentSession.plan = plan;
+      currentSession.status = "plan_generated";
+      return NextResponse.json(currentSession);
     }
 
-    if (action === "approve" && sessionId) {
-      const session = sessions.get(sessionId);
-      if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-
-      const plan = session.plan;
+    if (action === "approve" && session) {
+      const currentSession: PlanningSession = session;
+      const plan = currentSession.plan;
       if (!plan) return NextResponse.json({ error: "No plan generated" }, { status: 400 });
 
       const token = await getAdminToken();
@@ -683,7 +648,7 @@ export async function POST(req: Request) {
           description: plan.description,
           status: "active",
           progress: 0,
-          budget: (session.extracted.budget as number) || 0,
+          budget: (currentSession.extracted.budget as number) || 0,
         },
       });
 
@@ -704,10 +669,8 @@ export async function POST(req: Request) {
         createdTasks.push(created);
       }
 
-      session.status = "approved";
-      sessions.delete(sessionId);
-
-      return NextResponse.json({ project, tasks: createdTasks });
+      currentSession.status = "approved";
+      return NextResponse.json({ project, tasks: createdTasks, session: currentSession });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -718,15 +681,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const sessionId = searchParams.get("id");
-  if (!sessionId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
-  const session = sessions.get(sessionId);
-  if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-
-  return NextResponse.json(session);
 }
