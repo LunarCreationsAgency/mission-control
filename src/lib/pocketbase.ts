@@ -91,7 +91,7 @@ export async function getAdminToken(): Promise<string> {
 // --- TASKS ---
 export async function pbGetTasks() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/tasks/records", { token });
+  return apiCall("/api/collections/tasks/records?perPage=500", { token });
 }
 
 export async function pbCreateTask(data: Record<string, unknown>) {
@@ -112,7 +112,7 @@ export async function pbDeleteTask(id: string) {
 // --- PROJECTS ---
 export async function pbGetProjects() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/projects/records", { token });
+  return apiCall("/api/collections/projects/records?perPage=500", { token });
 }
 
 export async function pbGetProject(id: string) {
@@ -138,7 +138,7 @@ export async function pbDeleteProject(id: string) {
 // --- GOALS ---
 export async function pbGetGoals() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/goals/records", { token });
+  return apiCall("/api/collections/goals/records?perPage=500", { token });
 }
 
 export async function pbCreateGoal(data: Record<string, unknown>) {
@@ -159,7 +159,7 @@ export async function pbDeleteGoal(id: string) {
 // --- AGENTS ---
 export async function pbGetAgents() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/agents/records", { token });
+  return apiCall("/api/collections/agents/records?perPage=500", { token });
 }
 
 export async function pbUpdateAgent(id: string, data: Record<string, unknown>) {
@@ -170,7 +170,7 @@ export async function pbUpdateAgent(id: string, data: Record<string, unknown>) {
 // --- ACTIVITY LOGS ---
 export async function pbGetActivityLogs() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/activity_logs/records", { token });
+  return apiCall("/api/collections/activity_logs/records?perPage=500", { token });
 }
 
 export async function pbCreateActivityLog(data: Record<string, unknown>) {
@@ -181,7 +181,7 @@ export async function pbCreateActivityLog(data: Record<string, unknown>) {
 // --- COMPANY SETTINGS ---
 export async function pbGetCompanySettings() {
   const token = await getAdminToken();
-  return apiCall("/api/collections/company_settings/records", { token });
+  return apiCall("/api/collections/company_settings/records?perPage=500", { token });
 }
 
 export async function pbUpdateCompanySettings(id: string, data: Record<string, unknown>) {
