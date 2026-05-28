@@ -74,10 +74,10 @@ export default function NewProjectWizard() {
     if (!loading) inputRef.current?.focus();
   }, [loading]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const sendMessage = async (overrideText?: string) => {
+    const text = overrideText || input.trim();
+    if (!text || loading) return;
 
-    const text = input.trim();
     setInput("");
     setLoading(true);
     setError(null);
@@ -261,7 +261,7 @@ export default function NewProjectWizard() {
                 Generate Plan
               </button>
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage("I'd like to discuss more details before generating the plan.")}
                 disabled={loading}
                 className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
               >
@@ -288,7 +288,8 @@ export default function NewProjectWizard() {
                 )}
               </button>
               <button
-                onClick={() => setSession({ ...session, status: "ready_to_plan", plan: undefined })}
+                onClick={() => sendMessage("I want to modify the plan. Let's discuss changes.")}
+                disabled={loading}
                 className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
               >
                 Edit Plan
@@ -306,7 +307,7 @@ export default function NewProjectWizard() {
                 className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
               />
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={!input.trim() || loading}
                 className="flex items-center justify-center h-10 w-10 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white transition-all disabled:opacity-50 active:scale-[0.98]"
               >
