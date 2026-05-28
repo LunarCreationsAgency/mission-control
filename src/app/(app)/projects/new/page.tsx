@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, ArrowLeft, ArrowRight, Sparkles, AlertTriangle } from "lucide-react";
 
@@ -1202,18 +1202,13 @@ export default function NewProjectWizard() {
 
   // Build the full step list based on project type
   const projectType = (session?.answers.project_type as string) || null;
-  const projectTypeSteps = projectType ? (TYPE_STEPS_MAP[projectType] || []) : [];
-  const universalSteps = UNIVERSAL_STEPS;
-
-  // Phase 1: type selection → Phase 2: type-specific → Phase 3: universal
-  const allSteps = stepIndex === 0
-    ? [PROJECT_TYPE_STEP]
-    : stepIndex <= projectTypeSteps.length
-      ? projectTypeSteps
-      : universalSteps;
+  const allSteps = useMemo(() => {
+    if (!projectType) return [PROJECT_TYPE_STEP];
+    return [PROJECT_TYPE_STEP, ...(TYPE_STEPS_MAP[projectType] || []), ...UNIVERSAL_STEPS];
+  }, [projectType]);
+  const totalSteps = allSteps.length;
 
   const currentStep = allSteps[stepIndex] || null;
-  const totalSteps = allSteps.length;
   const progress = { current: stepIndex + 1, total: totalSteps };
 
   const startWizard = async () => {
@@ -1262,23 +1257,31 @@ export default function NewProjectWizard() {
         body: JSON.stringify({ action: "answer", session, stepId: currentStep.id, answer }),
       });
 
-      const nextIndex = stepIndex + 1;
-      if (nextIndex < allSteps.length) {
-        setStepIndex(nextIndex);
-        // Pre-fill answer if going back
+      const isTypeStep = currentStep.id === "project_type";
+      if (isTypeStep) {
+        // Type was just selected — allSteps will rebuild on next render
+        setStepIndex(1);
         setSelectedSingle(null);
         setSelectedMulti(new Set());
         setTextAnswer("");
       } else {
-        // All steps done — generate plan
-        const res = await fetch("/api/planning", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "generate", session: newSession }),
-        });
-        if (!res.ok) throw new Error(`API error ${res.status}`);
-        const data = await res.json();
-        setSession(data.session);
+        const nextIndex = stepIndex + 1;
+        if (nextIndex < allSteps.length) {
+          setStepIndex(nextIndex);
+          setSelectedSingle(null);
+          setSelectedMulti(new Set());
+          setTextAnswer("");
+        } else {
+          // All steps done — generate plan
+          const res = await fetch("/api/planning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "generate", session: newSession }),
+          });
+          if (!res.ok) throw new Error(`API error ${res.status}`);
+          const data = await res.json();
+          setSession(data.session);
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed");
