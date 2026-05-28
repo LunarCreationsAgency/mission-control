@@ -109,6 +109,30 @@ function generatePlan(answers: Record<string, unknown>) {
   addTask({ title: "Add scroll animations and micro-interactions", type: "code", description: "Implement fade-in animations, hover effects, and page transitions.", priority: "low", estimated_hours: 4 });
   addTask({ title: "Test across devices and browsers", type: "code", description: "Verify responsive behavior on mobile, tablet, desktop. Test Chrome, Safari, Firefox.", priority: "high", estimated_hours: 4 });
   addTask({ title: "SEO: meta tags, Open Graph, sitemap, robots.txt", type: "code", description: "Add meta titles, descriptions, structured data, XML sitemap, and robots.txt.", priority: "high", estimated_hours: 3 });
+
+  // Analytics setup
+  const analyticsChoice = (answers.analytics_choice as string) || "none";
+  if (analyticsChoice === "plausible") {
+    addTask({ title: "Set up Plausible Analytics (privacy-friendly)", type: "code", description: "Privacy-focused analytics without cookies. Track page views and goals.", priority: "medium", estimated_hours: 2 });
+  } else if (analyticsChoice === "ga4") {
+    addTask({ title: "Set up Google Analytics 4", type: "code", description: "GA4 tracking with events and conversions. Cookie consent required.", priority: "medium", estimated_hours: 2 });
+  } else if (analyticsChoice === "fathom") {
+    addTask({ title: "Set up Fathom Analytics", type: "code", description: "Privacy-focused analytics with event tracking.", priority: "medium", estimated_hours: 2 });
+  }
+
+  // Maintenance documentation
+  const maintenanceOwner = (answers.maintenance_owner as string) || "";
+  if (maintenanceOwner === "non_tech") {
+    addTask({ title: "Set up headless CMS for easy content management", type: "code", description: "CMS (e.g., Sanity, Contentful) so non-technical staff can update content.", priority: "high", estimated_hours: 6 });
+    addTask({ title: "Create content editing guide", type: "content", description: "Documentation on how to update text, images, and pages.", priority: "medium", estimated_hours: 2 });
+  } else if (maintenanceOwner === "tech") {
+    addTask({ title: "Set up headless CMS with developer documentation", type: "code", description: "CMS with clear data model and API docs for technical team.", priority: "medium", estimated_hours: 4 });
+  } else if (maintenanceOwner === "you") {
+    addTask({ title: "Set up maintenance agreement and monitoring", type: "planning", description: "Define maintenance scope, SLAs, and monitoring alerts.", priority: "medium", estimated_hours: 2 });
+  } else if (maintenanceOwner === "unsure") {
+    addTask({ title: "Set up headless CMS (recommended for all users)", type: "code", description: "CMS so anyone can update content regardless of technical skill.", priority: "high", estimated_hours: 6 });
+  }
+
   addTask({ title: "Deploy to Vercel and configure domain", type: "deploy", description: "Deploy to production, configure custom domain and SSL.", priority: "high", estimated_hours: 2 });
 
   // ═══════════════════════════════════════════
@@ -788,6 +812,13 @@ function generatePlan(answers: Record<string, unknown>) {
     }
     if (rebuildReasons.includes("maintenance") || rebuildReasons.includes("platform")) {
       addTask({ title: "Set up modern CMS for easy updates", type: "code", description: "Headless CMS or admin panel so non-technical staff can update content.", priority: "high", estimated_hours: 8 });
+    }
+
+    // Current traffic → SEO priority
+    if (currentTraffic === "high") {
+      addTask({ title: "Priority: preserve all SEO during rebuild", type: "planning", description: "High traffic site — any SEO loss is critical. Full URL mapping, 301 redirects, structured data preservation.", priority: "high", estimated_hours: 4 });
+    } else if (currentTraffic === "medium") {
+      addTask({ title: "Preserve key pages SEO during rebuild", type: "planning", description: "Medium traffic — map top 20 pages and set up redirects for important URLs.", priority: "high", estimated_hours: 3 });
     }
 
     // New features

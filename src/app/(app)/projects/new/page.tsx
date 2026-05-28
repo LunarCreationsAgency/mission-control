@@ -125,6 +125,31 @@ const UNIVERSAL_STEPS: WizardStep[] = [
     ],
   },
   {
+    id: "maintenance_owner",
+    question: "Who will maintain this after launch?",
+    description: "Determines if we need a CMS, documentation, or ongoing support.",
+    type: "single",
+    required: true,
+    options: [
+      { label: "Me / my team (non-technical)", value: "non_tech", icon: "👤" },
+      { label: "Me / my team (technical)", value: "tech", icon: "👨‍💻" },
+      { label: "You — ongoing support", value: "you", icon: "🤝" },
+      { label: "Not sure yet", value: "unsure", icon: "❓" },
+    ],
+  },
+  {
+    id: "analytics_choice",
+    question: "Which analytics do you want?",
+    type: "single",
+    required: true,
+    options: [
+      { label: "Plausible (privacy-friendly, no cookies)", value: "plausible", icon: "🔒" },
+      { label: "Google Analytics 4", value: "ga4", icon: "📊" },
+      { label: "Fathom Analytics", value: "fathom", icon: "📈" },
+      { label: "None — no tracking", value: "none", icon: "🚫" },
+    ],
+  },
+  {
     id: "project_name",
     question: "What should we call this project?",
     description: "Internal name in Mission Control (e.g., 'PCC Website', 'Q3 Landing Page')",
