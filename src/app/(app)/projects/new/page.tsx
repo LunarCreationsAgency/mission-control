@@ -1,31 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Sparkles, Check, Loader2, ArrowLeft, MessageSquare, FileText, AlertTriangle } from "lucide-react";
+import { Check, Loader2, ArrowLeft, ArrowRight, Sparkles, FileText, AlertTriangle } from "lucide-react";
 
-interface Message {
-  role: "user" | "assistant";
-  text: string;
-}
-
-interface ExtractedInfo {
-  project_type?: string;
-  project_name?: string;
-  audience?: string;
-  purpose?: string;
-  design_style?: string;
-  designStyle?: string;
-  features?: string[];
-  timeline?: string;
-  budget?: number;
-  source_url?: string;
-  has_auth?: boolean;
-  has_payment?: boolean;
-  has_blog?: boolean;
-  has_contact?: boolean;
-  domain?: string;
-  competitor?: string;
+interface WizardStep {
+  id: string;
+  question: string;
+  description?: string;
+  type: "single" | "multi" | "text" | "url" | "number" | "select";
+  options?: Array<{ label: string; value: string; icon?: string }>;
+  required?: boolean;
 }
 
 interface PlanTask {
@@ -40,96 +25,108 @@ interface Plan {
   project_name: string;
   description: string;
   tasks: PlanTask[];
+  budget?: number;
 }
 
-interface Session {
-  messages: Message[];
-  extracted: ExtractedInfo;
+interface WizardSession {
+  currentStep: number;
+  totalSteps: number;
+  answers: Record<string, unknown>;
   status: "discovering" | "ready_to_plan" | "plan_generated" | "approved";
   plan?: Plan;
 }
 
 export default function NewProjectWizard() {
   const router = useRouter();
-  const [session, setSession] = useState<Session>({
-    messages: [{
-      role: "assistant",
-      text: "Hey! Let's plan your project together. What are you building? (e.g., homepage, webapp, shop, blog, landing page, or tell me about an existing site you want to rebuild)",
-    }],
-    extracted: {},
-    status: "discovering",
-  });
-  const [input, setInput] = useState("");
+  const [session, setSession] = useState<WizardSession | null>(null);
+  const [currentStep, setCurrentStep] = useState<WizardStep | null>(null);
+  const [progress, setProgress] = useState({ current: 1, total: 7 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [session.messages]);
+  // Current answer state
+  const [selectedSingle, setSelectedSingle] = useState<string | null>(null);
+  const [selectedMulti, setSelectedMulti] = useState<Set<string>>(new Set());
+  const [textAnswer, setTextAnswer] = useState("");
 
-  useEffect(() => {
-    if (!loading) inputRef.current?.focus();
-  }, [loading]);
-
-  const sendMessage = async (overrideText?: string) => {
-    const text = overrideText || input.trim();
-    if (!text || loading) return;
-
-    setInput("");
+  const startWizard = async () => {
     setLoading(true);
     setError(null);
-
-    // Do NOT add the message here — let the API add it and return the full session
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "message", session, message: text }),
+        body: JSON.stringify({ action: "start" }),
       });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`API error ${res.status}: ${text}`);
-      }
+      if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setSession(data);
+      setSession(data.session);
+      setCurrentStep(data.step);
+      setProgress(data.progress);
     } catch (e) {
-      console.error("Failed to send message:", e);
-      setError(e instanceof Error ? e.message : "Failed to send message");
+      setError(e instanceof Error ? e.message : "Failed to start wizard");
     } finally {
       setLoading(false);
     }
   };
 
-  const generatePlan = async () => {
+  const submitAnswer = async () => {
+    if (!session || !currentStep || loading) return;
+
+    let answer: unknown;
+    if (currentStep.type === "single" || currentStep.type === "select") {
+      answer = selectedSingle;
+    } else if (currentStep.type === "multi") {
+      answer = Array.from(selectedMulti);
+    } else if (currentStep.type === "text" || currentStep.type === "url" || currentStep.type === "number") {
+      answer = textAnswer.trim() || undefined;
+    }
+
+    if (currentStep.required && !answer) {
+      setError("Please make a selection before continuing");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch("/api/planning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "generate", session }),
+        body: JSON.stringify({
+          action: "answer",
+          session,
+          stepId: currentStep.id,
+          answer,
+        }),
       });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`API error ${res.status}: ${text}`);
-      }
+      if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setSession(data);
+
+      setSession(data.session);
+      setProgress(data.progress);
+
+      if (data.plan) {
+        // Wizard complete — show plan
+        setCurrentStep(null);
+      } else {
+        // Next step
+        setCurrentStep(data.step);
+        setSelectedSingle(null);
+        setSelectedMulti(new Set());
+        setTextAnswer("");
+      }
     } catch (e) {
-      console.error("Failed to generate plan:", e);
-      setError(e instanceof Error ? e.message : "Failed to generate plan");
+      setError(e instanceof Error ? e.message : "Failed to submit answer");
     } finally {
       setLoading(false);
     }
   };
 
   const approvePlan = async () => {
-    if (creating) return;
+    if (!session?.plan || creating) return;
     setCreating(true);
     setError(null);
     try {
@@ -138,29 +135,38 @@ export default function NewProjectWizard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "approve", session }),
       });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`API error ${res.status}: ${text}`);
-      }
+      if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
       if (data.project?.id) {
         router.push(`/projects/${data.project.id}`);
       } else {
         throw new Error("Project created but no ID returned");
       }
     } catch (e) {
-      console.error("Failed to approve plan:", e);
       setError(e instanceof Error ? e.message : "Failed to create project");
       setCreating(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+  const goBack = () => {
+    if (!session || session.currentStep <= 0) {
+      router.push("/projects");
+      return;
     }
+    // Go to previous step
+    const prevStep = session.currentStep - 1;
+    // This would need API support for going back — for now just reload
+    window.location.reload();
+  };
+
+  const toggleMulti = (value: string) => {
+    const next = new Set(selectedMulti);
+    if (next.has(value)) {
+      next.delete(value);
+    } else {
+      next.add(value);
+    }
+    setSelectedMulti(next);
   };
 
   const getTypeColor = (type: string) => {
@@ -185,215 +191,300 @@ export default function NewProjectWizard() {
     return icons[type] || "📋";
   };
 
-  const isReadyToPlan = session.status === "ready_to_plan";
-  const hasPlan = !!session.plan;
-
-  return (
-    <div className="h-[calc(100vh-64px)] flex flex-col lg:flex-row page-enter">
-      {/* Left Panel — Chat */}
-      <div className="flex-1 flex flex-col min-h-0 border-r border-white/[0.04]">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.04]">
+  // ─── NOT STARTED ───
+  if (!session) {
+    return (
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center page-enter">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-20 h-20 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="h-10 w-10 text-[var(--primary-light)]" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-3">New Project</h1>
+          <p className="text-sm text-[var(--foreground-secondary)] mb-8">
+            Answer a few questions and we'll generate a complete project plan with tasks, timeline, and budget.
+          </p>
+          <button
+            onClick={startWizard}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 mx-auto rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-8 py-4 text-sm transition-all disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Starting...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Start Project Wizard
+              </>
+            )}
+          </button>
           <button
             onClick={() => router.push("/projects")}
+            className="mt-4 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
+          >
+            Cancel
+          </button>
+          {error && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3">
+              <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+              <p className="text-xs text-red-400">{error}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── PLAN GENERATED ───
+  if (session.plan) {
+    const plan = session.plan;
+    return (
+      <div className="min-h-[calc(100vh-64px)] page-enter">
+        <div className="max-w-2xl mx-auto px-5 py-8">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={goBack}
+              className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+          </div>
+
+          <h1 className="text-2xl font-bold text-white mb-2">Your Project Plan</h1>
+          <p className="text-sm text-[var(--foreground-secondary)] mb-6">
+            Review the generated plan below. You can edit tasks after the project is created.
+          </p>
+
+          {error && (
+            <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3">
+              <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+              <p className="text-xs text-red-400">{error}</p>
+            </div>
+          )}
+
+          {/* Project Card */}
+          <div className="liquid-glass p-5 mb-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">{plan.project_name}</h2>
+            <p className="text-sm text-[var(--foreground-secondary)] mt-1">{plan.description}</p>
+            <div className="flex gap-6 mt-4 pt-4 border-t border-white/[0.04]">
+              <div className="text-center">
+                <p className="text-xl font-bold text-[var(--foreground)]">{plan.tasks.length}</p>
+                <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase tracking-wider">Tasks</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-[var(--foreground)]">
+                  {plan.budget ? `€${plan.budget.toLocaleString()}` : "—"}
+                </p>
+                <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase tracking-wider">Budget</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-[var(--foreground)]">
+                  {plan.tasks.reduce((a, t) => a + t.estimated_hours, 0)}h
+                </p>
+                <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase tracking-wider">Est. Hours</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tasks */}
+          <div className="space-y-2 mb-8">
+            {plan.tasks.map((task, i) => (
+              <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <span className="text-lg shrink-0">{getTypeIcon(task.type)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[var(--foreground)]">{task.title}</p>
+                  <p className="text-xs text-[var(--foreground-tertiary)] mt-0.5">{task.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}>
+                      {task.type}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
+                      task.priority === "high"
+                        ? "bg-red-500/10 text-red-400"
+                        : task.priority === "medium"
+                        ? "bg-orange-500/10 text-orange-400"
+                        : "bg-slate-500/10 text-slate-400"
+                    }`}>
+                      {task.priority}
+                    </span>
+                    <span className="text-[10px] text-[var(--foreground-tertiary)]">
+                      ~{task.estimated_hours}h
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={approvePlan}
+              disabled={creating}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] hover:bg-emerald-600 text-white font-medium px-6 py-4 text-sm transition-all disabled:opacity-50"
+            >
+              {creating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating Project...
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  Approve & Create Project
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => router.push("/projects")}
+              className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-4 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── WIZARD STEP ───
+  if (!currentStep) return null;
+
+  const isMulti = currentStep.type === "multi";
+  const isText = currentStep.type === "text" || currentStep.type === "url" || currentStep.type === "number";
+  const hasAnswer = isMulti
+    ? selectedMulti.size > 0
+    : isText
+    ? textAnswer.trim().length > 0
+    : selectedSingle !== null;
+
+  return (
+    <div className="min-h-[calc(100vh-64px)] page-enter">
+      <div className="max-w-2xl mx-auto px-5 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={goBack}
             className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <div className="h-4 w-px bg-white/[0.08]" />
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-[var(--primary-light)]" />
-            <span className="text-sm font-medium text-[var(--foreground)]">Planning Session</span>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-[var(--foreground-tertiary)]">Step {progress.current} of {progress.total}</span>
+            <span className="text-xs text-[var(--primary-light)] font-medium">
+              {Math.round((progress.current / progress.total) * 100)}%
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[var(--primary)] transition-all duration-500"
+              style={{ width: `${(progress.current / progress.total) * 100}%` }}
+            />
           </div>
         </div>
 
-        {/* Error Banner */}
+        {/* Question */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-white mb-2">{currentStep.question}</h2>
+          {currentStep.description && (
+            <p className="text-sm text-[var(--foreground-secondary)]">{currentStep.description}</p>
+          )}
+        </div>
+
         {error && (
-          <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3">
+          <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3">
             <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
             <p className="text-xs text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-          {session.messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
-                  msg.role === "user"
-                    ? "bg-[var(--primary)]/20 text-[var(--foreground)] rounded-br-md"
-                    : "bg-white/[0.04] text-[var(--foreground-secondary)] rounded-bl-md"
+        {/* Options */}
+        <div className="space-y-3 mb-8">
+          {currentStep.options?.map((opt) => {
+            const isSelected = isMulti
+              ? selectedMulti.has(opt.value)
+              : selectedSingle === opt.value;
+
+            return (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  if (isMulti) {
+                    toggleMulti(opt.value);
+                  } else {
+                    setSelectedSingle(opt.value);
+                  }
+                  setError(null);
+                }}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${
+                  isSelected
+                    ? "border-[var(--primary)]/40 bg-[var(--primary)]/10"
+                    : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]"
                 }`}
               >
-                {msg.text}
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/[0.04] rounded-2xl rounded-bl-md px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-[var(--primary-light)]" />
-                  <span className="text-xs text-[var(--foreground-tertiary)]">Thinking...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input */}
-        <div className="px-5 py-4 border-t border-white/[0.04]">
-          {isReadyToPlan && !hasPlan ? (
-            <div className="flex gap-3">
-              <button
-                onClick={generatePlan}
-                disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-3 text-sm transition-all disabled:opacity-50"
-              >
-                <Sparkles className="h-4 w-4" />
-                Generate Plan
-              </button>
-              <button
-                onClick={() => setSession({ ...session, status: "discovering" })}
-                disabled={loading}
-                className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
-              >
-                Keep Talking
-              </button>
-            </div>
-          ) : hasPlan ? (
-            <div className="flex gap-3">
-              <button
-                onClick={approvePlan}
-                disabled={creating}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] hover:bg-emerald-600 text-white font-medium px-4 py-3 text-sm transition-all disabled:opacity-50"
-              >
-                {creating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4" />
-                    Approve & Create Project
-                  </>
+                <span className="text-2xl">{opt.icon}</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">{opt.label}</span>
+                {isSelected && (
+                  <Check className="h-4 w-4 text-[var(--primary-light)] ml-auto shrink-0" />
                 )}
               </button>
-              <button
-                onClick={() => setSession({ ...session, status: "discovering", plan: undefined })}
-                disabled={loading}
-                className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
-              >
-                Edit Plan
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type your answer..."
-                className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
-              />
-              <button
-                onClick={() => sendMessage()}
-                disabled={!input.trim() || loading}
-                className="flex items-center justify-center h-10 w-10 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white transition-all disabled:opacity-50 active:scale-[0.98]"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+            );
+          })}
+        </div>
+
+        {/* Text Input */}
+        {isText && (
+          <div className="mb-8">
+            <input
+              type={currentStep.type === "url" ? "url" : currentStep.type === "number" ? "number" : "text"}
+              value={textAnswer}
+              onChange={(e) => {
+                setTextAnswer(e.target.value);
+                setError(null);
+              }}
+              placeholder={
+                currentStep.type === "url"
+                  ? "https://example.com"
+                  : currentStep.type === "number"
+                  ? "Enter a number..."
+                  : "Type your answer..."
+              }
+              className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+            />
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex gap-3">
+          <button
+            onClick={submitAnswer}
+            disabled={loading || (currentStep.required && !hasAnswer)}
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-6 py-4 text-sm transition-all disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                {progress.current === progress.total ? (
+                  <>Generate Plan <Sparkles className="h-4 w-4" /></>
+                ) : (
+                  <>Continue <ArrowRight className="h-4 w-4" /></>
+                )}
+              </>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Right Panel — Plan Preview */}
-      <div className="w-full lg:w-[420px] xl:w-[480px] flex flex-col min-h-0 bg-white/[0.01]">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.04]">
-          <FileText className="h-4 w-4 text-[var(--primary-light)]" />
-          <span className="text-sm font-medium text-[var(--foreground)]">Plan Preview</span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 py-4">
-          {hasPlan && session.plan ? (
-            <div className="space-y-4">
-              <div className="liquid-glass p-4">
-                <h3 className="text-sm font-semibold text-[var(--foreground)]">{session.plan.project_name}</h3>
-                <p className="text-xs text-[var(--foreground-secondary)] mt-1">{session.plan.description}</p>
-                <div className="flex gap-4 mt-3">
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{session.plan.tasks.length}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Tasks</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{session.extracted.budget ? `€${session.extracted.budget}` : "—"}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Budget</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-[var(--foreground)]">{session.extracted.timeline || "—"}</p>
-                    <p className="text-[10px] text-[var(--foreground-tertiary)] uppercase">Timeline</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {session.plan.tasks.map((task, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <span className="text-lg shrink-0">{getTypeIcon(task.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[var(--foreground)] truncate">{task.title}</p>
-                      <p className="text-[10px] text-[var(--foreground-tertiary)] mt-0.5 line-clamp-2">{task.description}</p>
-                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}>
-                        {task.type}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="liquid-glass p-4 text-center">
-                <Sparkles className="h-8 w-8 text-[var(--primary-light)] mx-auto mb-2" />
-                <p className="text-sm text-[var(--foreground-secondary)]">
-                  Answer the questions in the chat to generate your project plan.
-                </p>
-              </div>
-
-              {session.extracted.project_type && (
-                <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Extracted Info</h4>
-                  <InfoRow label="Type" value={session.extracted.project_type} />
-                  {session.extracted.audience && <InfoRow label="Audience" value={session.extracted.audience} />}
-                  {session.extracted.purpose && <InfoRow label="Purpose" value={session.extracted.purpose} />}
-                  {session.extracted.designStyle && <InfoRow label="Style" value={session.extracted.designStyle} />}
-                  {session.extracted.timeline && <InfoRow label="Timeline" value={session.extracted.timeline} />}
-                  {session.extracted.budget && <InfoRow label="Budget" value={`€${session.extracted.budget}`} />}
-                  {session.extracted.domain && <InfoRow label="Domain" value={session.extracted.domain} />}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
-      <span className="text-[11px] text-[var(--foreground-tertiary)]">{label}</span>
-      <span className="text-xs font-medium text-[var(--foreground)]">{value}</span>
     </div>
   );
 }
