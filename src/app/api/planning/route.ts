@@ -57,7 +57,7 @@ const PROJECT_TYPES = [
   { keywords: ["blog", "article", "posts", "content", "news", "magazine"], type: "blog", name: "Blog" },
   { keywords: ["webapp", "web app", "application", "dashboard", "portal", "tool", "saas", "platform"], type: "webapp", name: "Web Application" },
   { keywords: ["portfolio", "showcase", "gallery", "work", "projects"], type: "portfolio", name: "Portfolio" },
-  { keywords: ["rebuild", "redesign", "update", "refresh", "revamp", "migrate", "modernize"], type: "rebuild", name: "Rebuild" },
+  { keywords: ["rebuild", "redesign", "update", "refresh", "revamp", "migrate", "modernize", "recreate", "make new", "new version", "overhaul", "looks old", "very old", "outdated"], type: "rebuild", name: "Rebuild" },
 ];
 
 function detectProjectType(text: string): { type: string; name: string } | null {
@@ -87,6 +87,12 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
     } catch {}
   }
 
+  // Organization/audience detection (e.g., "my club", "Prenzlauer Carnevalclub")
+  const orgMatch = text.match(/(?:my|our|the)\s+([A-Z][A-Za-z\s]+(?:club|e\.V\.|org|association|team|company|business))/);
+  if (orgMatch && !current.audience) {
+    extracted.audience = orgMatch[1].trim();
+  }
+
   // Budget detection
   const budgetMatch = text.match(/(?:budget|cost|price|spend)[\s:]*(?:€|$|EUR)?\s*(\d[\d\s,.]*(?:k)?)/i);
   if (budgetMatch) {
@@ -107,6 +113,17 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
     if (audienceMatch) extracted.audience = audienceMatch[1].trim();
   }
 
+  // Purpose detection
+  if (lower.includes("modern") || lower.includes("modernize") || lower.includes("make new")) {
+    extracted.purpose = "modernize design and improve user experience";
+  }
+  if (lower.includes("seo")) {
+    extracted.purpose = (extracted.purpose || current.purpose || "") + " improve SEO";
+  }
+  if (lower.includes("ux") || lower.includes("user experience")) {
+    extracted.purpose = (extracted.purpose || current.purpose || "") + " improve UX";
+  }
+
   // Auth detection
   if (lower.includes("login") || lower.includes("sign in") || lower.includes("user account") || lower.includes("auth")) {
     extracted.has_auth = true;
@@ -122,17 +139,14 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
     extracted.has_blog = true;
   }
 
-  // Purpose
-  const purposePatterns = [
-    /(?:goal|purpose|aim|objective|want to)\s+(.{10,100})/i,
-    /(?:to|for)\s+([^,.]{10,80})/i,
-  ];
-  for (const pattern of purposePatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      extracted.purpose = match[1].trim();
-      break;
-    }
+  // Design style detection
+  if (lower.includes("color palette") || lower.includes("keep colors") || lower.includes("brand colors")) {
+    extracted.design_style = "brand-aligned";
+  }
+
+  // Source content detection
+  if (lower.includes("scrape") || lower.includes("facebook") || lower.includes("album")) {
+    extracted.features = [...(current.features || []), "Facebook album image scraping"];
   }
 
   return extracted;
@@ -143,22 +157,30 @@ function extractInfo(text: string, current: ExtractedInfo): Partial<ExtractedInf
 function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { reply: string; ready: boolean } {
   const type = extracted.project_type;
 
+  // First exchange — after detecting type, always ask for audience/purpose
   if (messageCount <= 2) {
     if (!extracted.audience) {
       return {
-        reply: `Got it — a ${type === "rebuild" ? "rebuild" : (type || "project")}! Who is this for? (e.g., small businesses, developers, fitness enthusiasts)`,
+        reply: `Got it — a ${type === "rebuild" ? "rebuild" : (type || "project")}! Who is this for? (e.g., members, customers, local community)`,
         ready: false,
       };
     }
     if (!extracted.purpose) {
       return {
-        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., generate leads, sell products, build community)`,
+        reply: `Perfect, targeting ${extracted.audience}. What's the main goal? (e.g., modernize design, improve SEO, attract new members)`,
         ready: false,
       };
     }
   }
 
+  // Second exchange — type-specific questions
   if (messageCount === 3) {
+    if (type === "rebuild") {
+      return {
+        reply: "Do you have the current website URL? And what are the main pain points? (e.g., slow, not mobile-friendly, outdated design)",
+        ready: false,
+      };
+    }
     if (type === "homepage" || type === "landing") {
       return {
         reply: "What sections do you need? (e.g., hero, features, testimonials, pricing, contact)",
@@ -183,22 +205,17 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
         ready: false,
       };
     }
-    if (type === "rebuild") {
-      return {
-        reply: "What are the main pain points with the current site? (e.g., slow, outdated, not mobile-friendly)",
-        ready: false,
-      };
-    }
     return {
       reply: "What key features or sections should this include?",
       ready: false,
     };
   }
 
+  // Third exchange — ask for timeline or any missing info
   if (messageCount === 4) {
     if (!extracted.timeline) {
       return {
-        reply: "What's your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
+        reply: "What\'s your timeline? (e.g., '2 weeks', 'by end of month', 'ASAP')",
         ready: false,
       };
     }
@@ -210,16 +227,18 @@ function getNextQuestion(extracted: ExtractedInfo, messageCount: number): { repl
     }
   }
 
+  // Ready when we have type + audience + purpose
   if (type && extracted.audience && extracted.purpose) {
     return {
-      reply: `I have a good picture of this ${type}. Ready to generate your project plan?`,
+      reply: `I have a good picture of this ${type === "rebuild" ? "rebuild" : type}. Ready to generate your project plan?`,
       ready: true,
     };
   }
 
+  // Catch-all to prevent infinite loops
   return {
-    reply: "Tell me more about what you need — any specific features, integrations, or design preferences?",
-    ready: false,
+    reply: "I think I have enough to draft a plan. Ready to see it?",
+    ready: true,
   };
 }
 
