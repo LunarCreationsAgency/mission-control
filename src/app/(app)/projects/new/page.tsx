@@ -261,7 +261,7 @@ export default function NewProjectWizard() {
                 Generate Plan
               </button>
               <button
-                onClick={() => sendMessage("I'd like to discuss more details before generating the plan.")}
+                onClick={() => setSession({ ...session, status: "discovering" })}
                 disabled={loading}
                 className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
               >
@@ -288,7 +288,7 @@ export default function NewProjectWizard() {
                 )}
               </button>
               <button
-                onClick={() => sendMessage("I want to modify the plan. Let's discuss changes.")}
+                onClick={() => setSession({ ...session, status: "discovering", plan: undefined })}
                 disabled={loading}
                 className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all"
               >

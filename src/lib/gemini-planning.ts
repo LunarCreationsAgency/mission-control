@@ -80,8 +80,10 @@ const SYSTEM_PROMPT = `You are the Mission Control Orchestrator. You plan web pr
 
 RULES:
 1. You are having a natural, friendly conversation. Ask ONE question at a time.
-2. Based on the conversation, generate a structured project plan when the user seems ready.
-3. Output MUST be valid JSON.
+2. CRITICAL: You must ask at least 3-5 questions before setting ready_to_plan to true.
+3. If the user says "keep talking", "tell me more", or "not yet", you MUST set ready_to_plan to false.
+4. Only set ready_to_plan to true when you have gathered: project type, audience, purpose, key features, and at least one design preference.
+5. Output MUST be valid JSON.
 
 JSON FORMAT:
 {
@@ -127,7 +129,8 @@ TASK RULES:
 - For rebuilds: include audit and redirect tasks first`;
 
 export async function callGeminiAI(
-  messages: Array<{ role: "user" | "assistant"; text: string }>
+  messages: Array<{ role: "user" | "assistant"; text: string }>,
+  minMessages = 5
 ): Promise<{
   reply: string;
   ready_to_plan: boolean;
@@ -163,9 +166,13 @@ export async function callGeminiAI(
 
   const json = JSON.parse(content);
 
+  // Override ready_to_plan if conversation is too short
+  const userMessages = messages.filter(m => m.role === "user");
+  const actualReady = json.ready_to_plan && userMessages.length >= minMessages;
+
   return {
     reply: json.next_message || "Let's continue.",
-    ready_to_plan: json.ready_to_plan || false,
+    ready_to_plan: actualReady,
     extracted: json.extracted,
     plan: json.plan,
   };
