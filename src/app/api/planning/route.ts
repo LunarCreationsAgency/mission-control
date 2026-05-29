@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiCall, getAdminToken } from "@/lib/pocketbase";
+import { autoAssignTask } from "@/lib/auto-assign";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -905,6 +906,8 @@ export async function POST(req: Request) {
       });
 
       const createdTasks = [];
+      const taskAssignments = { assigned: 0, unassigned: 0 };
+
       for (const task of plan.tasks) {
         const created = await apiCall("/api/collections/tasks/records", {
           method: "POST",
@@ -912,10 +915,23 @@ export async function POST(req: Request) {
           body: { title: task.title, description: task.description, type: task.type, status: "todo", priority: task.priority, project: project.id },
         });
         createdTasks.push(created);
+
+        // Auto-assign the task
+        try {
+          const assignResult = await autoAssignTask(created.id as string, task.type);
+          if (assignResult.assigned) {
+            taskAssignments.assigned++;
+          } else {
+            taskAssignments.unassigned++;
+          }
+        } catch (e) {
+          console.error("Auto-assign failed for task", created.id, e);
+          taskAssignments.unassigned++;
+        }
       }
 
       currentSession.status = "approved";
-      return NextResponse.json({ project, tasks: createdTasks, session: currentSession });
+      return NextResponse.json({ project, tasks: createdTasks, assignments: taskAssignments, session: currentSession });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
