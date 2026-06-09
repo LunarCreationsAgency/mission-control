@@ -668,6 +668,11 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   const [creating, setCreating] = useState(false);
   const [githubRepo, setGithubRepo] = useState(project.github_repo || "");
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
