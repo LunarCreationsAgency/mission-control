@@ -24,6 +24,15 @@ export interface Project {
   budget: number;
   source_url?: string;        // URL to existing site being rebuilt
   deployed_url?: string;     // Live deployed URL
+  // Design tokens
+  color_primary?: string;
+  color_secondary?: string;
+  color_accent?: string;
+  color_background?: string;
+  font_heading?: string;
+  font_body?: string;
+  logo_url?: string;
+  design_vibe?: string;
 }
 
 export interface Goal {

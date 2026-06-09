@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   ArrowLeft, FolderKanban, Flag, TrendingUp, ListTodo, Wallet,
   Trash2, Pencil, LayoutDashboard, CheckSquare, Palette, Rocket,
-  ExternalLink, Globe, Copy, Check,
+  ExternalLink, Globe, Copy, Check, Type, Image, Sparkles, Save,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -432,17 +432,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
-      {activeTab === "design" && (
-        <div className="space-y-4">
-          <div className="liquid-glass p-12 text-center">
-            <Palette className="h-12 w-12 text-[var(--foreground-tertiary)] mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">Design Studio</h3>
-            <p className="text-sm text-[var(--foreground-secondary)] max-w-md mx-auto">
-              Coming soon: Color picker, typography selector, logo upload, and design tokens for this project.
-            </p>
-          </div>
-        </div>
-      )}
+      {activeTab === "design" && <DesignTab project={project} onUpdate={handleUpdate} />}
 
       {activeTab === "deploy" && (
         <div className="space-y-4">
@@ -542,6 +532,218 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         onSubmit={handleUpdate}
         project={project}
       />
+    </div>
+  );
+}
+
+function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Partial<Project>) => void }) {
+  const [saving, setSaving] = useState(false);
+  const [colors, setColors] = useState({
+    primary: project.color_primary || "#6366f1",
+    secondary: project.color_secondary || "#8b5cf6",
+    accent: project.color_accent || "#ec4899",
+    background: project.color_background || "#0f0f23",
+  });
+  const [fonts, setFonts] = useState({
+    heading: project.font_heading || "Inter",
+    body: project.font_body || "Inter",
+  });
+  const [logoUrl, setLogoUrl] = useState(project.logo_url || "");
+  const [vibe, setVibe] = useState(project.design_vibe || "");
+
+  const colorPresets = [
+    { name: "Cyberpunk", colors: { primary: "#00f0ff", secondary: "#7000ff", accent: "#ff0055", background: "#0a0a1a" } },
+    { name: "Minimal", colors: { primary: "#171717", secondary: "#525252", accent: "#ef4444", background: "#fafafa" } },
+    { name: "Nature", colors: { primary: "#059669", secondary: "#10b981", accent: "#f59e0b", background: "#f0fdf4" } },
+    { name: "Ocean", colors: { primary: "#2563eb", secondary: "#3b82f6", accent: "#06b6d4", background: "#f0f9ff" } },
+    { name: "Sunset", colors: { primary: "#ea580c", secondary: "#f97316", accent: "#eab308", background: "#fff7ed" } },
+    { name: "Dark Luxury", colors: { primary: "#d4af37", secondary: "#a855f7", accent: "#ec4899", background: "#0c0a09" } },
+  ];
+
+  const fontOptions = ["Inter", "Roboto", "Poppins", "Playfair Display", "Montserrat", "Space Grotesk", "JetBrains Mono", "Fira Code"];
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onUpdate({
+      color_primary: colors.primary,
+      color_secondary: colors.secondary,
+      color_accent: colors.accent,
+      color_background: colors.background,
+      font_heading: fonts.heading,
+      font_body: fonts.body,
+      logo_url: logoUrl,
+      design_vibe: vibe,
+    });
+    setSaving(false);
+  };
+
+  const applyPreset = (preset: typeof colorPresets[number]) => {
+    setColors(preset.colors);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Color Palette */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Palette className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Color Palette</h2>
+        </div>
+
+        {/* Presets */}
+        <div className="mb-5">
+          <p className="text-xs text-[var(--foreground-tertiary)] mb-2">Quick Presets</p>
+          <div className="flex flex-wrap gap-2">
+            {colorPresets.map((preset) => (
+              <button
+                key={preset.name}
+                onClick={() => applyPreset(preset)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all"
+              >
+                <div className="flex gap-0.5">
+                  <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.primary }} />
+                  <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.secondary }} />
+                  <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.accent }} />
+                </div>
+                <span className="text-xs text-[var(--foreground)]">{preset.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Color Pickers */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { key: "primary", label: "Primary", value: colors.primary },
+            { key: "secondary", label: "Secondary", value: colors.secondary },
+            { key: "accent", label: "Accent", value: colors.accent },
+            { key: "background", label: "Background", value: colors.background },
+          ].map((c) => (
+            <div key={c.key} className="space-y-2">
+              <label className="text-xs text-[var(--foreground-tertiary)]">{c.label}</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={c.value}
+                  onChange={(e) => setColors({ ...colors, [c.key]: e.target.value })}
+                  className="h-10 w-10 rounded-lg border-0 p-0 cursor-pointer bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={c.value}
+                  onChange={(e) => setColors({ ...colors, [c.key]: e.target.value })}
+                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[var(--primary)]/40"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Preview */}
+        <div className="mt-5 p-6 rounded-xl" style={{ background: colors.background }}>
+          <p className="text-sm font-semibold mb-3" style={{ color: colors.primary }}>Preview Heading</p>
+          <p className="text-sm mb-3" style={{ color: colors.secondary }}>Secondary text and descriptions appear here.</p>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: colors.accent + "20", color: colors.accent }}>
+              <Sparkles className="h-3 w-3" /> Accent Button
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: colors.primary + "20", color: colors.primary }}>
+              Primary CTA
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Typography */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Type className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Typography</h2>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-xs text-[var(--foreground-tertiary)]">Heading Font</label>
+            <select
+              value={fonts.heading}
+              onChange={(e) => setFonts({ ...fonts, heading: e.target.value })}
+              className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
+            >
+              {fontOptions.map((f) => (
+                <option key={f} value={f} className="bg-[#1a1a2e] text-white">{f}</option>
+              ))}
+            </select>
+            <p className="text-lg font-bold mt-2" style={{ fontFamily: fonts.heading }}>Aa Heading Sample</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs text-[var(--foreground-tertiary)]">Body Font</label>
+            <select
+              value={fonts.body}
+              onChange={(e) => setFonts({ ...fonts, body: e.target.value })}
+              className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
+            >
+              {fontOptions.map((f) => (
+                <option key={f} value={f} className="bg-[#1a1a2e] text-white">{f}</option>
+              ))}
+            </select>
+            <p className="text-sm mt-2" style={{ fontFamily: fonts.body }}>The quick brown fox jumps over the lazy dog.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Logo */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Image className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Logo</h2>
+        </div>
+        <div className="space-y-3">
+          <label className="text-xs text-[var(--foreground-tertiary)]">Logo URL</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              placeholder="https://..."
+              className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+            />
+          </div>
+          {logoUrl && (
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center">
+              <img src={logoUrl} alt="Logo preview" className="max-h-24 max-w-full object-contain" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Design Vibe */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Sparkles className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Design Vibe</h2>
+        </div>
+        <div className="space-y-3">
+          <label className="text-xs text-[var(--foreground-tertiary)]">Mood / Direction</label>
+          <textarea
+            value={vibe}
+            onChange={(e) => setVibe(e.target.value)}
+            placeholder="e.g., 'Dark cyberpunk with neon accents. Premium feel, minimal UI, bold typography.'"
+            rows={3}
+            className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 resize-none"
+          />
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 rounded-xl bg-[var(--primary)] text-white px-5 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? "Saving..." : "Save Design Tokens"}
+        </button>
+      </div>
     </div>
   );
 }
