@@ -105,13 +105,13 @@ export async function createVercelProject(options: VercelProjectOptions) {
     body: JSON.stringify({
       name,
       framework,
-      publicVisibility: true,
     }),
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(error.message || `Failed to create project: ${response.status}`);
+    console.error("Vercel API error:", response.status, JSON.stringify(error));
+    throw new Error(error.message || error.error?.message || `Failed to create project: ${response.status}`);
   }
 
   return response.json();

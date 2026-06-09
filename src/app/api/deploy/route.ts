@@ -17,32 +17,35 @@ export async function POST(request: Request) {
     // Fetch Vercel token from company settings
     const token = await getAdminToken();
     const rawSettings = await apiCall("/api/collections/company_settings/records?perPage=1", { token });
-    const settingsResult = rawSettings as { items?: Array<{ vercel_token?: string }> };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const settingsResult = rawSettings as any;
     const settings = settingsResult.items?.[0];
-    const vercelToken = settings?.vercel_token;
+    const vercelToken: string | undefined = settings?.vercel_token;
 
     if (!vercelToken) {
       return NextResponse.json({ error: "Vercel token not configured. Go to Settings and add your token." }, { status: 400 });
     }
 
-    let project: { vercel_project_id?: string } | null = null;
+    // Also get project record for Vercel project ID
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let project: any = null;
     if (projectId) {
       try {
         const rawProject = await apiCall(`/api/collections/projects/records/${projectId}`, { token });
-        project = rawProject as { vercel_project_id?: string };
+        project = rawProject;
       } catch {
         // Project not found
       }
     }
 
-    const vercelProjectId = project?.vercel_project_id as string | undefined;
+    const vercelProjectId: string | undefined = project?.vercel_project_id;
 
     switch (action) {
       case "deploy": {
         if (!vercelProjectId) {
           return NextResponse.json({ error: "Project not linked to Vercel. Create a Vercel project first." }, { status: 400 });
         }
-        const deploy = await triggerDeployment({ token: vercelToken, projectId: vercelProjectId as string });
+        const deploy = await triggerDeployment({ token: vercelToken, projectId: vercelProjectId });
         return NextResponse.json({ deployment: deploy });
       }
 
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
         const created = await createVercelProject({ token: vercelToken, name });
 
         // Link to our project if projectId provided
-        if (project) {
+        if (project && projectId) {
           await apiCall(`/api/collections/projects/records/${projectId}`, {
             method: "PATCH",
             token,
