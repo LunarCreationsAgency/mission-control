@@ -24,6 +24,9 @@ export interface Project {
   budget: number;
   source_url?: string;        // URL to existing site being rebuilt
   deployed_url?: string;     // Live deployed URL
+  vercel_project_id?: string;
+  vercel_team_id?: string;
+  github_repo?: string;
   // Design tokens
   color_primary?: string;
   color_secondary?: string;
@@ -77,4 +80,5 @@ export interface CompanySettings {
   currency: string;
   timezone: string;
   logo_url: string | null;
+  vercel_token?: string | null;
 }

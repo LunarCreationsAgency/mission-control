@@ -434,96 +434,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
       {activeTab === "design" && <DesignTab project={project} onUpdate={handleUpdate} />}
 
-      {activeTab === "deploy" && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="liquid-glass p-6">
-              <h3 className="text-base font-semibold text-[var(--foreground)] mb-4">Deployment</h3>
-              {project.deployed_url ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <Globe className="h-5 w-5 text-[var(--success)]" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-[var(--foreground-tertiary)]">Live URL</p>
-                      <p className="text-sm text-[var(--foreground)] truncate">{project.deployed_url}</p>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(project.deployed_url!)}
-                      className="text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
-                    >
-                      {copied ? <Check className="h-4 w-4 text-[var(--success)]" /> : <Copy className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <a
-                    href={project.deployed_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-white py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Open Live Site
-                  </a>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-[var(--foreground-secondary)]">
-                    This project hasn't been deployed yet.
-                  </p>
-                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <p className="text-xs text-[var(--foreground-tertiary)] mb-2">Set deployed URL</p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="https://..."
-                        id="deploy-url-input"
-                        className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
-                      />
-                      <button
-                        onClick={() => {
-                          const input = document.getElementById("deploy-url-input") as HTMLInputElement;
-                          if (input?.value) {
-                            handleUpdate({ deployed_url: input.value });
-                          }
-                        }}
-                        className="rounded-lg bg-[var(--primary)] text-white px-3 py-2 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="liquid-glass p-6">
-              <h3 className="text-base font-semibold text-[var(--foreground)] mb-4">Source</h3>
-              {project.source_url ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <Globe className="h-5 w-5 text-[var(--primary-light)]" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-[var(--foreground-tertiary)]">Original Site</p>
-                      <p className="text-sm text-[var(--foreground)] truncate">{project.source_url}</p>
-                    </div>
-                    <a
-                      href={project.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-[var(--foreground-secondary)]">
-                  No source URL set. This project was created from scratch.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {activeTab === "deploy" && <DeployTab project={project} onUpdate={handleUpdate} />}
 
       {/* Edit Modal */}
       <ProjectModal
@@ -744,6 +655,250 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
           {saving ? "Saving..." : "Save Design Tokens"}
         </button>
       </div>
+    </div>
+  );
+}
+
+function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Partial<Project>) => void }) {
+  const { success, error: toastError } = useToast();
+  const [deploying, setDeploying] = useState(false);
+  const [deployments, setDeployments] = useState<any[]>([]);
+  const [loadingDeployments, setLoadingDeployments] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [githubRepo, setGithubRepo] = useState(project.github_repo || "");
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDeploy = async () => {
+    setDeploying(true);
+    try {
+      const res = await fetch("/api/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deploy", projectId: project.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      success("Deployment triggered!");
+      if (data.deployment?.url) {
+        onUpdate({ deployed_url: data.deployment.url });
+      }
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Deploy failed");
+    } finally {
+      setDeploying(false);
+    }
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create-project", name: newProjectName.trim(), projectId: project.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      success("Vercel project created!");
+      if (data.project?.id) {
+        onUpdate({ vercel_project_id: data.project.id });
+      }
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to create project");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleSaveGithub = async () => {
+    try {
+      await onUpdate({ github_repo: githubRepo.trim() });
+      success("GitHub repo saved");
+    } catch (e) {
+      toastError("Failed to save");
+    }
+  };
+
+  const loadDeployments = async () => {
+    if (!project.vercel_project_id) return;
+    setLoadingDeployments(true);
+    try {
+      const res = await fetch("/api/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list", projectId: project.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setDeployments(data.deployments?.deployments || []);
+    } catch (e) {
+      console.error("Failed to load deployments:", e);
+    } finally {
+      setLoadingDeployments(false);
+    }
+  };
+
+  useEffect(() => {
+    if (project.vercel_project_id) {
+      loadDeployments();
+    }
+  }, [project.vercel_project_id]);
+
+  const statusColors: Record<string, string> = {
+    READY: "bg-[var(--success)]",
+    BUILDING: "bg-[var(--warning)]",
+    ERROR: "bg-red-500",
+    CANCELED: "bg-slate-500",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Vercel Connection */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Rocket className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Vercel Connection</h2>
+        </div>
+
+        {project.vercel_project_id ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <Globe className="h-5 w-5 text-[var(--success)]" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-[var(--foreground-tertiary)]">Vercel Project ID</p>
+                <p className="text-sm text-[var(--foreground)] truncate font-mono">{project.vercel_project_id}</p>
+              </div>
+            </div>
+
+            {project.deployed_url ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                  <Globe className="h-5 w-5 text-[var(--success)]" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-[var(--foreground-tertiary)]">Live URL</p>
+                    <p className="text-sm text-[var(--foreground)] truncate">{project.deployed_url}</p>
+                  </div>
+                  <button onClick={() => copyToClipboard(project.deployed_url!)} className="text-[var(--foreground-tertiary)] hover:text-[var(--foreground)]">
+                    {copied ? <Check className="h-4 w-4 text-[var(--success)]" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                </div>
+                <a href={project.deployed_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-white py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+                  <ExternalLink className="h-4 w-4" /> Open Live Site
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--foreground-secondary)]">Project linked but not yet deployed.</p>
+            )}
+
+            <button
+              onClick={handleDeploy}
+              disabled={deploying}
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-white py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+            >
+              <Rocket className="h-4 w-4" />
+              {deploying ? "Deploying..." : "Deploy to Production"}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-[var(--foreground-secondary)]">
+              No Vercel project linked. Create one or connect an existing project.
+            </p>
+            <div className="space-y-2">
+              <label className="text-xs text-[var(--foreground-tertiary)]">New Vercel Project Name</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="my-awesome-site"
+                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                />
+                <button
+                  onClick={handleCreateProject}
+                  disabled={creating || !newProjectName.trim()}
+                  className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+                >
+                  {creating ? "..." : "Create"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* GitHub Repo */}
+      <div className="liquid-glass p-5 lg:p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <ExternalLink className="h-5 w-5 text-[var(--primary-light)]" />
+          <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">GitHub Repository</h2>
+        </div>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={githubRepo}
+              onChange={(e) => setGithubRepo(e.target.value)}
+              placeholder="owner/repo-name"
+              className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+            />
+            <button onClick={handleSaveGithub} className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+              Save
+            </button>
+          </div>
+          {project.github_repo && (
+            <a
+              href={`https://github.com/${project.github_repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[var(--primary-light)] hover:underline flex items-center gap-1"
+            >
+              <ExternalLink className="h-3 w-3" /> github.com/{project.github_repo}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Deployment History */}
+      {project.vercel_project_id && (
+        <div className="liquid-glass p-5 lg:p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Deployment History</h2>
+            <button onClick={loadDeployments} disabled={loadingDeployments} className="text-xs text-[var(--primary-light)] hover:underline">
+              {loadingDeployments ? "Loading..." : "Refresh"}
+            </button>
+          </div>
+
+          {deployments.length === 0 ? (
+            <p className="text-sm text-[var(--foreground-tertiary)]">No deployments yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {deployments.slice(0, 10).map((d) => (
+                <div key={d.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                  <div className={`h-2 w-2 rounded-full ${statusColors[d.state] || "bg-slate-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[var(--foreground)] truncate">{d.meta?.githubCommitMessage || d.id.slice(0, 8)}</p>
+                    <p className="text-xs text-[var(--foreground-tertiary)]">{new Date(d.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  {d.url && (
+                    <a href={`https://${d.url}`} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-light)] hover:underline text-xs">
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
