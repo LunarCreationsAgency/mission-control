@@ -81,4 +81,5 @@ export interface CompanySettings {
   timezone: string;
   logo_url: string | null;
   vercel_token?: string | null;
+  github_token?: string | null;
 }

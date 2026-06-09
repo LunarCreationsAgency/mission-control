@@ -741,6 +741,30 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
     }
   };
 
+  const handleCreateRepo = async () => {
+    if (!githubRepo.trim()) return;
+    const cleanName = githubRepo.trim();
+    setCreating(true);
+    try {
+      const res = await fetch("/api/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create-repo", name: cleanName, description: `Source code for ${project.name}`, projectId: project.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      success("GitHub repo created and linked!");
+      if (data.repo?.full_name) {
+        setGithubRepo(data.repo.full_name);
+        onUpdate({ github_repo: data.repo.full_name });
+      }
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to create repo");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const loadDeployments = async () => {
     if (!project.vercel_project_id) return;
     setLoadingDeployments(true);
@@ -856,27 +880,75 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">GitHub Repository</h2>
         </div>
         <div className="space-y-3">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={githubRepo}
-              onChange={(e) => setGithubRepo(e.target.value)}
-              placeholder="owner/repo-name"
-              className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
-            />
-            <button onClick={handleSaveGithub} className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
-              Save
-            </button>
-          </div>
-          {project.github_repo && (
-            <a
-              href={`https://github.com/${project.github_repo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-[var(--primary-light)] hover:underline flex items-center gap-1"
-            >
-              <ExternalLink className="h-3 w-3" /> github.com/{project.github_repo}
-            </a>
+          {project.github_repo ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <ExternalLink className="h-5 w-5 text-[var(--success)]" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-[var(--foreground-tertiary)]">Linked Repository</p>
+                  <p className="text-sm text-[var(--foreground)] truncate font-mono">{project.github_repo}</p>
+                </div>
+                <a
+                  href={`https://github.com/${project.github_repo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--primary-light)] hover:underline text-xs flex items-center gap-1"
+                >
+                  <ExternalLink className="h-3 w-3" /> Open
+                </a>
+              </div>
+              <button
+                onClick={() => { setGithubRepo(""); onUpdate({ github_repo: "" }); }}
+                className="text-xs text-[var(--foreground-tertiary)] hover:text-red-400 transition-colors"
+              >
+                Unlink repository
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-[var(--foreground-secondary)]">
+                No repository linked. Create one on GitHub or enter an existing repo.
+              </p>
+              <div className="space-y-2">
+                <label className="text-xs text-[var(--foreground-tertiary)]">Repository Name</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={githubRepo}
+                    onChange={(e) => setGithubRepo(e.target.value)}
+                    placeholder="my-awesome-site"
+                    className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                  />
+                  <button
+                    onClick={handleCreateRepo}
+                    disabled={creating || !githubRepo.trim()}
+                    className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+                  >
+                    {creating ? "..." : "Create"}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[var(--foreground-tertiary)]">
+                  Creates a private GitHub repo + auto-links to Vercel project
+                </p>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <div className="h-px flex-1 bg-white/[0.04]" />
+                <span className="text-[10px] text-[var(--foreground-tertiary)]">or link existing</span>
+                <div className="h-px flex-1 bg-white/[0.04]" />
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={githubRepo}
+                  onChange={(e) => setGithubRepo(e.target.value)}
+                  placeholder="owner/existing-repo"
+                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                />
+                <button onClick={handleSaveGithub} className="rounded-lg bg-white/[0.06] text-white px-4 py-2.5 text-sm font-medium hover:bg-white/[0.10] transition-colors">
+                  Link
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -19,6 +19,7 @@ export default function SettingsPage() {
     currency: settings?.currency || "EUR",
     timezone: settings?.timezone || "Europe/Berlin",
     vercel_token: settings?.vercel_token || "",
+    github_token: settings?.github_token || "",
   });
 
   const handleSave = async () => {
@@ -30,6 +31,7 @@ export default function SettingsPage() {
         currency: form.currency.trim().toUpperCase(),
         timezone: form.timezone.trim(),
         vercel_token: form.vercel_token.trim() || null,
+        github_token: form.github_token.trim() || null,
       });
       success("Settings saved");
       setEditing(false);
@@ -47,6 +49,7 @@ export default function SettingsPage() {
       currency: settings?.currency || "EUR",
       timezone: settings?.timezone || "Europe/Berlin",
       vercel_token: settings?.vercel_token || "",
+      github_token: settings?.github_token || "",
     });
     setEditing(true);
   };
@@ -156,6 +159,17 @@ export default function SettingsPage() {
                   className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
                 />
                 <p className="text-[10px] text-[var(--foreground-tertiary)]">Your Vercel API token from vercel.com/account/tokens</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">GitHub Token</label>
+                <input
+                  type="password"
+                  value={form.github_token}
+                  onChange={(e) => setForm({ ...form, github_token: e.target.value })}
+                  placeholder="ghp_..."
+                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                />
+                <p className="text-[10px] text-[var(--foreground-tertiary)]">GitHub personal access token with 'repo' scope from github.com/settings/tokens</p>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
