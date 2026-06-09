@@ -56,6 +56,9 @@ export async function linkGitHubToVercel(
   vercelToken: string,
   productionBranch = "main"
 ) {
+  // Note: Vercel requires OAuth or a pre-configured git credential to link repos.
+  // This API endpoint may fail with 400 if no OAuth connection exists.
+  // In that case, the user links manually via Vercel dashboard.
   const url = `https://api.vercel.com/v9/projects/${vercelProjectId}/link`;
   const response = await fetch(url, {
     method: "POST",
@@ -66,7 +69,6 @@ export async function linkGitHubToVercel(
     body: JSON.stringify({
       type: "github",
       repo: githubRepoFullName,
-      gitCredentialId: null, // Will use OAuth or token
       productionBranch,
     }),
   });
