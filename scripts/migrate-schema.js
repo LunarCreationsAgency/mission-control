@@ -86,6 +86,15 @@ async function main() {
   });
 
   await addField(token, "tasks", {
+    system: false, id: "type", name: "type", type: "select",
+    required: false, presentable: false,
+    options: {
+      maxSelect: 1,
+      values: ["design", "code", "content", "deploy", "planning", "shop"],
+    },
+  });
+
+  await addField(token, "tasks", {
     system: false, id: "required_skills", name: "required_skills", type: "json",
     required: false, presentable: false, options: {},
   });

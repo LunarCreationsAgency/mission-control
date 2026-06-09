@@ -1,9 +1,10 @@
 /**
- * Auto-Assignment Engine
- * Matches tasks to agents based on skills and workload.
+ * Auto-Assignment Engine v2 — Workload-aware with specialist preference.
+ * Design tasks go to Pixel, code to Architect, deploy to Forge.
+ * Generalist tasks (planning, content) distribute across the team.
  */
 
-import { pbGetAgents, pbUpdateTask } from "@/lib/pocketbase";
+import { pbGetAgents, pbGetTasks, pbUpdateTask } from "@/lib/pocketbase";
 
 interface Agent {
   id: string;
@@ -14,115 +15,179 @@ interface Agent {
   current_task?: string;
 }
 
-/**
- * Find the best agent for a task based on skills, status, and workload.
- * Returns agent ID or null if no suitable agent found.
- */
-export async function findBestAgentForTask(taskType: string): Promise<string | null> {
-  try {
-    const result = await pbGetAgents();
-    const agents = (result.items || []) as Agent[];
+interface Task {
+  id: string;
+  assignee?: string;
+  type?: string;
+}
 
-    // Filter: only active agents (not paused, not offline, not error)
-    const availableAgents = agents.filter((a) => {
+/**
+ * Count how many tasks each agent currently owns.
+ */
+async function getAgentWorkloads(): Promise<Record<string, number>> {
+  try {
+    const result = await pbGetTasks();
+    const tasks = (result.items || []) as Task[];
+    const counts: Record<string, number> = {};
+    for (const task of tasks) {
+      if (task.assignee) {
+        counts[task.assignee] = (counts[task.assignee] || 0) + 1;
+      }
+    }
+    return counts;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Score an agent for a specific task type.
+ */
+function scoreAgent(agent: Agent, taskType: string, workload: number): number {
+  let score = 0;
+  const skills = agent.skills || [];
+
+  // ─── SKILL MATCH ───
+  if (skills.includes(taskType)) {
+    score += 25; // Direct specialist match
+  } else if (
+    (taskType === "code" && skills.includes("development")) ||
+    (taskType === "design" && skills.includes("creative")) ||
+    (taskType === "content" && skills.includes("copywriting")) ||
+    (taskType === "deploy" && skills.includes("devops")) ||
+    (taskType === "planning" && skills.includes("strategy")) ||
+    (taskType === "shop" && skills.includes("ecommerce"))
+  ) {
+    score += 12; // Related skill match
+  } else {
+    score += 1; // Generalist fallback (barely)
+  }
+
+  // ─── WORKLOAD PENALTY ───
+  if (workload === 0) {
+    score += 8; // Fresh agent — eager
+  } else if (workload <= 3) {
+    score += 3; // Light load — fine
+  } else if (workload <= 6) {
+    score -= 5; // Getting busy
+  } else if (workload <= 10) {
+    score -= 15; // Heavy load — avoid
+  } else {
+    score -= 30; // Overloaded — only if no one else can do it
+  }
+
+  // ─── STATUS ───
+  if (agent.status === "idle") {
+    score += 4;
+  } else if (agent.status === "working") {
+    score -= 2;
+  }
+
+  // ─── GENERALIST BONUS ───
+  // For planning/content tasks, spread the load — generalists get a boost
+  if ((taskType === "planning" || taskType === "content") && skills.includes("planning")) {
+    score += 5;
+  }
+
+  return score;
+}
+
+/**
+ * Find the best agent for a task. Returns agent ID or null.
+ */
+export async function findBestAgentForTask(taskType: string): Promise<{ agentId: string | null; agentName: string | null }> {
+  try {
+    const [agentsResult, workloads] = await Promise.all([
+      pbGetAgents(),
+      getAgentWorkloads(),
+    ]);
+
+    const agents = (agentsResult.items || []) as Agent[];
+
+    // Filter active agents
+    const available = agents.filter((a) => {
       if (a.paused) return false;
       if (a.status === "offline" || a.status === "error") return false;
       return true;
     });
 
-    if (availableAgents.length === 0) return null;
+    if (available.length === 0) return { agentId: null, agentName: null };
 
-    // Score each agent: +10 for matching skill, +5 for idle status, -5 for working
-    const scored = availableAgents.map((agent) => {
-      let score = 0;
+    // Score every agent
+    const scored = available.map((agent) => ({
+      agent,
+      score: scoreAgent(agent, taskType, workloads[agent.id] || 0),
+    }));
 
-      // Skill match
-      const skills = agent.skills || [];
-      if (skills.includes(taskType)) {
-        score += 20; // Direct skill match
-      } else if (
-        (taskType === "code" && skills.includes("development")) ||
-        (taskType === "design" && skills.includes("creative")) ||
-        (taskType === "content" && skills.includes("copywriting")) ||
-        (taskType === "deploy" && skills.includes("devops")) ||
-        (taskType === "planning" && skills.includes("strategy")) ||
-        (taskType === "shop" && skills.includes("ecommerce"))
-      ) {
-        score += 10; // Related skill match
-      } else {
-        score += 2; // Generalist fallback
-      }
-
-      // Workload preference
-      if (agent.status === "idle") {
-        score += 5;
-      } else if (agent.status === "working") {
-        score -= 3;
-      }
-
-      // Prefer agents without a current task
-      if (!agent.current_task) {
-        score += 5;
-      }
-
-      return { agent, score };
-    });
-
-    // Sort by score descending
+    // Sort descending
     scored.sort((a, b) => b.score - a.score);
 
-    // Return the best match if score > 0
-    if (scored.length > 0 && scored[0].score > 0) {
-      return scored[0].agent.id;
+    // Pick the best if they have a positive score
+    const best = scored[0];
+    if (best && best.score > 0) {
+      return { agentId: best.agent.id, agentName: best.agent.name };
     }
 
-    return null;
+    // Fallback: least loaded agent if all scores negative
+    const leastLoaded = scored.sort(
+      (a, b) => (workloads[a.agent.id] || 0) - (workloads[b.agent.id] || 0)
+    )[0];
+    if (leastLoaded) {
+      return { agentId: leastLoaded.agent.id, agentName: leastLoaded.agent.name };
+    }
+
+    return { agentId: null, agentName: null };
   } catch (e) {
     console.error("Auto-assign: failed to find agent:", e);
-    return null;
+    return { agentId: null, agentName: null };
   }
 }
 
 /**
- * Assign a task to the best-matching agent.
- * Updates the task's assignee field in PocketBase.
+ * Assign a task to the best agent and update PB.
  */
-export async function autoAssignTask(taskId: string, taskType: string): Promise<{ assigned: boolean; agentId: string | null; agentName: string | null }> {
-  const agentId = await findBestAgentForTask(taskType);
+export async function autoAssignTask(
+  taskId: string,
+  taskType: string
+): Promise<{ assigned: boolean; agentId: string | null; agentName: string | null }> {
+  const match = await findBestAgentForTask(taskType);
 
-  if (!agentId) {
-    console.log(`Auto-assign: no suitable agent found for task ${taskId} (type: ${taskType})`);
+  if (!match.agentId) {
+    console.log(`Auto-assign: no agent for task ${taskId} (${taskType})`);
     return { assigned: false, agentId: null, agentName: null };
   }
 
   try {
-    await pbUpdateTask(taskId, { assignee: agentId });
-    console.log(`Auto-assign: task ${taskId} → agent ${agentId}`);
-    return { assigned: true, agentId, agentName: null };
+    await pbUpdateTask(taskId, { assignee: match.agentId });
+    console.log(`Auto-assign: ${taskId} → ${match.agentName} (${taskType})`);
+    return { assigned: true, agentId: match.agentId, agentName: match.agentName };
   } catch (e) {
-    console.error("Auto-assign: failed to assign task:", e);
+    console.error("Auto-assign: failed:", e);
     return { assigned: false, agentId: null, agentName: null };
   }
 }
 
 /**
- * Batch assign multiple tasks. Used after project creation from wizard.
+ * Batch assign tasks. Used after wizard project creation.
  */
 export async function autoAssignTasks(
   tasks: Array<{ id: string; type?: string }>
-): Promise<{ assigned: number; unassigned: number }> {
+): Promise<{ assigned: number; unassigned: number; breakdown: Record<string, number> }> {
   let assigned = 0;
   let unassigned = 0;
+  const breakdown: Record<string, number> = {};
 
   for (const task of tasks) {
     const result = await autoAssignTask(task.id, task.type || "planning");
     if (result.assigned) {
       assigned++;
+      breakdown[result.agentName || "Unknown"] = (breakdown[result.agentName || "Unknown"] || 0) + 1;
     } else {
       unassigned++;
     }
   }
 
-  console.log(`Auto-assign: ${assigned}/${tasks.length} tasks assigned, ${unassigned} unassigned`);
-  return { assigned, unassigned };
+  console.log(`Auto-assign: ${assigned}/${tasks.length} assigned, ${unassigned} unassigned`);
+  console.log("Breakdown:", breakdown);
+  return { assigned, unassigned, breakdown };
 }
