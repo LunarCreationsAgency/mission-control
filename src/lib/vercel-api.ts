@@ -37,13 +37,18 @@ export async function triggerDeployment(options: VercelDeployOptions) {
       name: projectId,
       project: projectId,
       target,
-      // Use git source if connected, else force a build
       gitSource: { type: "project-id", projectId },
     }),
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
+    const msg = error.message || error.error?.message || "";
+    if (msg.toLowerCase().includes("git") || response.status === 400) {
+      throw new Error(
+        "Deploy failed: No git repo connected. Push code to GitHub and link it in Vercel dashboard first."
+      );
+    }
     throw new Error(error.message || `Vercel deploy failed: ${response.status}`);
   }
 

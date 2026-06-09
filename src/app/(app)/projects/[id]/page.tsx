@@ -696,14 +696,28 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
     }
   };
 
+  const sanitizeVercelName = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .substring(0, 100);
+  };
+
   const handleCreateProject = async () => {
     if (!newProjectName.trim()) return;
+    const cleanName = sanitizeVercelName(newProjectName.trim());
+    if (!cleanName) {
+      toastError("Invalid project name. Use letters, numbers, dots, hyphens, underscores only.");
+      return;
+    }
     setCreating(true);
     try {
       const res = await fetch("/api/deploy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "create-project", name: newProjectName.trim(), projectId: project.id }),
+        body: JSON.stringify({ action: "create-project", name: cleanName, projectId: project.id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
