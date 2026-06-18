@@ -141,13 +141,32 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
       {/* Mobile card */}
       <div className="lg:hidden bg-[var(--surface-elevated)] rounded-2xl p-4">
         <Link href={`/goals/${goal.id}`} className="block">
-          <div className="flex items-center justify-between mb-3">
-            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${status.bg} ${status.color}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
-            </span>
-            <span className="text-sm font-semibold text-[var(--foreground)]">{progress}%</span>
+          {/* Top row: badge + % + actions, all in one flex */}
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 shrink-0 ${status.bg} ${status.color}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
+              </span>
+              <span className="text-sm font-semibold text-[var(--foreground)]">{progress}%</span>
+            </div>
+            <div className="flex gap-1.5 shrink-0">
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-white/[0.08]"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); setTimeout(() => setDeletingId((prev) => prev === goal.id ? null : prev), 3000); }
+              }}
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isDeleting ? "bg-red-500/20 text-red-400" : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"}`}
+              >
+                {isDeleting ? <span className="text-[10px] font-bold">OK?</span> : <Trash2 className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
-          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-2 pr-20">{goal.name}</h3>
+          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-2">{goal.name}</h3>
           {goal.description && (
             <p className="text-[13px] text-[var(--foreground-tertiary)] line-clamp-2 mb-3">{goal.description}</p>
           )}
@@ -161,22 +180,6 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
             <span>{progress >= 100 ? "🎉 Complete" : progress >= 80 ? "Almost there" : "In progress"}</span>
           </div>
         </Link>
-        {/* Actions */}
-        <div className="absolute top-3 right-3 flex gap-1.5">
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-white/[0.08]">
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); setTimeout(() => setDeletingId((prev) => prev === goal.id ? null : prev), 3000); }
-          }}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isDeleting ? "bg-red-500/20 text-red-400" : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"}`}
-          >
-            {isDeleting ? <span className="text-[10px] font-bold">OK?</span> : <Trash2 className="h-4 w-4" />}
-          </button>
-        </div>
       </div>
 
       {/* Desktop card */}
