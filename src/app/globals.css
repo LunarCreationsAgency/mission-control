@@ -19,6 +19,12 @@
   --radius-xs: 10px;
 }
 
+html {
+  /* Prevent elastic scroll on iOS for native-app feel */
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -26,7 +32,57 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: none;
 }
+
+/* ========================================
+   MOBILE NATIVE APP UTILITIES
+   ======================================== */
+
+/* Prevent text selection on UI elements (native app feel) */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow selection on text content */
+.allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Touch-friendly tap target */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth scroll with momentum */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS Safe Area utilities */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left { padding-left: env(safe-area-inset-left); }
+.safe-right { padding-right: env(safe-area-inset-right); }
+
+/* ========================================
+   LIQUID GLASS
+   ======================================== */
 
 /* Modern Liquid Glass */
 .liquid-glass {
@@ -246,11 +302,36 @@ body {
   }
 }
 
-/* Mobile touch improvements */
+/* ========================================
+   MOBILE NATIVE APP OVERRIDES
+   ======================================== */
 @media (max-width: 1023px) {
   body {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+  }
+
+  /* Disable heavy blur effects on mobile for performance */
+  .liquid-glass {
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+  }
+  .liquid-glass-subtle {
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

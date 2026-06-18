@@ -209,8 +209,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-hide">
+      {/* Tabs — mobile: pill-style, scrollable with snap; desktop: tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory -mx-3 px-3 sm:-mx-0 sm:px-0">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -218,7 +218,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+              className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
                 isActive
                   ? "bg-[var(--primary)]/15 text-[var(--primary-light)]"
                   : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.04]"
@@ -227,7 +227,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               <Icon className="h-4 w-4" />
               {tab.label}
               {tab.id === "tasks" && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/[0.08] text-[10px] font-bold">
+                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/[0.08] text-[10px] font-bold px-1.5">
                   {projectTasks.length}
                 </span>
               )}

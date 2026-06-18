@@ -12,7 +12,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <Navbar />
         <CommandPalette />
         <main className="min-h-screen lg:pl-20">
-          <div className="mx-auto max-w-7xl p-4 lg:p-8">{children}</div>
+          {/* Mobile: tighter padding, safe areas; Desktop: spacious */}
+          <div className="mx-auto max-w-7xl px-3 pt-14 pb-24 sm:px-4 lg:px-8 lg:pt-8 lg:pb-8">
+            {children}
+          </div>
         </main>
       </ToastProvider>
     </>

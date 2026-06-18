@@ -34,14 +34,14 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
     <div className="group relative">
       <Link
         href={`/tasks/${task.id}`}
-        className={`block rounded-[20px] p-5 bg-white/[0.02] border border-white/[0.04] border-t-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-200 active:scale-[0.98] ${
+        className={`block rounded-2xl p-4 sm:p-5 bg-white/[0.02] border border-white/[0.04] border-t-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-200 active:scale-[0.98] select-none touch-manipulation ${
           isOverdue ? "border-l-[3px] border-l-red-500 shadow-[inset_3px_0_0_rgba(239,68,68,0.2)]" : ""
         }`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {/* Top row: badges */}
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${priority.bg} ${priority.text}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${priority.dot}`} />
                 {priority.label}
@@ -53,21 +53,21 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
             </div>
 
             {/* Title */}
-            <h3 className="text-[15px] font-semibold text-[var(--foreground)] leading-snug mb-1.5 truncate">
+            <h3 className="text-base sm:text-[15px] font-semibold text-[var(--foreground)] leading-snug mb-1.5 pr-8">
               {task.title}
             </h3>
 
             {/* Description */}
             {task.description && (
-              <p className="text-[12px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed mb-3">
+              <p className="text-[13px] sm:text-[12px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed mb-3">
                 {task.description}
               </p>
             )}
 
             {/* Meta row */}
-            <div className="flex items-center gap-4 text-[11px] text-[var(--foreground-tertiary)]">
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-[var(--foreground-tertiary)] flex-wrap">
               {project && (
-                <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded px-1.5 py-0.5 text-[var(--primary-light)]">
+                <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded-lg px-2 py-1 text-[var(--primary-light)]">
                   <FolderKanban className="h-3 w-3" />
                   <span>{project.name}</span>
                 </div>
@@ -87,14 +87,14 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
             </div>
           </div>
 
-          {/* Arrow */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] text-[var(--foreground-tertiary)] group-hover:bg-white/[0.06] group-hover:text-[var(--foreground-secondary)] transition-all">
-            <ArrowRight className="h-4 w-4" />
+          {/* Arrow — larger tap target on mobile */}
+          <div className="flex h-10 w-10 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] text-[var(--foreground-tertiary)] group-hover:bg-white/[0.06] group-hover:text-[var(--foreground-secondary)] transition-all">
+            <ArrowRight className="h-5 w-5 sm:h-4 sm:w-4" />
           </div>
         </div>
       </Link>
 
-      {/* Delete button */}
+      {/* Delete button — always visible on mobile (touch), hover-only on desktop */}
       {onDelete && (
         <button
           onClick={(e) => {
@@ -102,9 +102,10 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
             e.stopPropagation();
             onDelete(task.id);
           }}
-          className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-lg text-red-400 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-500/10 transition-all duration-200"
+          className="absolute top-3 right-3 sm:right-3 flex h-9 w-9 sm:h-7 sm:w-7 items-center justify-center rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+          aria-label="Delete task"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
         </button>
       )}
     </div>

@@ -116,46 +116,53 @@ export default function Navbar() {
         </button>
       </aside>
 
-      {/* Mobile: Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom,0px)] pt-2"
+      {/* Mobile: Bottom Navigation Bar — iOS app-style dock */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]"
         style={{
-          background: "rgba(10,10,15,0.98)",
+          background: "linear-gradient(to top, rgba(10,10,18,0.98) 0%, rgba(10,10,18,0.95) 70%, rgba(10,10,18,0.85) 100%)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
-          backdropFilter: "blur(20px)",
+          backdropFilter: "blur(24px) saturate(160%)",
+          WebkitBackdropFilter: "blur(24px) saturate(160%)",
         }}
       >
-        {primaryNav.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-200 min-w-[64px] ${
-                isActive
-                  ? "text-[var(--primary-light)]"
-                  : "text-[var(--foreground-tertiary)]"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
-              {isActive && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--primary-light)]" />
-              )}
-            </Link>
-          );
-        })}
+        <div className="flex items-center justify-around px-2 pt-2">
+          {primaryNav.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 min-w-[68px] min-h-[56px] select-none active:scale-95 ${
+                  isActive
+                    ? "text-[var(--primary-light)]"
+                    : "text-[var(--foreground-tertiary)]"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl transition-all ${isActive ? "bg-white/[0.08]" : ""}`}>
+                  <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+                {isActive && (
+                  <span className="absolute bottom-1.5 h-[3px] w-[3px] rounded-full bg-[var(--primary-light)]" />
+                )}
+              </Link>
+            );
+          })}
 
-        {/* More button */}
-        <button
-          onClick={() => setMoreOpen(!moreOpen)}
-          className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-200 min-w-[64px] ${
-            moreOpen ? "text-[var(--primary-light)]" : "text-[var(--foreground-tertiary)]"
-          }`}
-        >
-          <MoreHorizontal className="h-5 w-5" />
-          <span className="text-[10px] font-medium">More</span>
-        </button>
+          {/* More button */}
+          <button
+            onClick={() => setMoreOpen(!moreOpen)}
+            className={`flex flex-col items-center justify-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 min-w-[68px] min-h-[56px] select-none active:scale-95 ${
+              moreOpen ? "text-[var(--primary-light)]" : "text-[var(--foreground-tertiary)]"
+            }`}
+          >
+            <div className={`p-1.5 rounded-xl transition-all ${moreOpen ? "bg-white/[0.08]" : ""}`}>
+              <MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={moreOpen ? 2.5 : 2} />
+            </div>
+            <span className="text-[10px] font-semibold leading-none">More</span>
+          </button>
+        </div>
       </nav>
 
       {/* Mobile: More Sheet */}
