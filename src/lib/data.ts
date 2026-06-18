@@ -147,6 +147,17 @@ export async function getAgents(): Promise<Agent[]> {
   });
 }
 
+export async function getAgent(id: string): Promise<Agent> {
+  const data = await apiGet(`/api/agents/${id}`);
+  return data.agent as Agent;
+}
+
+export async function updateAgent(id: string, body: Record<string, unknown>) {
+  const data = await apiPatch(`/api/agents/${id}`, body);
+  invalidateCache("agents");
+  return data;
+}
+
 // --- ACTIVITY ---
 export async function getActivityLogs(): Promise<ActivityLog[]> {
   // Always fresh — no cache
