@@ -1,12 +1,13 @@
 "use client";
 
-import { type Task, type Project } from "@/types";
-import { Calendar, User, ArrowRight, Clock, Trash2, FolderKanban } from "lucide-react";
+import { type Task, type Project, type Agent } from "@/types";
+import { Calendar, ArrowRight, Clock, Trash2, FolderKanban, Circle } from "lucide-react";
 import Link from "next/link";
 
 interface TaskListCardProps {
   task: Task;
   project?: Project;
+  agent?: Agent;
   onDelete?: (id: string) => void;
 }
 
@@ -17,14 +18,14 @@ const priorityConfig: Record<string, { bg: string; text: string; dot: string; la
   critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400", label: "Critical" },
 };
 
-const statusConfig: Record<string, { dot: string; bg: string; label: string }> = {
-  todo: { dot: "bg-slate-400", bg: "bg-slate-500/10", label: "To Do" },
-  in_progress: { dot: "bg-[var(--primary)]", bg: "bg-[var(--primary)]/10", label: "In Progress" },
-  review: { dot: "bg-[var(--warning)]", bg: "bg-[var(--warning)]/10", label: "Review" },
-  done: { dot: "bg-[var(--success)]", bg: "bg-[var(--success)]/10", label: "Done" },
+const statusConfig: Record<string, { dot: string; text: string }> = {
+  todo: { dot: "bg-slate-400", text: "text-slate-400" },
+  in_progress: { dot: "bg-[var(--primary)]", text: "text-[var(--primary-light)]" },
+  review: { dot: "bg-[var(--warning)]", text: "text-[var(--warning)]" },
+  done: { dot: "bg-[var(--success)]", text: "text-[var(--success)]" },
 };
 
-export default function TaskListCard({ task, project, onDelete }: TaskListCardProps) {
+export default function TaskListCard({ task, project, agent, onDelete }: TaskListCardProps) {
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const status = statusConfig[task.status] || statusConfig.todo;
 
@@ -34,67 +35,66 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
     <div className="group relative">
       <Link
         href={`/tasks/${task.id}`}
-        className={`block rounded-2xl p-4 sm:p-5 bg-white/[0.02] border border-white/[0.04] border-t-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-200 active:scale-[0.98] select-none touch-manipulation ${
-          isOverdue ? "border-l-[3px] border-l-red-500 shadow-[inset_3px_0_0_rgba(239,68,68,0.2)]" : ""
+        className={`block bg-[var(--surface-elevated)] rounded-2xl p-4 active:scale-[0.97] transition-transform select-none touch-manipulation ${
+          isOverdue ? "border-l-[3px] border-l-red-500" : ""
         }`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {/* Top row: badges */}
-            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+            {/* Top row: priority badge + status dot */}
+            <div className="flex items-center gap-2 mb-3">
               <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${priority.bg} ${priority.text}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${priority.dot}`} />
                 {priority.label}
               </span>
-              <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold rounded-lg px-2 py-1 ${status.bg} ${status.dot.replace("bg-", "text-")}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                {status.label}
+              <span className={`flex items-center gap-1 text-[11px] ${status.text}`}>
+                <Circle className={`h-2 w-2 rounded-full ${status.dot}`} fill="currentColor" stroke="none" />
+                {task.status === "in_progress" ? "In Progress" : task.status === "todo" ? "To Do" : task.status === "review" ? "Review" : "Done"}
               </span>
             </div>
 
             {/* Title */}
-            <h3 className="text-base sm:text-[15px] font-semibold text-[var(--foreground)] leading-snug mb-1.5 pr-8">
+            <h3 className="text-[15px] font-semibold text-[var(--foreground)] leading-snug mb-2 pr-10">
               {task.title}
             </h3>
 
             {/* Description */}
             {task.description && (
-              <p className="text-[13px] sm:text-[12px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed mb-3">
+              <p className="text-[13px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed mb-3">
                 {task.description}
               </p>
             )}
 
             {/* Meta row */}
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-[var(--foreground-tertiary)] flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {project && (
-                <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded-lg px-2 py-1 text-[var(--primary-light)]">
+                <div className="inline-flex items-center gap-1 bg-[var(--primary)]/10 rounded-lg px-2 py-1 text-[var(--primary-light)] text-[11px]">
                   <FolderKanban className="h-3 w-3" />
-                  <span>{project.name}</span>
+                  <span className="truncate max-w-[120px]">{project.name}</span>
                 </div>
               )}
-              {task.assignee && (
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  <span>Agent</span>
-                </div>
+              {agent && (
+                <span className="text-[11px] text-[var(--foreground-tertiary)]">
+                  {agent.name}
+                </span>
               )}
               {task.due_date && (
-                <div className={`flex items-center gap-1 ${isOverdue ? "text-red-400" : ""}`}>
+                <span className={`flex items-center gap-1 text-[11px] ${isOverdue ? "text-red-400" : "text-[var(--foreground-tertiary)]"}`}>
                   {isOverdue ? <Clock className="h-3 w-3" /> : <Calendar className="h-3 w-3" />}
                   <span>{new Date(task.due_date).toLocaleDateString("de-DE")}</span>
-                </div>
+                </span>
               )}
             </div>
           </div>
 
-          {/* Arrow — larger tap target on mobile */}
-          <div className="flex h-10 w-10 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] text-[var(--foreground-tertiary)] group-hover:bg-white/[0.06] group-hover:text-[var(--foreground-secondary)] transition-all">
-            <ArrowRight className="h-5 w-5 sm:h-4 sm:w-4" />
+          {/* Chevron */}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.04] text-[var(--foreground-tertiary)]">
+            <ArrowRight className="h-5 w-5" />
           </div>
         </div>
       </Link>
 
-      {/* Delete button — always visible on mobile (touch), hover-only on desktop */}
+      {/* Delete button — always visible on mobile */}
       {onDelete && (
         <button
           onClick={(e) => {
@@ -102,10 +102,10 @@ export default function TaskListCard({ task, project, onDelete }: TaskListCardPr
             e.stopPropagation();
             onDelete(task.id);
           }}
-          className="absolute top-3 right-3 sm:right-3 flex h-9 w-9 sm:h-7 sm:w-7 items-center justify-center rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+          className="absolute top-3 right-14 flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400 transition-all lg:opacity-0 lg:group-hover:opacity-100"
           aria-label="Delete task"
         >
-          <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+          <Trash2 className="h-4 w-4" />
         </button>
       )}
     </div>
