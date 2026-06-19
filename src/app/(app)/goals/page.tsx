@@ -141,14 +141,11 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
       {/* Mobile card */}
       <div className="lg:hidden bg-[var(--surface-elevated)] rounded-2xl p-4">
         <Link href={`/goals/${goal.id}`} className="block">
-          {/* Top row: badge + % + actions, all in one flex */}
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 shrink-0 ${status.bg} ${status.color}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
-              </span>
-              <span className="text-sm font-semibold text-[var(--foreground)]">{progress}%</span>
-            </div>
+          {/* Row 1: badge (left) + actions (right) */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 shrink-0 ${status.bg} ${status.color}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} /> {status.label}
+            </span>
             <div className="flex gap-1.5 shrink-0">
               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-white/[0.08]"
@@ -166,13 +163,24 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
               </button>
             </div>
           </div>
-          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-2">{goal.name}</h3>
+
+          {/* Row 2: Title */}
+          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-1">{goal.name}</h3>
+
+          {/* Row 3: Description */}
           {goal.description && (
             <p className="text-[13px] text-[var(--foreground-tertiary)] line-clamp-2 mb-3">{goal.description}</p>
           )}
-          <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden mb-3">
-            <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
+
+          {/* Row 4: Progress bar + % */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+              <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
+            </div>
+            <span className="text-xs font-semibold text-[var(--foreground)] shrink-0">{progress}%</span>
           </div>
+
+          {/* Row 5: Date + status text */}
           <div className="flex items-center justify-between text-[11px] text-[var(--foreground-tertiary)]">
             {goal.target_date ? (
               <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(goal.target_date).toLocaleDateString("de-DE")}</span>
