@@ -194,40 +194,57 @@ function ProjectCard({
   const status = statusStyle[project.status] || statusStyle.active;
 
   return (
-    <div className="group relative">
+    <div className="lg:group lg:relative">
       {/* Mobile: Full-width card, no liquid-glass border, proper shadow */}
       <div className="lg:hidden bg-[var(--surface-elevated)] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform">
         <Link href={`/projects/${project.id}`} className="block p-4">
-          {/* Top row: Status + Delete */}
-          <div className="flex items-center justify-between mb-3">
-            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 ${status.bg}`}>
+          {/* Row 1: Status badge (left) + Delete (right) */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2 py-1 shrink-0 ${status.bg}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               <span className="text-[var(--foreground)]">{status.label}</span>
             </span>
-            <span className="text-sm font-semibold text-[var(--foreground)]">{progress}%</span>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(project.id);
+              }}
+              className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${
+                isDeleting
+                  ? "bg-red-500/20 text-red-400"
+                  : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"
+              }`}
+            >
+              {isDeleting ? (
+                <span className="text-[10px] font-bold">OK?</span>
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
-          {/* Title */}
-          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-1 pr-10">
+          {/* Row 2: Title */}
+          <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug mb-1">
             {project.name}
           </h3>
 
-          {/* Description */}
+          {/* Row 3: Description */}
           {project.description && (
             <p className="text-[13px] text-[var(--foreground-tertiary)] line-clamp-2 mb-3 leading-relaxed">
               {project.description}
             </p>
           )}
 
-          {/* Progress Bar - no label, just bar */}
-          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden mb-3">
-            <div
-              className={`h-full rounded-full transition-all ${progressColor}`}
-              style={{ width: `${progress}%` }}
-            />
+          {/* Row 4: Progress bar + % */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
+            </div>
+            <span className="text-xs font-semibold text-[var(--foreground)] shrink-0">{progress}%</span>
           </div>
 
-          {/* Bottom row: Tasks count + Chevron */}
+          {/* Row 5: Tasks count + Chevron */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-[var(--foreground-tertiary)]">
               {doneCount}/{taskCount} tasks
@@ -235,26 +252,6 @@ function ProjectCard({
             <ChevronRight className="h-4 w-4 text-[var(--foreground-tertiary)]" />
           </div>
         </Link>
-
-        {/* Delete button - always visible on mobile */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDelete(project.id);
-          }}
-          className={`absolute top-3 right-3 z-10 flex items-center justify-center h-10 w-10 rounded-xl transition-all ${
-            isDeleting
-              ? "bg-red-500/20 text-red-400"
-              : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"
-          }`}
-        >
-          {isDeleting ? (
-            <span className="text-[10px] font-bold">OK?</span>
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </button>
       </div>
 
       {/* Desktop: Liquid glass card */}
