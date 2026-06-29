@@ -198,7 +198,7 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
     } catch { /* fallback to main */ }
 
     const fileName = task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".tsx";
-    const filePath = `src/app/${fileName}`;
+    const filePath = `src/components/${fileName}`;
 
     try {
       await createFileInRepo(githubToken, owner, repo, filePath, deliverable, `feat: ${task.title} [agent: ${agent.name}]`, branch);
