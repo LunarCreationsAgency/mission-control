@@ -47,6 +47,57 @@ export async function createGitHubRepo(options: CreateRepoOptions) {
 }
 
 /**
+ * Create or update a file in a GitHub repo.
+ * Content must be a string (will be base64 encoded).
+ */
+export async function createFileInRepo(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+  content: string,
+  message: string,
+  branch = "main"
+) {
+  const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`;
+  const b64 = Buffer.from(content).toString("base64");
+
+  // Check if file exists (to get SHA for update)
+  let sha: string | undefined;
+  try {
+    const getRes = await fetch(url + `?ref=${branch}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" },
+    });
+    if (getRes.ok) {
+      const data = await getRes.json();
+      sha = data.sha;
+    }
+  } catch { /* file doesn't exist */ }
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/vnd.github.v3+json",
+    },
+    body: JSON.stringify({
+      message,
+      content: b64,
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(error.message || `GitHub file creation failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
  * Link a GitHub repo to a Vercel project.
  * Uses Vercel's API to connect a git provider.
  */
