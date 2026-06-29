@@ -10,6 +10,8 @@ export interface Task {
   assignee?: string;
   required_skills?: string[];
   type?: "design" | "code" | "content" | "deploy" | "planning" | "shop";
+  /** Agent feedback / output awaiting human review */
+  review_notes?: string;
   created: string;
   updated: string;
 }

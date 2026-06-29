@@ -22,12 +22,13 @@ export async function POST(req: NextRequest) {
   }
 
   const start = Date.now();
-  const { executed, errors } = await runWorkerCycle();
+  const { executed, review_count, errors } = await runWorkerCycle();
   const duration = Date.now() - start;
 
   return NextResponse.json({
     ok: true,
     executed,
+    review_count,
     errors,
     duration_ms: duration,
   });
