@@ -19,7 +19,10 @@ interface OllamaResponse {
 function ollamaChat(prompt: string, maxTokens = 400): Promise<string> {
   const body = JSON.stringify({
     model: "deepseek-v4-pro:cloud",
-    messages: [{ role: "user", content: prompt }],
+    messages: [
+      { role: "system", content: "You are a senior developer. Output ONLY the requested content. No explanations, no thinking out loud, no markdown code blocks. Start immediately with the code/content." },
+      { role: "user", content: prompt },
+    ],
     stream: false,
     options: { num_predict: maxTokens, temperature: 0.7 },
   });
