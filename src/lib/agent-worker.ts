@@ -298,58 +298,68 @@ export async function runWorkerCycle(): Promise<{ executed: number; review_count
     const tasks = await getPendingTasks(token);
     const agentMap = new Map(agents.map((a) => [a.id, a]));
 
-    for (const task of tasks) {
-      try {
-        const agent = task.assignee ? agentMap.get(task.assignee) : undefined;
-        if (!agent) {
-          errors.push(`Task ${task.id}: no agent found for assignee ${task.assignee}`);
-          continue;
+    // Execute ALL tasks in parallel (not sequential) to fit within Vercel timeout
+    const results = await Promise.all(
+      tasks.map(async (task) => {
+        try {
+          const agent = task.assignee ? agentMap.get(task.assignee) : undefined;
+          if (!agent) {
+            return { task, error: `No agent found for assignee ${task.assignee}` };
+          }
+          if (agent.paused) {
+            return { task, error: `Agent ${agent.name} is paused` };
+          }
+
+          const taskType = task.type || "planning";
+          const handler = handlers[taskType] || handlers.planning;
+
+          // Mark in_progress + agent working
+          await updateTask(token, task.id, {
+            status: "in_progress",
+            updated: new Date().toISOString(),
+          });
+          await updateAgent(token, agent.id, {
+            status: "working",
+            current_task: task.id,
+          });
+
+          // Execute
+          const { output, notes } = await handler(task, agent, token);
+
+          // Move to review
+          await updateTask(token, task.id, {
+            status: "review",
+            review_notes: `${notes}\n\n--- Output ---\n${output}`.substring(0, 5000),
+            updated: new Date().toISOString(),
+          });
+          await updateAgent(token, agent.id, {
+            status: "idle",
+            current_task: null,
+          });
+
+          await logActivity(
+            token,
+            "review",
+            "task",
+            task.id,
+            task.title,
+            `Agent ${agent.name} finished "${task.title}" (${taskType}) via AI and submitted for review.`
+          );
+
+          return { task, success: true };
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          return { task, error: msg };
         }
-        if (agent.paused) {
-          errors.push(`Task ${task.id}: agent ${agent.name} is paused`);
-          continue;
-        }
+      })
+    );
 
-        const taskType = task.type || "planning";
-        const handler = handlers[taskType] || handlers.planning;
-
-        // Mark in_progress + agent working
-        await updateTask(token, task.id, {
-          status: "in_progress",
-          updated: new Date().toISOString(),
-        });
-        await updateAgent(token, agent.id, {
-          status: "working",
-          current_task: task.id,
-        });
-
-        // Execute real operation
-        const { output, notes } = await handler(task, agent, token);
-
-        // Move to review
-        await updateTask(token, task.id, {
-          status: "review",
-          review_notes: `${notes}\n\n--- Output ---\n${output}`.substring(0, 5000),
-          updated: new Date().toISOString(),
-        });
-        await updateAgent(token, agent.id, {
-          status: "idle",
-          current_task: null,
-        });
-
-        await logActivity(
-          token,
-          "review",
-          "task",
-          task.id,
-          task.title,
-          `Agent ${agent.name} finished "${task.title}" (${taskType}) via AI and submitted for review.`
-        );
-
+    // Collect results
+    for (const result of results) {
+      if (result.error) {
+        errors.push(`Task ${result.task.id}: ${result.error}`);
+      } else {
         reviewCount++;
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        errors.push(`Task ${task.id}: ${msg}`);
       }
     }
   } catch (e) {
