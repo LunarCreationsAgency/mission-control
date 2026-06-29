@@ -1,27 +1,15 @@
 /**
- * Ollama AI Agent — Real content/code/design generation with SHORT review reports
+ * Ollama AI Agent — Two-stage generation:
+ * 1. Specialist model (qwen3-coder) writes the deliverable
+ * 2. Communicator model (deepseek) writes the human-readable report
  *
- * Uses model-specific routing:
- * - code/design → qwen3-coder:480b-cloud (best for React/TS/CSS)
- * - content/planning → deepseek-v4-pro:cloud (fastest + best creative)
- *
- * All outputs include a SHORT human-readable review report (2-3 sentences) + deliverable.
+ * This lets each model focus on what it's best at.
  */
 
 import { request } from "https";
 
 const OLLAMA_URL = process.env.OLLAMA_URL || "https://ollama-o7r0.srv1625666.hstgr.cloud";
 
-const MODEL_MAP: Record<string, string> = {
-  code: "deepseek-v4-pro:cloud",
-  design: "deepseek-v4-pro:cloud",
-  content: "deepseek-v4-pro:cloud",
-  planning: "deepseek-v4-pro:cloud",
-  shop: "deepseek-v4-pro:cloud",
-  deploy: "deepseek-v4-pro:cloud",
-};
-
-const DEFAULT_MODEL = "deepseek-v4-pro:cloud";
 const OLLAMA_TIMEOUT_MS = 8000;
 
 interface OllamaResponse {
@@ -30,8 +18,8 @@ interface OllamaResponse {
   error?: string;
 }
 
-function ollamaChat(prompt: string, maxTokens = 400, taskType = "code"): Promise<string> {
-  const model = MODEL_MAP[taskType] || DEFAULT_MODEL;
+/** Generic chat with any model */
+function ollamaChat(prompt: string, maxTokens = 400, model: string): Promise<string> {
   const body = JSON.stringify({
     model,
     messages: [{ role: "user", content: prompt }],
@@ -88,88 +76,81 @@ function ollamaChat(prompt: string, maxTokens = 400, taskType = "code"): Promise
   });
 }
 
-/* ───────── helpers ───────── */
+/* ───────── Communicator Agent — writes human reports ───────── */
 
-function parseReviewAndDeliverable(result: string): { review: string; deliverable: string } {
-  const parts = result.split(/---DELIVERABLE---|---OUTPUT---|---CODE---|---CSS---/i);
-  if (parts.length >= 2) {
-    return {
-      review: parts[0].trim(),
-      deliverable: parts[1].trim().replace(/```[a-z]*\n?/gi, "").replace(/```\n?/g, "").trim(),
-    };
+const COMMUNICATOR_MODEL = "deepseek-v4-pro:cloud";
+const CODER_MODEL = "qwen3-coder:480b-cloud";
+
+async function generateReport(taskTitle: string, taskType: string, deliverablePreview: string): Promise<string> {
+  const prompt = `A developer just finished this deliverable:
+
+Task: ${taskTitle}
+Type: ${taskType}
+Preview: ${deliverablePreview.substring(0, 500)}
+
+Write a SHORT 2-sentence report in plain English for a non-technical manager. Explain what was built and why it's useful. No code, no technical jargon.`;
+
+  try {
+    const result = await ollamaChat(prompt, 120, COMMUNICATOR_MODEL);
+    return result.trim();
+  } catch {
+    return `${taskType} deliverable created for "${taskTitle}". Review the output for details.`;
   }
-  return { review: "", deliverable: result };
 }
 
-/* ───────── Task-specific generators with SHORT prompts ───────── */
+/* ───────── Specialist Generators — focus on deliverable only ───────── */
+
+export async function generateCode(taskTitle: string, description: string): Promise<{ review: string; deliverable: string }> {
+  // Step 1: Specialist writes code
+  const codePrompt = `Write a React component in TypeScript with Tailwind CSS.
+
+Task: ${taskTitle}
+Description: ${description || "Component"}
+
+Output ONLY valid TypeScript React code. No explanations, no markdown code fences.`;
+
+  let code: string;
+  try {
+    code = await ollamaChat(codePrompt, 800, CODER_MODEL);
+    code = code.replace(/```[a-z]*\n?/gi, "").replace(/```\n?/g, "").trim();
+  } catch {
+    return { review: "Code generation timed out.", deliverable: "// AI generation failed" };
+  }
+
+  // Step 2: Communicator writes report
+  const review = await generateReport(taskTitle, "React component", code);
+
+  return { review, deliverable: code };
+}
 
 export async function generateDesignCSS(
   taskTitle: string,
   description: string,
   tokens: Record<string, string | undefined>
 ): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + CSS deliverable.
+  const cssPrompt = `Write CSS custom properties for a design system.
 
 Task: ${taskTitle}
 Colors: primary=${tokens.color_primary || "#3b82f6"}, secondary=${tokens.color_secondary || "#64748b"}, accent=${tokens.color_accent || "#f59e0b"}, bg=${tokens.color_background || "#0a0a0f"}
 Fonts: heading=${tokens.font_heading || "Inter"}, body=${tokens.font_body || "Inter"}
 Vibe: ${tokens.design_vibe || "modern"}
 
-Format:
-REPORT: (2 sentences)
----
-DELIVERABLE: (CSS only)`;
+Output ONLY valid CSS. No explanations, no markdown.`;
 
+  let css: string;
   try {
-    const result = await ollamaChat(prompt, 600, "design");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Generated CSS design tokens using ${tokens.color_primary || "brand colors"} and ${tokens.font_heading || "Inter"} typography. The system includes glass morphism and responsive breakpoints.`;
-    }
-    return parsed;
+    css = await ollamaChat(cssPrompt, 600, CODER_MODEL);
+    css = css.replace(/```css\n?/gi, "").replace(/```\n?/g, "").trim();
   } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "/* AI generation failed */",
-    };
+    return { review: "CSS generation timed out.", deliverable: "/* AI generation failed */" };
   }
+
+  const review = await generateReport(taskTitle, "CSS design system", css);
+  return { review, deliverable: css };
 }
 
-export async function generateCode(
-  taskTitle: string,
-  description: string
-): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + React component code.
-
-Task: ${taskTitle}
-Description: ${description || "Component"}
-
-Format:
-REPORT: (2 sentences explaining what the component does)
----
-DELIVERABLE: (TypeScript React code only, no markdown)`;
-
-  try {
-    const result = await ollamaChat(prompt, 800, "code");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Built a React component with TypeScript types and Tailwind CSS styling. The component is responsive and includes basic accessibility features.`;
-    }
-    return parsed;
-  } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "// AI generation failed",
-    };
-  }
-}
-
-export async function generateContent(
-  taskTitle: string,
-  description: string,
-  projectName?: string
-): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + marketing copy.
+export async function generateContent(taskTitle: string, description: string, projectName?: string): Promise<{ review: string; deliverable: string }> {
+  const prompt = `Write professional marketing copy.
 
 Task: ${taskTitle}
 Description: ${description || ""}
@@ -177,113 +158,76 @@ ${projectName ? `Project: ${projectName}` : ""}
 Tone: confident, modern, slightly edgy
 Target: CTOs and startup founders
 
-Format:
-REPORT: (2 sentences explaining the content strategy)
----
-DELIVERABLE: (the actual copy, use markdown)`;
+Output the copy directly. No explanations.`;
 
+  let content: string;
   try {
-    const result = await ollamaChat(prompt, 600, "content");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Created professional copy with a confident tone targeting decision-makers. The content emphasizes value and drives engagement.`;
-    }
-    return parsed;
+    content = await ollamaChat(prompt, 600, COMMUNICATOR_MODEL);
   } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "AI generation failed",
-    };
+    return { review: "Content generation timed out.", deliverable: "AI generation failed" };
   }
+
+  const review = await generateReport(taskTitle, "Marketing copy", content);
+  return { review, deliverable: content };
 }
 
-export async function generatePlan(
-  taskTitle: string,
-  description: string,
-  projectName?: string
-): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + JSON project plan.
+export async function generatePlan(taskTitle: string, description: string, projectName?: string): Promise<{ review: string; deliverable: string }> {
+  const prompt = `Write a JSON project plan.
 
 Task: ${taskTitle}
 Description: ${description || ""}
 ${projectName ? `Project: ${projectName}` : ""}
 
-Format:
-REPORT: (2 sentences summarizing timeline and risks)
----
-DELIVERABLE: (JSON with phases, milestones, risks)`;
+Output ONLY valid JSON with: projectName, durationWeeks, phases (array with name, week, duration, deliverables, status). No explanations.`;
 
+  let plan: string;
   try {
-    const result = await ollamaChat(prompt, 600, "planning");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Created a structured project plan with realistic timelines and detailed deliverables. The plan identifies critical dependencies and risk mitigation strategies.`;
-    }
-    return parsed;
+    plan = await ollamaChat(prompt, 600, COMMUNICATOR_MODEL);
+    plan = plan.replace(/```json\n?/gi, "").replace(/```\n?/g, "").trim();
   } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "{}",
-    };
+    return { review: "Plan generation timed out.", deliverable: "{}" };
   }
+
+  const review = await generateReport(taskTitle, "Project plan", plan);
+  return { review, deliverable: plan };
 }
 
-export async function generateShopConfig(
-  taskTitle: string,
-  description: string,
-  projectName?: string
-): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + JSON shop config.
+export async function generateShopConfig(taskTitle: string, description: string, projectName?: string): Promise<{ review: string; deliverable: string }> {
+  const prompt = `Write a JSON e-commerce configuration.
 
 Task: ${taskTitle}
 Description: ${description || ""}
 ${projectName ? `Project: ${projectName}` : ""}
 
-Format:
-REPORT: (2 sentences about payment/shipping setup)
----
-DELIVERABLE: (JSON config)`;
+Output ONLY valid JSON with: paymentMethods, shippingZones, taxRules, currencies. No explanations.`;
 
+  let config: string;
   try {
-    const result = await ollamaChat(prompt, 600, "shop");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Generated e-commerce configuration covering payments, shipping, and taxes. The config is ready for implementation.`;
-    }
-    return parsed;
+    config = await ollamaChat(prompt, 500, COMMUNICATOR_MODEL);
+    config = config.replace(/```json\n?/gi, "").replace(/```\n?/g, "").trim();
   } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "{}",
-    };
+    return { review: "Shop config generation timed out.", deliverable: "{}" };
   }
+
+  const review = await generateReport(taskTitle, "E-commerce config", config);
+  return { review, deliverable: config };
 }
 
-export async function generateDeployNotes(
-  taskTitle: string,
-  description: string
-): Promise<{ review: string; deliverable: string }> {
-  const prompt = `Write a SHORT 2-sentence report + deployment checklist.
+export async function generateDeployNotes(taskTitle: string, description: string): Promise<{ review: string; deliverable: string }> {
+  const prompt = `Write a deployment checklist.
 
 Task: ${taskTitle}
 Description: ${description || ""}
 
-Format:
-REPORT: (2 sentences about deployment strategy)
----
-DELIVERABLE: (deployment checklist)`;
+Output a concise checklist. No explanations.`;
 
+  let notes: string;
   try {
-    const result = await ollamaChat(prompt, 400, "deploy");
-    const parsed = parseReviewAndDeliverable(result);
-    if (!parsed.review) {
-      parsed.review = `Created a deployment checklist with pre-flight checks and rollback procedures. The plan ensures safe production deployment.`;
-    }
-    return parsed;
+    notes = await ollamaChat(prompt, 300, COMMUNICATOR_MODEL);
   } catch {
-    return {
-      review: "AI generation timed out — using fallback template.",
-      deliverable: "Deployment notes generation failed",
-    };
+    return { review: "Deploy notes generation timed out.", deliverable: "Deployment checklist generation failed" };
   }
+
+  const review = await generateReport(taskTitle, "Deployment checklist", notes);
+  return { review, deliverable: notes };
 }
