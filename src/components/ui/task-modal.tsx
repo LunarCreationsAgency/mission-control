@@ -36,6 +36,7 @@ const typeOptions: { value: string; label: string; icon: React.ReactNode }[] = [
   { value: "content", label: "📝 Content", icon: <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> },
   { value: "deploy", label: "🚀 Deploy", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
   { value: "planning", label: "📋 Planning", icon: <span className="h-1.5 w-1.5 rounded-full bg-slate-400" /> },
+  { value: "shop", label: "🛒 Shop", icon: <span className="h-1.5 w-1.5 rounded-full bg-pink-400" /> },
 ];
 
 export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode }: TaskModalProps) {

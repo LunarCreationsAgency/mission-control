@@ -213,19 +213,83 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
     };
   },
 
-  /** SHOP — Shop configuration notes */
+  /** SHOP — Generate structured e-commerce configuration */
   async shop(task, agent, token) {
+    const project = task.project ? await getProject(token, task.project) : null;
+    const shopConfig = {
+      project: project?.name || "Unnamed Shop",
+      generated_by: agent.name,
+      timestamp: new Date().toISOString(),
+      sections: {
+        products: {
+          categories: ["General"],
+          variants_enabled: true,
+          inventory_tracking: true,
+        },
+        payments: {
+          stripe: { enabled: false, test_mode: true },
+          paypal: { enabled: false },
+          bank_transfer: { enabled: false },
+        },
+        shipping: {
+          flat_rate: { enabled: true, cost: "5.00", currency: project?.budget ? "EUR" : "USD" },
+          free_shipping_threshold: "50.00",
+        },
+        taxes: {
+          vat_enabled: true,
+          vat_rate: "19%",
+          included_in_price: true,
+        },
+        checkout: {
+          guest_checkout: true,
+          cart_abandonment: true,
+          email_notifications: true,
+        },
+      },
+      recommendations: [
+        "Enable Stripe for card payments",
+        "Set up shipping zones for target markets",
+        "Configure tax rules per region",
+        "Add product categories before launch",
+      ],
+    };
+
     return {
-      output: `Shop Configuration: ${task.title}\n\nTODO: Configure products, payments, shipping.\nReview all settings before going live.`,
-      notes: `Agent ${agent.name} prepared shop configuration for "${task.title}". Review product setup, payment gateways, and shipping rules.`,
+      output: JSON.stringify(shopConfig, null, 2),
+      notes: `Agent ${agent.name} generated e-commerce configuration for "${project?.name || task.title}". Review payment gateways, shipping rules, and tax settings before approving.`,
     };
   },
 
-  /** PLANNING — Planning document (wizard already handles this) */
+  /** PLANNING — Generate structured project plan */
   async planning(task, agent, token) {
+    const project = task.project ? await getProject(token, task.project) : null;
+    const plan = {
+      project: project?.name || task.title,
+      generated_by: agent.name,
+      timestamp: new Date().toISOString(),
+      phases: [
+        { name: "Discovery", duration: "3-5 days", deliverables: ["Requirements doc", "User stories", "Tech stack decision"], status: "pending" },
+        { name: "Design", duration: "5-7 days", deliverables: ["Wireframes", "Visual design", "Design system"], status: "pending" },
+        { name: "Development", duration: "2-4 weeks", deliverables: ["Frontend", "Backend", "APIs", "Database"], status: "pending" },
+        { name: "Testing", duration: "3-5 days", deliverables: ["Unit tests", "Integration tests", "Bug fixes"], status: "pending" },
+        { name: "Deployment", duration: "1-2 days", deliverables: ["CI/CD setup", "Production deploy", "Domain config"], status: "pending" },
+        { name: "Launch", duration: "1 day", deliverables: ["Go-live", "Monitoring", "Analytics"], status: "pending" },
+      ],
+      milestones: [
+        { name: "Design Approval", target: "Week 2", blocker: false },
+        { name: "MVP Complete", target: "Week 4", blocker: true },
+        { name: "Soft Launch", target: "Week 5", blocker: false },
+      ],
+      risks: [
+        "Scope creep — define MVP strictly",
+        "Integration delays — test early",
+        "Performance — optimize before launch",
+      ],
+    };
+
     return {
-      output: `Planning Document: ${task.title}\n\n${task.description || ""}\n\nReview the strategy and timeline.`,
-      notes: `Agent ${agent.name} finalized planning for "${task.title}". Review milestones and dependencies before approving.`,
+      output: JSON.stringify(plan, null, 2),
+      notes: `Agent ${agent.name} created a project plan for "${project?.name || task.title}". Review phases, milestones, and risk mitigations before approving.`,
     };
   },
 };
