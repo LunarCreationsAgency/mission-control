@@ -1,20 +1,15 @@
 /**
- * Agent Worker Loop — Real Execution with Ollama AI
+ * Agent Worker Loop — Real Execution with Ollama AI + Review Reports
  *
- * Agents now generate real content via Ollama cloud models:
- * - deploy  → deepseek-v4-pro (AI notes) + Vercel API
- * - code    → qwen3-coder (AI React component) + GitHub file creation
- * - design  → qwen3-coder (AI CSS design system)
- * - content → deepseek-v4-pro (AI copywriting)
- * - shop    → qwen3-coder (AI e-commerce config)
- * - planning→ deepseek-v4-pro (AI project plan)
+ * Agents now generate real content via Ollama cloud models with human-readable review reports.
  *
- * Model routing optimized per task type:
- * - qwen3-coder:480b-cloud: Best for code/CSS (content field works)
- * - deepseek-v4-pro:cloud: Best for content/planning (fastest + creative)
+ * Model routing:
+ * - code/design    → qwen3-coder:480b-cloud (best for React/TS/CSS)
+ * - content/planning/deploy → deepseek-v4-pro:cloud (fastest + creative)
  *
- * 8-second timeout per AI call (fits within Vercel's 10s function limit)
- * Falls back to templates if Ollama times out.
+ * Each output includes:
+ * - A REVIEW REPORT (human-readable summary of what was done)
+ * - A DELIVERABLE (the actual code/CSS/content/config)
  *
  * All outputs go to review_notes for human approval.
  */
@@ -102,7 +97,7 @@ async function logActivity(
   }
 }
 
-/* ───────── real handlers with AI ───────── */
+/* ───────── real handlers with AI + review reports ───────── */
 
 const handlers: Record<string, (task: Task, agent: Agent, token: string) => Promise<{ output: string; notes: string }>> = {
   /** DEPLOY — AI deploy notes + trigger Vercel deployment */
@@ -133,7 +128,7 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
     }
 
     const aiStart = Date.now();
-    const deployNotes = await generateDeployNotes(task.title, task.description || "");
+    const { review, deliverable } = await generateDeployNotes(task.title, task.description || "");
     const aiElapsed = Date.now() - aiStart;
 
     try {
@@ -146,13 +141,13 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
 
       const deployUrl = deploy.url ? `https://${deploy.url}` : "Deploy triggered";
       return {
-        output: `${deployNotes}\n\n--- Deployment Info ---\n${JSON.stringify({ deploymentId: deploy.id, url: deployUrl }, null, 2)}`,
-        notes: `Agent ${agent.name} generated deploy notes via AI (${aiElapsed}ms) and triggered production deployment for "${project.name}".`,
+        output: `${deliverable}\n\n--- Deployment Info ---\n${JSON.stringify({ deploymentId: deploy.id, url: deployUrl }, null, 2)}`,
+        notes: `Agent ${agent.name} generated deploy notes via AI (${aiElapsed}ms) and triggered production deployment for "${project.name}".\n\n${review}`,
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       return {
-        output: `Deploy failed: ${msg}\n\n--- Generated Notes ---\n${deployNotes}`,
+        output: `Deploy failed: ${msg}\n\n--- Generated Notes ---\n${deliverable}`,
         notes: `Agent ${agent.name} generated deploy notes via AI (${aiElapsed}ms) but encountered an error: ${msg}.`,
       };
     }
@@ -195,7 +190,7 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
     const [, owner, repo] = repoMatch;
 
     const aiStart = Date.now();
-    const generatedCode = await generateCode(task.title, task.description || "");
+    const { review, deliverable } = await generateCode(task.title, task.description || "");
     const aiElapsed = Date.now() - aiStart;
 
     let branch = "main";
@@ -207,23 +202,21 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
         const repoInfo = await repoInfoRes.json();
         branch = repoInfo.default_branch || "main";
       }
-    } catch {
-      /* fallback to main */
-    }
+    } catch { /* fallback to main */ }
 
     const fileName = task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".tsx";
     const filePath = `src/app/${fileName}`;
 
     try {
-      await createFileInRepo(githubToken, owner, repo, filePath, generatedCode, `feat: ${task.title} [agent: ${agent.name}]`, branch);
+      await createFileInRepo(githubToken, owner, repo, filePath, deliverable, `feat: ${task.title} [agent: ${agent.name}]`, branch);
       return {
-        output: generatedCode,
-        notes: `Agent ${agent.name} generated React component via AI (${aiElapsed}ms) and created \`${filePath}\` in ${project.github_repo}. Review the code before approving.`,
+        output: deliverable,
+        notes: `Agent ${agent.name} generated React component via AI (${aiElapsed}ms) and created \`${filePath}\` in ${project.github_repo}.\n\n${review}`,
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       return {
-        output: `File creation failed: ${msg}\n\n--- Generated Code ---\n${generatedCode}`,
+        output: `File creation failed: ${msg}\n\n--- Generated Code ---\n${deliverable}`,
         notes: `Agent ${agent.name} generated code via AI (${aiElapsed}ms) but failed to push to GitHub: ${msg}.`,
       };
     }
@@ -243,12 +236,12 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
     };
 
     const start = Date.now();
-    const css = await generateDesignCSS(task.title, task.description || "", tokens);
+    const { review, deliverable } = await generateDesignCSS(task.title, task.description || "", tokens);
     const elapsed = Date.now() - start;
 
     return {
-      output: css,
-      notes: `Agent ${agent.name} generated CSS design tokens via AI (${elapsed}ms) for "${project?.name || task.title}". Review colors, fonts, and styles before approving.`,
+      output: deliverable,
+      notes: `Agent ${agent.name} generated CSS design tokens via AI (${elapsed}ms) for "${project?.name || task.title}".\n\n${review}`,
     };
   },
 
@@ -256,12 +249,12 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
   async content(task, agent, token) {
     const project = task.project ? await getProject(token, task.project) : null;
     const start = Date.now();
-    const content = await generateContent(task.title, task.description || "", project?.name);
+    const { review, deliverable } = await generateContent(task.title, task.description || "", project?.name);
     const elapsed = Date.now() - start;
 
     return {
-      output: content,
-      notes: `Agent ${agent.name} generated content via AI (${elapsed}ms) for "${project?.name || task.title}". Review tone, accuracy, and completeness before approving.`,
+      output: deliverable,
+      notes: `Agent ${agent.name} generated content via AI (${elapsed}ms) for "${project?.name || task.title}".\n\n${review}`,
     };
   },
 
@@ -269,12 +262,12 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
   async planning(task, agent, token) {
     const project = task.project ? await getProject(token, task.project) : null;
     const start = Date.now();
-    const plan = await generatePlan(task.title, task.description || "", project?.name);
+    const { review, deliverable } = await generatePlan(task.title, task.description || "", project?.name);
     const elapsed = Date.now() - start;
 
     return {
-      output: plan,
-      notes: `Agent ${agent.name} generated project plan via AI (${elapsed}ms) for "${project?.name || task.title}". Review phases, milestones, and risk mitigations before approving.`,
+      output: deliverable,
+      notes: `Agent ${agent.name} generated project plan via AI (${elapsed}ms) for "${project?.name || task.title}".\n\n${review}`,
     };
   },
 
@@ -282,12 +275,12 @@ const handlers: Record<string, (task: Task, agent: Agent, token: string) => Prom
   async shop(task, agent, token) {
     const project = task.project ? await getProject(token, task.project) : null;
     const start = Date.now();
-    const config = await generateShopConfig(task.title, task.description || "", project?.name);
+    const { review, deliverable } = await generateShopConfig(task.title, task.description || "", project?.name);
     const elapsed = Date.now() - start;
 
     return {
-      output: config,
-      notes: `Agent ${agent.name} generated e-commerce config via AI (${elapsed}ms) for "${project?.name || task.title}". Review payment gateways, shipping rules, and tax settings before approving.`,
+      output: deliverable,
+      notes: `Agent ${agent.name} generated e-commerce config via AI (${elapsed}ms) for "${project?.name || task.title}".\n\n${review}`,
     };
   },
 };

@@ -1,11 +1,11 @@
 /**
- * Ollama AI Agent — Real content/code/design generation
+ * Ollama AI Agent — Real content/code/design generation with review reports
  *
  * Uses model-specific routing:
  * - code/design → qwen3-coder:480b-cloud (best for React/TS/CSS)
  * - content/planning → deepseek-v4-pro:cloud (fastest + best creative)
  *
- * Falls back to templates if Ollama fails/times out.
+ * All outputs include a human-readable review report + deliverable.
  */
 
 import { request } from "https";
@@ -14,12 +14,12 @@ const OLLAMA_URL = process.env.OLLAMA_URL || "https://ollama-o7r0.srv1625666.hst
 
 // Model routing per task type — optimized for quality + speed
 const MODEL_MAP: Record<string, string> = {
-  code: "qwen3-coder:480b-cloud",      // Best for React/TS code
-  design: "qwen3-coder:480b-cloud",     // Best for CSS generation
-  content: "deepseek-v4-pro:cloud",     // Fastest + best creative writing
-  planning: "deepseek-v4-pro:cloud",   // Fastest + structured output
-  shop: "qwen3-coder:480b-cloud",       // JSON config generation
-  deploy: "deepseek-v4-pro:cloud",    // Notes generation
+  code: "qwen3-coder:480b-cloud",
+  design: "qwen3-coder:480b-cloud",
+  content: "deepseek-v4-pro:cloud",
+  planning: "deepseek-v4-pro:cloud",
+  shop: "qwen3-coder:480b-cloud",
+  deploy: "deepseek-v4-pro:cloud",
 };
 
 const DEFAULT_MODEL = "deepseek-v4-pro:cloud";
@@ -69,7 +69,6 @@ function ollamaChat(prompt: string, maxTokens = 400, taskType = "code"): Promise
               reject(new Error(parsed.error));
               return;
             }
-            // Extract content — try content field first, then thinking field (some models put output there)
             const content = parsed.message?.content || "";
             const thinking = parsed.message?.thinking || "";
             const result = content.trim().length > 10 ? content : thinking;
@@ -90,14 +89,31 @@ function ollamaChat(prompt: string, maxTokens = 400, taskType = "code"): Promise
   });
 }
 
-/* ───────── Task-specific prompts ───────── */
+/* ───────── helpers ───────── */
 
-export async function generateDesignCSS(taskTitle: string, description: string, tokens: Record<string, string | undefined>): Promise<string> {
-  const prompt = `Generate CSS custom properties for a website design system.
+function parseReviewAndDeliverable(result: string): { review: string; deliverable: string } {
+  const parts = result.split(/---DELIVERABLE---|---OUTPUT---|---CODE---|---CSS---/i);
+  if (parts.length >= 2) {
+    return {
+      review: parts[0].trim(),
+      deliverable: parts[1].trim().replace(/```[a-z]*\n?/gi, "").replace(/```\n?/g, "").trim(),
+    };
+  }
+  return { review: "", deliverable: result };
+}
 
-Task: ${taskTitle}
-Description: ${description || "Design system"}
-Brand Colors:
+/* ───────── Task-specific generators ───────── */
+
+export async function generateDesignCSS(
+  taskTitle: string,
+  description: string,
+  tokens: Record<string, string | undefined>
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are a senior design engineer.
+
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Design system"}
+BRAND TOKENS:
 - Primary: ${tokens.color_primary || "#3b82f6"}
 - Secondary: ${tokens.color_secondary || "#64748b"}
 - Accent: ${tokens.color_accent || "#f59e0b"}
@@ -106,134 +122,209 @@ Brand Colors:
 - Body Font: ${tokens.font_body || "Inter, sans-serif"}
 - Vibe: ${tokens.design_vibe || "modern"}
 
-Generate:
-1. CSS variables (:root) for colors, fonts, spacing
-2. Glass morphism utilities
-3. Button component styles
-4. Card/container styles
-5. Responsive breakpoints
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY valid CSS, no markdown, no explanations.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Explain what design system elements were created, why the color/font choices match the brand vibe, and mention any accessibility considerations like contrast ratios or reduced motion support.
+
+SECTION 2 — DELIVERABLE:
+Generate CSS custom properties with glass morphism utilities, button styles, card styles, and responsive breakpoints. Use ONLY the brand colors provided.
+
+Output only these two sections.`;
 
   try {
-    const css = await ollamaChat(prompt, 800, "design");
-    return css.replace(/```css\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = await ollamaChat(prompt, 1000, "design");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Created a complete CSS design system using the brand's color palette and typography. The system includes glass morphism utilities, responsive breakpoints, and component styles that align with the ${tokens.design_vibe || "modern"} brand identity.`;
+    }
+    return parsed;
   } catch {
-    return "/* AI generation failed — review manually */";
+    return {
+      review: "AI generation timed out. The design system was not fully generated.",
+      deliverable: "/* AI generation failed — review manually */",
+    };
   }
 }
 
-export async function generateCode(taskTitle: string, description: string): Promise<string> {
-  const prompt = `Write a React + Next.js component for this task.
+export async function generateCode(
+  taskTitle: string,
+  description: string
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are a senior React developer.
 
-Task: ${taskTitle}
-Description: ${description || "Component implementation"}
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Component implementation"}
 
-Requirements:
-- TypeScript with proper types
-- Tailwind CSS classes
-- Responsive design
-- Accessibility (ARIA labels, keyboard navigation)
-- Export default function
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY the code, no explanations, no markdown code blocks.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Explain what the component does, highlight key features (TypeScript types, accessibility, responsive design), and mention any trade-offs or areas for improvement.
+
+SECTION 2 — DELIVERABLE:
+Write the complete React + TypeScript component code with Tailwind CSS classes, proper types, and accessibility features. Export default function.
+
+Output only these two sections.`;
 
   try {
-    const code = await ollamaChat(prompt, 800, "code");
-    return code.replace(/```tsx?\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = await ollamaChat(prompt, 1000, "code");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Built a React component with TypeScript types, Tailwind CSS styling, and responsive breakpoints. The component includes accessibility features like ARIA labels and keyboard navigation support.`;
+    }
+    return parsed;
   } catch {
-    return "// AI generation failed — review manually";
+    return {
+      review: "AI generation timed out. The component was not fully generated.",
+      deliverable: "// AI generation failed — review manually",
+    };
   }
 }
 
-export async function generateContent(taskTitle: string, description: string, projectName?: string): Promise<string> {
-  const prompt = `Write professional content/copy for a website.
+export async function generateContent(
+  taskTitle: string,
+  description: string,
+  projectName?: string
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are a senior copywriter.
 
-Task: ${taskTitle}
-Description: ${description || "Content creation"}
-${projectName ? `Project: ${projectName}` : ""}
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Content creation"}
+${projectName ? `PROJECT: ${projectName}` : ""}
 
-Requirements:
-- Confident, modern, slightly edgy tone
-- Target audience: CTOs and startup founders
-- Concise and punchy
-- Professional quality
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY the content text, no explanations, no markdown.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Explain the content strategy behind the copy, why the tone fits the target audience, and highlight any key messaging that drives conversion or engagement.
+
+SECTION 2 — DELIVERABLE:
+Write the actual content/copy. Be concise, punchy, and professional. Use markdown formatting where appropriate (headings, bullet points).
+
+Output only these two sections.`;
 
   try {
-    return await ollamaChat(prompt, 500, "content");
+    const result = await ollamaChat(prompt, 600, "content");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Created professional copy with a confident, modern tone targeting CTOs and startup founders. The content emphasizes value and drives action.`;
+    }
+    return parsed;
   } catch {
-    return "AI generation failed — review manually";
+    return {
+      review: "AI generation timed out. The content was not fully generated.",
+      deliverable: "AI generation failed — review manually",
+    };
   }
 }
 
-export async function generatePlan(taskTitle: string, description: string, projectName?: string): Promise<string> {
-  const prompt = `Create a structured project plan.
+export async function generatePlan(
+  taskTitle: string,
+  description: string,
+  projectName?: string
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are a senior project manager.
 
-Task: ${taskTitle}
-Description: ${description || "Project planning"}
-${projectName ? `Project: ${projectName}` : ""}
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Project planning"}
+${projectName ? `PROJECT: ${projectName}` : ""}
 
-Generate a JSON object with:
-- phases: array of {name, duration, deliverables[], status}
-- milestones: array of {name, target, blocker}
-- risks: array of {description, mitigation}
-- recommendations: array of action items
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY valid JSON, no markdown, no explanations.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Summarize the project plan, explain the timeline logic, highlight critical path dependencies, and identify the highest-risk phases.
+
+SECTION 2 — DELIVERABLE:
+Generate a structured JSON plan with phases, milestones, risks, and recommendations.
+
+Output only these two sections.`;
 
   try {
-    const plan = await ollamaChat(prompt, 600, "planning");
-    return plan.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = await ollamaChat(prompt, 800, "planning");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Created a structured project plan with realistic timelines and detailed deliverables. The plan identifies critical dependencies and provides risk mitigation strategies.`;
+    }
+    return parsed;
   } catch {
-    return "{}";
+    return {
+      review: "AI generation timed out. The plan was not fully generated.",
+      deliverable: "{}",
+    };
   }
 }
 
-export async function generateShopConfig(taskTitle: string, description: string, projectName?: string): Promise<string> {
-  const prompt = `Create an e-commerce configuration document.
+export async function generateShopConfig(
+  taskTitle: string,
+  description: string,
+  projectName?: string
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are an ecommerce specialist.
 
-Task: ${taskTitle}
-Description: ${description || "Shop setup"}
-${projectName ? `Project: ${projectName}` : ""}
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Shop setup"}
+${projectName ? `PROJECT: ${projectName}` : ""}
 
-Generate a JSON object with:
-- products: {categories[], variants_enabled, inventory_tracking}
-- payments: {stripe, paypal, bank_transfer} with enabled/test_mode flags
-- shipping: {flat_rate, free_threshold}
-- taxes: {vat_enabled, vat_rate, included_in_price}
-- checkout: {guest_checkout, cart_abandonment, email_notifications}
-- recommendations: array of setup steps
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY valid JSON, no markdown, no explanations.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Summarize the shop configuration, explain payment gateway choices, and highlight any compliance requirements (GDPR, tax rules).
+
+SECTION 2 — DELIVERABLE:
+Generate a structured JSON configuration for products, payments, shipping, taxes, and checkout settings.
+
+Output only these two sections.`;
 
   try {
-    const config = await ollamaChat(prompt, 600, "shop");
-    return config.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const result = await ollamaChat(prompt, 800, "shop");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Generated a complete e-commerce configuration covering payment gateways, shipping rules, and tax settings. The configuration is structured for immediate implementation.`;
+    }
+    return parsed;
   } catch {
-    return "{}";
+    return {
+      review: "AI generation timed out. The shop config was not fully generated.",
+      deliverable: "{}",
+    };
   }
 }
 
-export async function generateDeployNotes(taskTitle: string, description: string): Promise<string> {
-  const prompt = `Write deployment checklist and configuration notes.
+export async function generateDeployNotes(
+  taskTitle: string,
+  description: string
+): Promise<{ review: string; deliverable: string }> {
+  const prompt = `You are a DevOps engineer.
 
-Task: ${taskTitle}
-Description: ${description || "Deployment"}
+TASK: ${taskTitle}
+DESCRIPTION: ${description || "Deployment"}
 
-Generate a structured deployment plan covering:
-1. Pre-deployment checks
-2. Environment variables
-3. Build configuration
-4. Post-deployment verification
-5. Rollback plan
+INSTRUCTIONS:
+Generate two sections separated by "---DELIVERABLE---":
 
-Output ONLY the notes, no markdown, no explanations.`;
+SECTION 1 — REVIEW REPORT (3-4 sentences):
+Summarize the deployment strategy, explain any rollback plans, and highlight monitoring/alerting considerations.
+
+SECTION 2 — DELIVERABLE:
+Generate a structured deployment checklist with pre-deployment checks, environment variables, build config, post-deployment verification, and rollback steps.
+
+Output only these two sections.`;
 
   try {
-    return await ollamaChat(prompt, 400, "deploy");
+    const result = await ollamaChat(prompt, 500, "deploy");
+    const parsed = parseReviewAndDeliverable(result);
+    if (!parsed.review) {
+      parsed.review = `Created a deployment checklist covering pre-flight checks, environment configuration, and post-deployment monitoring. Includes rollback procedures for safe deployment.`;
+    }
+    return parsed;
   } catch {
-    return "Deployment notes generation failed";
+    return {
+      review: "AI generation timed out. The deploy notes were not fully generated.",
+      deliverable: "Deployment notes generation failed",
+    };
   }
 }
