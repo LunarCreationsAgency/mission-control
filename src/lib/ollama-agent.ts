@@ -12,13 +12,13 @@ import { request } from "https";
 
 const OLLAMA_URL = process.env.OLLAMA_URL || "https://ollama-o7r0.srv1625666.hstgr.cloud";
 
-// Model routing per task type — optimized for quality + speed
+// Model routing per task type
 const MODEL_MAP: Record<string, string> = {
-  code: "deepseek-v4-pro:cloud",
-  design: "deepseek-v4-pro:cloud",
+  code: "qwen3-coder:480b-cloud",
+  design: "qwen3-coder:480b-cloud",
   content: "deepseek-v4-pro:cloud",
   planning: "deepseek-v4-pro:cloud",
-  shop: "deepseek-v4-pro:cloud",
+  shop: "qwen3-coder:480b-cloud",
   deploy: "deepseek-v4-pro:cloud",
 };
 
