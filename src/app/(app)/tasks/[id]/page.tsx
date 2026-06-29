@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useData } from "@/lib/use-data";
 import { getTasks, getProjects, updateTask, deleteTask } from "@/lib/data";
 import { type Task, type Project } from "@/types";
-import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Pencil, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, Target, FolderKanban, Flag, Clock, Pencil, Trash2, Loader2, Eye, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import TaskModal from "@/components/ui/task-modal";
@@ -40,6 +40,26 @@ export default function TaskDetailPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const handleApprove = async () => {
+    try {
+      await updateTask(id, { status: "done", updated: new Date().toISOString() } as Record<string, unknown>);
+      success("Task approved");
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to approve");
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await updateTask(id, { status: "todo", updated: new Date().toISOString() } as Record<string, unknown>);
+      success("Task rejected — sent back to queue");
+      refetch();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to reject");
+    }
+  };
 
   const handleEdit = async (data: Partial<Task>) => {
     try {
@@ -147,6 +167,31 @@ export default function TaskDetailPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+          {/* Review Panel — shown when status === "review" */}
+          {task.status === "review" && (
+            <div className="bg-[var(--surface-elevated)] rounded-2xl p-5 lg:p-6 border border-[var(--warning)]/20">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="h-5 w-5 text-[var(--warning)]" />
+                <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Agent Output — Awaiting Review</h2>
+              </div>
+              {task.review_notes ? (
+                <div className="bg-white/[0.02] rounded-xl p-4 mb-4 whitespace-pre-wrap text-sm text-[var(--foreground-secondary)] leading-relaxed font-mono">
+                  {task.review_notes}
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--foreground-tertiary)] mb-4">Agent submitted this task for review but provided no detailed notes.</p>
+              )}
+              <div className="flex gap-3">
+                <button onClick={handleApprove} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] px-4 py-3 text-sm font-medium text-white active:scale-[0.98] transition-all">
+                  <Check className="h-4 w-4" /> Approve
+                </button>
+                <button onClick={handleReject} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm font-medium text-[var(--foreground-secondary)] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 active:scale-[0.98] transition-all">
+                  <X className="h-4 w-4" /> Reject
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="liquid-glass p-5 lg:p-6">
             <h2 className="mb-3 lg:mb-4 text-base lg:text-lg font-semibold text-[var(--foreground)]">Description</h2>
             <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">{task.description || "No description provided."}</p>
