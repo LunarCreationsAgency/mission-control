@@ -13,11 +13,11 @@ import { request } from "https";
 const OLLAMA_URL = process.env.OLLAMA_URL || "https://ollama-o7r0.srv1625666.hstgr.cloud";
 
 const MODEL_MAP: Record<string, string> = {
-  code: "qwen3-coder:480b-cloud",
-  design: "qwen3-coder:480b-cloud",
+  code: "deepseek-v4-pro:cloud",
+  design: "deepseek-v4-pro:cloud",
   content: "deepseek-v4-pro:cloud",
   planning: "deepseek-v4-pro:cloud",
-  shop: "qwen3-coder:480b-cloud",
+  shop: "deepseek-v4-pro:cloud",
   deploy: "deepseek-v4-pro:cloud",
 };
 
