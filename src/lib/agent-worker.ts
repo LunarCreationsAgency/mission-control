@@ -2,15 +2,19 @@
  * Agent Worker Loop — Real Execution with Ollama AI
  *
  * Agents now generate real content via Ollama cloud models:
- * - deploy  → AI deploy notes + Vercel API deployment
- * - code    → AI React component generation + GitHub file creation
- * - design  → AI CSS design system generation
- * - content → AI copywriting
- * - shop    → AI e-commerce config generation
- * - planning→ AI project plan generation
+ * - deploy  → deepseek-v4-pro (AI notes) + Vercel API
+ * - code    → qwen3-coder (AI React component) + GitHub file creation
+ * - design  → qwen3-coder (AI CSS design system)
+ * - content → deepseek-v4-pro (AI copywriting)
+ * - shop    → qwen3-coder (AI e-commerce config)
+ * - planning→ deepseek-v4-pro (AI project plan)
  *
- * Uses qwen3-coder:480b-cloud (fastest Ollama cloud model with working content field)
+ * Model routing optimized per task type:
+ * - qwen3-coder:480b-cloud: Best for code/CSS (content field works)
+ * - deepseek-v4-pro:cloud: Best for content/planning (fastest + creative)
+ *
  * 8-second timeout per AI call (fits within Vercel's 10s function limit)
+ * Falls back to templates if Ollama times out.
  *
  * All outputs go to review_notes for human approval.
  */
