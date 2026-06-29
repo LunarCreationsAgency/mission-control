@@ -79,7 +79,7 @@ function ollamaChat(prompt: string, maxTokens = 400, model: string): Promise<str
 /* ───────── Communicator Agent — writes human reports ───────── */
 
 const COMMUNICATOR_MODEL = "deepseek-v4-pro:cloud";
-const CODER_MODEL = "qwen3-coder:480b-cloud";
+const CODER_MODEL = "deepseek-v4-pro:cloud";
 
 async function generateReport(taskTitle: string, taskType: string, deliverablePreview: string): Promise<string> {
   const prompt = `A developer just finished this deliverable:
