@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type Task, type Project, type Goal, type Agent, type ActivityLog } from "@/types";
 import {
   ListTodo, Bot, Target, FolderKanban, Plus,
-  Play, Pause, CheckCircle2, AlertCircle, ArrowUpRight,
+  Play, Pause, CheckCircle2, AlertCircle, ArrowUpRight, Loader2,
   Clock, CalendarDays, CircleDot,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [workerRunning, setWorkerRunning] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -83,6 +84,8 @@ export default function DashboardPage() {
     ...a,
     taskCount: tasks.filter((t) => t.assignee === a.id).length,
   })).sort((a, b) => b.taskCount - a.taskCount);
+
+  const reviewCount = tasks.filter((t) => t.status === "review").length;
 
   const handleCreateTask = async (taskData: Partial<Task>) => {
     const res = await fetch("/api/tasks", {
@@ -267,6 +270,34 @@ export default function DashboardPage() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Worker Control */}
+          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Worker</h2>
+              {reviewCount > 0 && (
+                <span className="text-[10px] font-bold text-[var(--warning)]">{reviewCount} in review</span>
+              )}
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  setWorkerRunning(true);
+                  const res = await fetch("/api/worker/run", { method: "POST" });
+                  const data = await res.json();
+                  if (data.ok) {
+                    await fetchData();
+                  }
+                } catch { /* ignore */ }
+                setWorkerRunning(false);
+              }}
+              disabled={workerRunning}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)]/15 border border-[var(--primary)]/20 px-4 py-3 text-sm font-medium text-[var(--primary-light)] hover:bg-[var(--primary)]/25 active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {workerRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+              {workerRunning ? "Running..." : "Run Worker"}
+            </button>
           </div>
 
           {/* Activity */}
