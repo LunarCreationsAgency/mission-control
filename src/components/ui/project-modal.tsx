@@ -84,9 +84,9 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
         <div
           className="overflow-hidden rounded-lg"
           style={{
-            background: "#16161e",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderTopColor: "rgba(255,255,255,0.15)",
+            background: "var(--surface-elevated)",
+            border: "1px solid var(--border)",
+            borderTopColor: "var(--border-strong)",
             boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
           }}
         >
@@ -181,7 +181,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {project ? "Update" : "Create"}
