@@ -1,7 +1,7 @@
 "use client";
 
 import { type Task } from "@/types";
-import { Calendar, User, GripVertical, Trash2, Pencil, FolderKanban } from "lucide-react";
+import { Calendar, User, GripVertical, Trash2, FolderKanban } from "lucide-react";
 import { useRef, useCallback } from "react";
 import Link from "next/link";
 
@@ -15,18 +15,18 @@ interface TaskCardProps {
   isDragging?: boolean;
 }
 
-const priorityConfig: Record<string, { bg: string; text: string; dot: string }> = {
-  low: { bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400" },
-  medium: { bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
-  high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400" },
-  critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
+const priorityConfig: Record<string, { pill: string; dot: string; label: string }> = {
+  low: { pill: "status-pill-todo", dot: "bg-blue-400", label: "Low" },
+  medium: { pill: "status-pill-todo", dot: "bg-amber-400", label: "Medium" },
+  high: { pill: "status-pill-review", dot: "bg-orange-400", label: "High" },
+  critical: { pill: "status-pill-done", dot: "bg-red-400", label: "Critical" },
 };
 
-const priorityBorderColors: Record<string, string> = {
-  low: "border-l-blue-400",
-  medium: "border-l-amber-400",
-  high: "border-l-orange-400",
-  critical: "border-l-red-400",
+const priorityBorder: Record<string, string> = {
+  low: "border-l-blue-400/60",
+  medium: "border-l-amber-400/60",
+  high: "border-l-orange-400/60",
+  critical: "border-l-red-400/60",
 };
 
 export default function TaskCard({
@@ -52,8 +52,6 @@ export default function TaskCard({
       e.dataTransfer.effectAllowed = "move";
       isDraggingRef.current = true;
       onDragStart(task.id);
-
-      // Create a custom drag image (optional)
       const el = e.currentTarget as HTMLElement;
       const rect = el.getBoundingClientRect();
       e.dataTransfer.setDragImage(el, rect.width / 2, 20);
@@ -63,31 +61,17 @@ export default function TaskCard({
   );
 
   const handleDragEnd = useCallback(() => {
-    setTimeout(() => {
-      isDraggingRef.current = false;
-      onDragEnd();
-    }, 50);
+    setTimeout(() => { isDraggingRef.current = false; onDragEnd(); }, 50);
   }, [onDragEnd]);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (isDraggingRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      const dx = Math.abs(e.clientX - dragStartPos.current.x);
-      const dy = Math.abs(e.clientY - dragStartPos.current.y);
-      if (dx > 5 || dy > 5) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    },
-    []
-  );
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (isDraggingRef.current) { e.preventDefault(); e.stopPropagation(); return; }
+    const dx = Math.abs(e.clientX - dragStartPos.current.x);
+    const dy = Math.abs(e.clientY - dragStartPos.current.y);
+    if (dx > 5 || dy > 5) { e.preventDefault(); e.stopPropagation(); }
+  }, []);
 
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
-
   const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
 
   return (
@@ -96,48 +80,40 @@ export default function TaskCard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       className={`
-        group relative border-l-[2.5px] rounded-[14px] p-3.5
-        bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06]
-        hover:bg-white/[0.04] hover:border-white/[0.08]
-        transition-all duration-200 cursor-grab
-        ${isDragging ? "opacity-30 scale-95 rotate-1" : ""}
-        ${isOverdue ? "border-l-red-500 shadow-[inset_2px_0_0_rgba(239,68,68,0.3)]" : priorityBorderColors[task.priority] || priorityBorderColors.medium}
+        group relative border-l-[2.5px] rounded-lg p-3
+        bg-[var(--surface-elevated)] border border-[var(--border)]
+        hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)]
+        transition-all duration-150 cursor-grab active:cursor-grabbing
+        ${isDragging ? "opacity-30 scale-[0.98]" : ""}
+        ${isOverdue ? "border-l-red-500" : priorityBorder[task.priority] || priorityBorder.medium}
       `}
     >
-      {/* Hover actions */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+      {/* Delete button on hover */}
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDelete(task.id);
-          }}
-          className="flex h-6 w-6 items-center justify-center rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(task.id); }}
+          className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:text-red-400 transition-all"
         >
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
 
-      {/* Content */}
       <Link
         href={`/tasks/${task.id}`}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
         className="block"
       >
-        <div className="mb-2 flex items-center justify-between gap-2 pr-12">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider rounded-lg px-2 py-0.5 ${priority.bg} ${priority.text}`}
-            >
-              <span className={`h-1 w-1 rounded-full ${priority.dot}`} />
-              {task.priority}
-            </span>
-          </div>
-          <GripVertical className="h-3 w-3 text-[var(--foreground-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        {/* Priority badge */}
+        <div className="mb-2 flex items-center justify-between">
+          <span className={`status-pill ${priority.pill}`}>
+            <span className={`dot ${priority.dot}`} />
+            {priority.label}
+          </span>
+          <GripVertical className="h-3 w-3 text-[var(--foreground-quaternary)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
         </div>
 
-        <h4 className="mb-1 text-[13px] font-medium text-[var(--foreground)] leading-snug">
+        <h4 className="mb-1 text-[13px] font-medium text-[var(--foreground)] leading-snug pr-8">
           {task.title}
         </h4>
 
@@ -147,24 +123,24 @@ export default function TaskCard({
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-[10px] text-[var(--foreground-tertiary)]">
+        <div className="flex items-center gap-2 text-[10px] text-[var(--foreground-quaternary)]">
           {project && (
-            <div className="flex items-center gap-1 bg-[var(--primary)]/10 rounded px-1.5 py-0.5">
-              <FolderKanban className="h-3 w-3 text-[var(--primary-light)]" />
-              <span className="text-[var(--primary-light)]">{project}</span>
+            <div className="inline-flex items-center gap-1 bg-[var(--primary-subtle)] border border-[var(--primary-border)] rounded px-1.5 py-0.5">
+              <FolderKanban className="h-2.5 w-2.5 text-[var(--primary-light)]" />
+              <span className="text-[var(--primary-light)] truncate max-w-[80px]">{project}</span>
             </div>
           )}
           {task.assignee && (
-            <div className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              <span>Agent</span>
-            </div>
+            <span className="flex items-center gap-1">
+              <User className="h-2.5 w-2.5" />
+              Agent
+            </span>
           )}
           {task.due_date && (
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{new Date(task.due_date).toLocaleDateString("de-DE")}</span>
-            </div>
+            <span className="flex items-center gap-1">
+              <Calendar className="h-2.5 w-2.5" />
+              {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+            </span>
           )}
         </div>
       </Link>
