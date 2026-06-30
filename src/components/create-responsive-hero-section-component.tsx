@@ -1,44 +1,37 @@
 import React from 'react';
 
-interface HeroProps {
+interface HeroSectionProps {
   title: string;
   subtitle: string;
   ctaText: string;
-  ctaLink: string;
-  backgroundGradient?: string; // optional custom gradient
+  onCTAClick: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({
-  title,
-  subtitle,
-  ctaText,
-  ctaLink,
-  backgroundGradient = 'from-blue-600 to-purple-700',
+const HeroSection: React.FC<HeroSectionProps> = ({ 
+  title, 
+  subtitle, 
+  ctaText, 
+  onCTAClick 
 }) => {
   return (
-    <section
-      className={`relative flex flex-col items-center justify-center min-h-screen px-4 py-20 text-center text-white bg-gradient-to-br ${backgroundGradient}`}
-      aria-label="Hero section"
-    >
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-full py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6">
           {title}
         </h1>
-        <p className="mt-6 text-lg sm:text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
+        <p className="text-xl sm:text-2xl text-blue-100 mb-10 max-w-3xl mx-auto">
           {subtitle}
         </p>
-        <div className="mt-10">
-          <a
-            href={ctaLink}
-            className="inline-block px-8 py-4 text-lg font-semibold text-white bg-indigo-600 rounded-lg shadow-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-transparent transition-colors duration-200"
-            aria-label={`${ctaText} - ${subtitle}`}
-          >
-            {ctaText}
-          </a>
-        </div>
+        <button
+          onClick={onCTAClick}
+          className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          aria-label={`Click to ${ctaText.toLowerCase()}`}
+        >
+          {ctaText}
+        </button>
       </div>
-    </section>
+    </div>
   );
 };
 
-export default Hero;
+export default HeroSection;
