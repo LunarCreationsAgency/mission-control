@@ -10,10 +10,20 @@ export interface Task {
   assignee?: string;
   required_skills?: string[];
   type?: "design" | "code" | "content" | "deploy" | "planning" | "shop";
-  /** Agent feedback / output awaiting human review */
   review_notes?: string;
+  revision_count?: number;
   created: string;
   updated: string;
+}
+
+export interface TaskComment {
+  id: string;
+  task: string;
+  author: string;
+  author_type: "user" | "agent" | "system";
+  content: string;
+  comment_type: "feedback" | "agent_response" | "system" | "reassignment";
+  created: string;
 }
 
 export interface Project {
@@ -24,12 +34,11 @@ export interface Project {
   progress: number;
   icon: string;
   budget: number;
-  source_url?: string;        // URL to existing site being rebuilt
-  deployed_url?: string;     // Live deployed URL
+  source_url?: string;
+  deployed_url?: string;
   vercel_project_id?: string;
   vercel_team_id?: string;
   github_repo?: string;
-  // Design tokens
   color_primary?: string;
   color_secondary?: string;
   color_accent?: string;
