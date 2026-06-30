@@ -38,7 +38,7 @@ export default function KpiCard({ title, value, subtitle, icon, accent, delay = 
 
   return (
     <div
-      className="glass group relative overflow-hidden p-6 hover-lift animated-card"
+      className="glass group relative overflow-hidden p-6"
       style={{ animationDelay: `${delay}s` }}
     >
       <div

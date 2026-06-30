@@ -82,7 +82,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
 
       <div className="relative w-full max-w-md z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
         <div
-          className="overflow-hidden rounded-xl"
+          className="overflow-hidden rounded-lg"
           style={{
             background: "#16161e",
             border: "1px solid rgba(255,255,255,0.1)",
@@ -93,11 +93,11 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-0">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(59,130,246,0.1)" }}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: "rgba(59,130,246,0.1)" }}>
                 <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-white">
+                <h2 className="text-base font-semibold text-[var(--foreground)]">
                   {project ? "Edit Project" : "New Project"}
                 </h2>
                 <p className="text-xs text-[var(--foreground-tertiary)]">
@@ -107,7 +107,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
             </div>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-white/[0.06] hover:text-white transition-all"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] transition-all"
             >
               <X className="h-4 w-4" />
             </button>
@@ -126,7 +126,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Project name"
                 autoFocus
-                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all"
               />
             </div>
 
@@ -140,7 +140,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What's this project about?"
                 rows={3}
-                className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all resize-none"
+                className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all resize-none"
               />
             </div>
 
@@ -164,7 +164,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                   placeholder="0"
                   min="0"
                   step="100"
-                  className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all"
+                  className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all"
                 />
               </div>
             </div>
@@ -174,14 +174,14 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-white/[0.06]"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-[var(--surface-hover)]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {project ? "Update" : "Create"}

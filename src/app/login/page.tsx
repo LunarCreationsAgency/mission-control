@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="liquid-glass-subtle flex h-14 w-14 items-center justify-center mb-4 animate-float">
+          <div className="glass flex h-14 w-14 items-center justify-center mb-4">
             <Bot className="h-7 w-7 text-[var(--primary-light)]" />
           </div>
           <h1 className="text-xl font-bold text-[var(--foreground)]">Mission Control</h1>
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="liquid-glass p-6 space-y-4">
+          <div className="glass p-6 space-y-4">
             {error && (
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3">
                 <p className="text-xs text-red-400">{error}</p>
@@ -70,7 +70,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
-                className="w-full rounded-xl bg-white/[0.03] border border-white/[0.06] border-t-white/[0.1] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-white/[0.04] transition-all"
+                className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-all"
               />
             </div>
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-xl bg-white/[0.03] border border-white/[0.06] border-t-white/[0.1] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-white/[0.04] transition-all pr-12"
+                  className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-all pr-12"
                 />
                 <button
                   type="button"

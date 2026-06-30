@@ -111,8 +111,8 @@ export default function CustomSelect({
               className={`
                 flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
                 ${option.value === value
-                  ? "bg-[var(--primary)]/10 text-white"
-                  : "text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-white"
+                  ? "bg-[var(--primary)]/10 text-[var(--foreground)]"
+                  : "text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
                 }
               `}
             >
@@ -148,8 +148,8 @@ export default function CustomSelect({
         className={`
           flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-all
           ${disabled
-            ? "border-white/[0.04] bg-white/[0.02] text-[var(--foreground-tertiary)] cursor-not-allowed"
-            : "border-white/[0.08] bg-white/[0.04] text-white hover:bg-white/[0.06] cursor-pointer"
+            ? "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-tertiary)] cursor-not-allowed"
+            : "border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] cursor-pointer"
           }
         `}
       >

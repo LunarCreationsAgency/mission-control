@@ -137,7 +137,7 @@ export default function CommandPalette() {
         animation: "fadeInScale 0.15s ease forwards",
       }}>
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border)]">
           <Search className="h-5 w-5 text-[var(--foreground-tertiary)]" />
           <input
             ref={inputRef}
@@ -213,7 +213,7 @@ export default function CommandPalette() {
 
         {/* Footer */}
         {results.length > 0 && (
-          <div className="flex items-center justify-between px-5 py-2.5 border-t border-white/[0.06] text-[10px] text-[var(--foreground-tertiary)]">
+          <div className="flex items-center justify-between px-5 py-2.5 border-t border-[var(--border)] text-[10px] text-[var(--foreground-tertiary)]">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1"><ArrowUp className="h-3 w-3" /><ArrowDown className="h-3 w-3" /> to navigate</span>
               <span className="flex items-center gap-1"><CornerDownLeft className="h-3 w-3" /> to select</span>
