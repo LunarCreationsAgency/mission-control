@@ -31,7 +31,7 @@ export default function AgentsPage() {
   if (loading) return <AgentsSkeleton />;
 
   return (
-    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-1 mb-2">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
@@ -111,7 +111,7 @@ function AgentCard({
               onTogglePause(agent.id, agent.paused);
             }}
             disabled={isUpdating}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
               agent.paused
                 ? "bg-[var(--success-subtle)] text-[var(--success)] active:bg-[var(--success-subtle)]"
                 : "bg-red-500/10 text-[var(--destructive)] active:bg-red-500/20"
@@ -156,7 +156,7 @@ function AgentsSkeleton() {
       <div className="lg:hidden skeleton h-6 w-20 rounded-lg mb-2" />
       <div className="hidden lg:flex items-end justify-between mb-8">
         <div><div className="skeleton h-3 w-16 mb-2" /><div className="skeleton h-8 w-24" /></div>
-        <div className="skeleton h-9 w-32 rounded-xl" />
+        <div className="skeleton h-9 w-32 rounded-lg" />
       </div>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
         {[1, 2, 3].map((i) => <div key={i} className="bg-[var(--surface-elevated)] rounded-lg h-32 animate-pulse" />)}

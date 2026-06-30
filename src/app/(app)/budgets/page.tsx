@@ -30,13 +30,13 @@ export default function BudgetsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <p className="text-sm text-[var(--destructive)] mb-4">Failed to load budgets</p>
-        <button className="px-4 py-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium">Retry</button>
+        <button className="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium">Retry</button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-1 mb-2">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Budgets</h1>
@@ -52,7 +52,7 @@ export default function BudgetsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary-subtle)] text-[var(--primary-light)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-light)]">
               <Wallet className="h-5 w-5" />
             </div>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Total</span>
@@ -62,7 +62,7 @@ export default function BudgetsPage() {
 
         <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--success-subtle)] text-[var(--success)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--success-subtle)] text-[var(--success)]">
               <FolderKanban className="h-5 w-5" />
             </div>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Projects</span>
@@ -73,7 +73,7 @@ export default function BudgetsPage() {
 
         <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--warning-subtle)] text-[var(--warning)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--warning-subtle)] text-[var(--warning)]">
               <TrendingUp className="h-5 w-5" />
             </div>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Average</span>
@@ -106,7 +106,7 @@ export default function BudgetsPage() {
                     href={`/projects/${project.id}`}
                     className="block active:scale-[0.98] transition-transform"
                   >
-                    <div className="flex items-center gap-4 p-3 rounded-xl bg-[var(--surface)]">
+                    <div className="flex items-center gap-4 p-3 rounded-lg bg-[var(--surface)]">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[var(--foreground)] truncate">{project.name}</p>
                         <p className="text-[11px] text-[var(--foreground-tertiary)]">{project.status}</p>

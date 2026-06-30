@@ -273,7 +273,7 @@ export default function DashboardPage() {
           {/* Quick Access Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/tasks" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-xl bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center shrink-0">
+              <div className="h-12 w-12 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center shrink-0">
                 <ListTodo className="h-6 w-6 text-[var(--primary)]" />
               </div>
               <div>
@@ -283,7 +283,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link href="/agents" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-xl bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center shrink-0">
+              <div className="h-12 w-12 rounded-lg bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center shrink-0">
                 <Bot className="h-6 w-6 text-[var(--agent)]" />
               </div>
               <div>
@@ -293,7 +293,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link href="/projects" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-xl bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center shrink-0">
+              <div className="h-12 w-12 rounded-lg bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center shrink-0">
                 <FolderKanban className="h-6 w-6 text-[var(--coral)]" />
               </div>
               <div>

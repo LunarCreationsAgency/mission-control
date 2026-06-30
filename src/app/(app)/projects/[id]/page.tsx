@@ -126,7 +126,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       <div className="space-y-6 pt-2 lg:pt-0">
         <div className="skeleton h-8 w-48" />
         <div className="skeleton h-4 w-32" />
-        <div className="skeleton h-10 w-96 rounded-xl" />
+        <div className="skeleton h-10 w-96 rounded-lg" />
         <div className="skeleton h-64 rounded-lg" />
       </div>
     );
@@ -288,7 +288,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                       <Link
                         key={task.id}
                         href={`/tasks/${task.id}`}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
                       >
                         <span className="text-lg">{typeConfig.icon}</span>
                         <div className={`h-2 w-2 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -332,7 +332,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Live URL
                 </h3>
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
                   <Globe className="h-4 w-4 text-[var(--primary-light)]" />
                   <span className="text-xs text-[var(--foreground)] truncate flex-1">{project.deployed_url}</span>
                   <button
@@ -346,7 +346,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   href={project.deployed_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 mt-3 rounded-xl bg-[var(--primary-subtle)] text-[var(--primary-light)] py-2.5 text-sm font-medium hover:bg-[var(--primary-subtle)] transition-colors"
+                  className="flex items-center justify-center gap-2 mt-3 rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-light)] py-2.5 text-sm font-medium hover:bg-[var(--primary-subtle)] transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Open Site
@@ -356,7 +356,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
             <button
               onClick={handleDelete}
-              className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl text-sm font-medium transition-all ${
+              className={`w-full flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
                 deleting
                   ? "bg-red-500/15 text-[var(--destructive)] hover:bg-red-500/25"
                   : "bg-[var(--surface)] text-[var(--foreground-tertiary)] hover:bg-red-500/15 hover:text-[var(--destructive)]"
@@ -394,7 +394,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   <Link
                     key={task.id}
                     href={`/tasks/${task.id}`}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
+                    className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
                   >
                     <span className="text-xl">{typeConfig.icon}</span>
                     <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -509,7 +509,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all"
               >
                 <div className="flex gap-0.5">
                   <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.primary }} />
@@ -551,7 +551,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
         </div>
 
         {/* Preview */}
-        <div className="mt-5 p-6 rounded-xl" style={{ background: colors.background }}>
+        <div className="mt-5 p-6 rounded-lg" style={{ background: colors.background }}>
           <p className="text-sm font-semibold mb-3" style={{ color: colors.primary }}>Preview Heading</p>
           <p className="text-sm mb-3" style={{ color: colors.secondary }}>Secondary text and descriptions appear here.</p>
           <div className="flex items-center gap-2">
@@ -619,7 +619,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             />
           </div>
           {logoUrl && (
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
+            <div className="p-4 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
               <img src={logoUrl} alt="Logo preview" className="max-h-24 max-w-full object-contain" />
             </div>
           )}
@@ -649,7 +649,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] px-5 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-[var(--primary)] text-[var(--foreground)] px-5 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {saving ? "Saving..." : "Save Design Tokens"}
@@ -813,7 +813,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
         {project.vercel_project_id ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
               <Globe className="h-5 w-5 text-[var(--success)]" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-[var(--foreground-tertiary)]">Vercel Project ID</p>
@@ -823,7 +823,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
             {project.deployed_url ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
                   <Globe className="h-5 w-5 text-[var(--success)]" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--foreground-tertiary)]">Live URL</p>
@@ -833,7 +833,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                     {copied ? <Check className="h-4 w-4 text-[var(--success)]" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
-                <a href={project.deployed_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+                <a href={project.deployed_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full rounded-lg bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
                   <ExternalLink className="h-4 w-4" /> Open Live Site
                 </a>
               </div>
@@ -844,7 +844,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             <button
               onClick={handleDeploy}
               disabled={deploying}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 w-full rounded-lg bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
             >
               <Rocket className="h-4 w-4" />
               {deploying ? "Deploying..." : "Deploy to Production"}
@@ -887,7 +887,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
         <div className="space-y-3">
           {project.github_repo ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
                 <ExternalLink className="h-5 w-5 text-[var(--success)]" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-[var(--foreground-tertiary)]">Linked Repository</p>
@@ -973,7 +973,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
           ) : (
             <div className="space-y-2">
               {deployments.slice(0, 10).map((d) => (
-                <div key={d.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+                <div key={d.id} className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
                   <div className={`h-2 w-2 rounded-full ${statusColors[d.state] || "bg-slate-400"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-[var(--foreground)] truncate">{d.meta?.githubCommitMessage || d.id.slice(0, 8)}</p>

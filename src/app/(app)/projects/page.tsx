@@ -79,7 +79,7 @@ export default function ProjectsPage() {
         <p className="text-sm text-[var(--destructive)] mb-4">Failed to load projects</p>
         <button
           onClick={fetchData}
-          className="px-4 py-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium"
+          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium"
         >
           Retry
         </button>
@@ -125,7 +125,7 @@ export default function ProjectsPage() {
           <p className="text-sm text-[var(--foreground-secondary)] mb-6">No projects yet</p>
           <button
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-medium text-[var(--foreground)]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-5 py-3 text-sm font-medium text-[var(--foreground)]"
           >
             <Plus className="h-4 w-4" />
             Create Project
@@ -210,7 +210,7 @@ function ProjectCard({
                 e.stopPropagation();
                 onDelete(project.id);
               }}
-              className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${
+              className={`flex items-center justify-center h-10 w-10 rounded-lg transition-all ${
                 isDeleting
                   ? "bg-red-500/20 text-[var(--destructive)]"
                   : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-[var(--destructive)]"

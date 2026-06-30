@@ -176,7 +176,7 @@ export default function ActivityPage() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
             >
               <X className="h-3.5 w-3.5" />
               Clear
@@ -277,7 +277,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
     >
       {/* Icon */}
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${config.bg} ${config.color}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.bg} ${config.color}`}
       >
         {config.icon}
       </div>
@@ -307,7 +307,7 @@ function ActivitySkeleton() {
           <div className="skeleton h-3 w-20 mb-2" />
           <div className="skeleton h-8 w-28" />
         </div>
-        <div className="skeleton h-9 w-28 rounded-xl" />
+        <div className="skeleton h-9 w-28 rounded-lg" />
       </div>
       <div className="space-y-6">
         <div>
