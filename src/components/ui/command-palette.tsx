@@ -130,9 +130,9 @@ export default function CommandPalette() {
 
       {/* Palette */}
       <div className="relative w-full max-w-xl overflow-hidden rounded-xl" style={{
-        background: "#16161e",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderTopColor: "rgba(255,255,255,0.15)",
+        background: "var(--surface-elevated)",
+        border: "1px solid var(--border)",
+        borderTopColor: "var(--border-strong)",
         boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
         animation: "fadeInScale 0.15s ease forwards",
       }}>

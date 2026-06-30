@@ -84,7 +84,7 @@ export default function GoalModal({ isOpen, onClose, onSubmit, goal }: GoalModal
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
       <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={onClose} />
       <div className="relative w-full max-w-md z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
-        <div className="overflow-hidden rounded-lg" style={{ background: "#16161e", border: "1px solid rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.15)", boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)" }}>
+        <div className="overflow-hidden rounded-lg" style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderTopColor: "var(--border-strong)", boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)" }}>
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-0">
             <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ export default function GoalModal({ isOpen, onClose, onSubmit, goal }: GoalModal
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)] transition-all hover:bg-[var(--surface-hover)]">Cancel</button>
               <button type="submit" disabled={loading || !name.trim()}
-                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold px-4 py-2.5 text-sm transition-all disabled:opacity-50 active:scale-[0.98]"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {goal ? "Update" : "Create"}
