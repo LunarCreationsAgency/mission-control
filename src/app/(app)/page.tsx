@@ -286,7 +286,7 @@ export default function DashboardPage() {
             body: JSON.stringify(data),
           });
           success("Task created");
-          refetchTasks();
+          fetchData();
           setTaskModalOpen(false);
         }}
         mode="create"
