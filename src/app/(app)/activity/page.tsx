@@ -272,7 +272,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
 
   return (
     <div
-      className="group flex items-start gap-3 p-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)] border-t-white/[0.06] hover:bg-[var(--surface-elevated)] transition-all duration-200 "
+      className="group flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] border-t-white/[0.06] hover:bg-[var(--surface-elevated)] transition-all duration-200 "
       style={{ animationDelay: `${delay}s` }}
     >
       {/* Icon */}
@@ -314,7 +314,7 @@ function ActivitySkeleton() {
           <div className="skeleton h-4 w-24 mb-3" />
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="skeleton h-16 w-full rounded-2xl" />
+              <div key={i} className="skeleton h-16 w-full rounded-lg" />
             ))}
           </div>
         </div>

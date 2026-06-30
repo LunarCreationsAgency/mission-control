@@ -19,9 +19,9 @@ export default function BudgetsPage() {
         <div className="lg:hidden skeleton h-6 w-24 rounded-lg mb-2" />
         <div className="hidden lg:block"><div className="skeleton h-3 w-20 mb-2" /><div className="skeleton h-8 w-32" /></div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[1,2,3].map(i => <div key={i} className="skeleton h-28 rounded-2xl" />)}
+          {[1,2,3].map(i => <div key={i} className="skeleton h-28 rounded-lg" />)}
         </div>
-        <div className="skeleton h-64 rounded-2xl" />
+        <div className="skeleton h-64 rounded-lg" />
       </div>
     );
   }
@@ -50,7 +50,7 @@ export default function BudgetsPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-[var(--surface-elevated)] rounded-2xl p-5">
+        <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
               <Wallet className="h-5 w-5" />
@@ -60,7 +60,7 @@ export default function BudgetsPage() {
           <p className="text-2xl font-bold text-[var(--foreground)]">€{totalBudget.toLocaleString()}</p>
         </div>
 
-        <div className="bg-[var(--surface-elevated)] rounded-2xl p-5">
+        <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--success)]/10 text-[var(--success)]">
               <FolderKanban className="h-5 w-5" />
@@ -71,7 +71,7 @@ export default function BudgetsPage() {
           <p className="text-[11px] text-[var(--foreground-tertiary)]">of {projects.length} total</p>
         </div>
 
-        <div className="bg-[var(--surface-elevated)] rounded-2xl p-5">
+        <div className="bg-[var(--surface-elevated)] rounded-lg p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--warning)]/10 text-[var(--warning)]">
               <TrendingUp className="h-5 w-5" />
@@ -85,7 +85,7 @@ export default function BudgetsPage() {
       </div>
 
       {/* Budget Breakdown */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
         <h2 className="text-base font-semibold text-[var(--foreground)] mb-4">Breakdown</h2>
 
         {budgetedProjects.length === 0 ? (

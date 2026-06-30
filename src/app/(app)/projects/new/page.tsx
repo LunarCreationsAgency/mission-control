@@ -1376,7 +1376,7 @@ export default function NewProjectWizard() {
     return (
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center ">
         <div className="text-center max-w-md mx-auto px-6">
-          <div className="w-20 h-20 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
             <Sparkles className="h-10 w-10 text-[var(--primary-light)]" />
           </div>
           <h1 className="text-2xl font-bold text-[var(--foreground)] mb-3">New Project</h1>

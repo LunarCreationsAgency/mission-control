@@ -196,7 +196,7 @@ function ProjectCard({
   return (
     <div className="lg:group lg:relative">
       {/* Mobile: Full-width card, no glass-elevated border, proper shadow */}
-      <div className="lg:hidden bg-[var(--surface-elevated)] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform">
+      <div className="lg:hidden bg-[var(--surface-elevated)] rounded-lg overflow-hidden active:scale-[0.98] transition-transform">
         <Link href={`/projects/${project.id}`} className="block p-4">
           {/* Row 1: Status badge (left) + Delete (right) */}
           <div className="flex items-start justify-between gap-2 mb-2">
@@ -326,7 +326,7 @@ function ProjectsSkeleton() {
       {/* Mobile skeleton */}
       <div className="lg:hidden space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-[var(--surface-elevated)] rounded-2xl p-4 h-36 animate-pulse" />
+          <div key={i} className="bg-[var(--surface-elevated)] rounded-lg p-4 h-36 animate-pulse" />
         ))}
       </div>
       {/* Desktop skeleton */}

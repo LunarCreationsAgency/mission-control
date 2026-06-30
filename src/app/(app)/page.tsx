@@ -143,7 +143,7 @@ export default function DashboardPage() {
         {/* Left Column — 2/3 */}
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           {/* Task Distribution */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-6">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-[var(--foreground)]">Task Distribution</h2>
               <Link href="/tasks" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View all <ArrowUpRight className="h-3 w-3" /></Link>
@@ -169,7 +169,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Active Projects */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-6">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-[var(--foreground)]">Active Projects</h2>
               <Link href="/projects" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View all <ArrowUpRight className="h-3 w-3" /></Link>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
         <div className="space-y-4 lg:space-y-6">
           {/* Overdue */}
           {overdueTasks.length > 0 && (
-            <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5 border-l-[3px] border-l-red-500">
+            <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5 border-l-[3px] border-l-red-500">
               <div className="flex items-center gap-2 mb-3">
                 <Clock className="h-4 w-4 text-red-400" />
                 <h2 className="text-sm font-semibold text-red-400">Overdue</h2>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
 
           {/* Upcoming */}
           {upcomingTasks.length > 0 && (
-            <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+            <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
               <div className="flex items-center gap-2 mb-3">
                 <CalendarDays className="h-4 w-4 text-[var(--primary-light)]" />
                 <h2 className="text-sm font-semibold text-[var(--foreground)]">Upcoming</h2>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
           )}
 
           {/* Agent Load */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Agent Load</h2>
               <Link href="/agents" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Worker Control */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Worker</h2>
               {reviewCount > 0 && (
@@ -301,7 +301,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Activity */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Activity</h2>
               <Link href="/activity" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
@@ -332,7 +332,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Goals */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5">
+          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Goals</h2>
               <Link href="/goals" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
@@ -392,7 +392,7 @@ function KpiCard({ title, value, subtitle, icon, accent, href }: { title: string
 
   return (
     <Link href={href} className="block">
-      <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-5 active:scale-[0.98] transition-transform">
+      <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5 active:scale-[0.98] transition-transform">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--foreground-tertiary)]">{title}</p>
@@ -417,16 +417,16 @@ function DashboardSkeleton() {
         <div className="flex gap-2"><div className="skeleton h-9 w-24 rounded-xl" /><div className="skeleton h-9 w-28 rounded-xl" /></div>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        {[1,2,3,4].map((i) => <div key={i} className="skeleton h-24 lg:h-28 rounded-2xl" />)}
+        {[1,2,3,4].map((i) => <div key={i} className="skeleton h-24 lg:h-28 rounded-lg" />)}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="skeleton h-56 rounded-2xl" />
-          <div className="skeleton h-48 rounded-2xl" />
+          <div className="skeleton h-56 rounded-lg" />
+          <div className="skeleton h-48 rounded-lg" />
         </div>
         <div className="space-y-4">
-          <div className="skeleton h-40 rounded-2xl" />
-          <div className="skeleton h-40 rounded-2xl" />
+          <div className="skeleton h-40 rounded-lg" />
+          <div className="skeleton h-40 rounded-lg" />
         </div>
       </div>
     </div>

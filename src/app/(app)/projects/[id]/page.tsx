@@ -218,7 +218,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
+              className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
                 isActive
                   ? "bg-[var(--primary)]/15 text-[var(--primary-light)]"
                   : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
@@ -949,7 +949,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                   placeholder="owner/existing-repo"
                   className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
                 />
-                <button onClick={handleSaveGithub} className="rounded-lg bg-[var(--surface-hover)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--surface-elevated)] transition-colors">
+                <button onClick={handleSaveGithub} className="rounded-lg bg-[var(--surface-hover)] text-[var(--foreground)] px-4 py-2.5 text-sm font-medium hover:bg-[var(--surface-elevated)] transition-colors">
                   Link
                 </button>
               </div>

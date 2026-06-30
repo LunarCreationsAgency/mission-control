@@ -88,10 +88,10 @@ function AgentCard({
 
   return (
     <Link href={`/agents/${agent.id}`} className="block active:scale-[0.98] transition-transform">
-      <div className="bg-[var(--surface-elevated)] rounded-2xl p-4">
+      <div className="bg-[var(--surface-elevated)] rounded-lg p-4">
         {/* Top row: avatar + name + status toggle */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary-light)]">
             <Bot className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
@@ -159,7 +159,7 @@ function AgentsSkeleton() {
         <div className="skeleton h-9 w-32 rounded-xl" />
       </div>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
-        {[1, 2, 3].map((i) => <div key={i} className="bg-[var(--surface-elevated)] rounded-2xl h-32 animate-pulse" />)}
+        {[1, 2, 3].map((i) => <div key={i} className="bg-[var(--surface-elevated)] rounded-lg h-32 animate-pulse" />)}
       </div>
     </div>
   );

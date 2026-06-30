@@ -62,8 +62,8 @@ export default function SettingsPage() {
           <div className="skeleton h-3 w-20 mb-2" />
           <div className="skeleton h-8 w-32" />
         </div>
-        <div className="bg-[var(--surface-elevated)] rounded-2xl h-64 animate-pulse" />
-        <div className="bg-[var(--surface-elevated)] rounded-2xl h-64 animate-pulse" />
+        <div className="bg-[var(--surface-elevated)] rounded-lg h-64 animate-pulse" />
+        <div className="bg-[var(--surface-elevated)] rounded-lg h-64 animate-pulse" />
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Company Settings */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
             <Building2 className="h-5 w-5" />
@@ -164,7 +164,7 @@ export default function SettingsPage() {
       </div>
 
       {/* App Info */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl p-4 lg:p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
             <Settings className="h-5 w-5" />
@@ -187,7 +187,7 @@ export default function SettingsPage() {
 
 function SettingCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface)]">
+    <div className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface)]">
       <div className="text-[var(--foreground-tertiary)]">{icon}</div>
       <div className="min-w-0">
         <p className="text-[11px] text-[var(--foreground-tertiary)]">{label}</p>
