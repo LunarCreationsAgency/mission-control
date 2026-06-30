@@ -127,7 +127,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <div className="skeleton h-8 w-48" />
         <div className="skeleton h-4 w-32" />
         <div className="skeleton h-10 w-96 rounded-xl" />
-        <div className="skeleton h-64 rounded-[20px]" />
+        <div className="skeleton h-64 rounded-lg" />
       </div>
     );
   }
@@ -138,7 +138,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)]">
           <ArrowLeft className="h-4 w-4" /> Back to Projects
         </Link>
-        <div className="liquid-glass p-12 text-center">
+        <div className="glass-elevated p-12 text-center">
           <p className="text-[var(--foreground-secondary)]">Project not found.</p>
         </div>
       </div>
@@ -242,7 +242,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-4 lg:space-y-6">
             {/* Progress */}
-            <div className="liquid-glass p-5 lg:p-6">
+            <div className="glass-elevated p-5 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Progress</h2>
                 <span className="text-2xl font-bold text-[var(--foreground)]">{progress}%</span>
@@ -259,7 +259,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Description */}
-            <div className="liquid-glass p-5 lg:p-6">
+            <div className="glass-elevated p-5 lg:p-6">
               <h2 className="mb-3 lg:mb-4 text-base lg:text-lg font-semibold text-[var(--foreground)]">Description</h2>
               <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
                 {project.description || "No description provided."}
@@ -267,7 +267,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Recent Tasks */}
-            <div className="liquid-glass p-5 lg:p-6">
+            <div className="glass-elevated p-5 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Recent Tasks</h2>
                 <button
@@ -313,7 +313,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Right Column - Meta */}
           <div className="space-y-4">
-            <div className="liquid-glass p-5">
+            <div className="glass-elevated p-5">
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                 Details
               </h3>
@@ -328,7 +328,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {project.deployed_url && (
-              <div className="liquid-glass p-5">
+              <div className="glass-elevated p-5">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Live URL
                 </h3>
@@ -379,7 +379,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {projectTasks.length === 0 ? (
-            <div className="liquid-glass p-12 text-center">
+            <div className="glass-elevated p-12 text-center">
               <p className="text-[var(--foreground-secondary)]">No tasks yet.</p>
               <p className="text-xs text-[var(--foreground-tertiary)] mt-1">
                 Tasks are created automatically when you use the planning wizard.
@@ -495,7 +495,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   return (
     <div className="space-y-6">
       {/* Color Palette */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Palette className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Color Palette</h2>
@@ -566,7 +566,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Typography */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Type className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Typography</h2>
@@ -602,7 +602,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Logo */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Image className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Logo</h2>
@@ -627,7 +627,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Design Vibe */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Design Vibe</h2>
@@ -805,7 +805,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   return (
     <div className="space-y-6">
       {/* Vercel Connection */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Rocket className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Vercel Connection</h2>
@@ -879,7 +879,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* GitHub Repo */}
-      <div className="liquid-glass p-5 lg:p-6">
+      <div className="glass-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <ExternalLink className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">GitHub Repository</h2>
@@ -960,7 +960,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
       {/* Deployment History */}
       {project.vercel_project_id && (
-        <div className="liquid-glass p-5 lg:p-6">
+        <div className="glass-elevated p-5 lg:p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Deployment History</h2>
             <button onClick={loadDeployments} disabled={loadingDeployments} className="text-xs text-[var(--primary-light)] hover:underline">

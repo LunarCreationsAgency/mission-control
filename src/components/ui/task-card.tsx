@@ -1,7 +1,7 @@
 "use client";
 
 import { type Task } from "@/types";
-import { Calendar, User, GripVertical, Trash2, FolderKanban } from "lucide-react";
+import { Calendar, User, GripVertical, Trash2, Pencil, FolderKanban } from "lucide-react";
 import { useRef, useCallback } from "react";
 import Link from "next/link";
 
@@ -15,18 +15,11 @@ interface TaskCardProps {
   isDragging?: boolean;
 }
 
-const priorityConfig: Record<string, { pill: string; dot: string; label: string }> = {
-  low: { pill: "status-pill-todo", dot: "bg-blue-400", label: "Low" },
-  medium: { pill: "status-pill-todo", dot: "bg-amber-400", label: "Medium" },
-  high: { pill: "status-pill-review", dot: "bg-orange-400", label: "High" },
-  critical: { pill: "status-pill-done", dot: "bg-red-400", label: "Critical" },
-};
-
-const priorityBorder: Record<string, string> = {
-  low: "border-l-blue-400/60",
-  medium: "border-l-amber-400/60",
-  high: "border-l-orange-400/60",
-  critical: "border-l-red-400/60",
+const priorityConfig: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+  low: { bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400", label: "Low" },
+  medium: { bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400", label: "Medium" },
+  high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400", label: "High" },
+  critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400", label: "Critical" },
 };
 
 export default function TaskCard({
@@ -61,89 +54,81 @@ export default function TaskCard({
   );
 
   const handleDragEnd = useCallback(() => {
-    setTimeout(() => { isDraggingRef.current = false; onDragEnd(); }, 50);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+      onDragEnd();
+    }, 50);
   }, [onDragEnd]);
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (isDraggingRef.current) { e.preventDefault(); e.stopPropagation(); return; }
-    const dx = Math.abs(e.clientX - dragStartPos.current.x);
-    const dy = Math.abs(e.clientY - dragStartPos.current.y);
-    if (dx > 5 || dy > 5) { e.preventDefault(); e.stopPropagation(); }
-  }, []);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isDraggingRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      const dx = Math.abs(e.clientX - dragStartPos.current.x);
+      const dy = Math.abs(e.clientY - dragStartPos.current.y);
+      if (dx > 4 || dy > 4) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    []
+  );
 
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
 
   return (
-    <div
+    <Link
+      href={`/tasks/${task.id}`}
       draggable
+      onMouseDown={handleMouseDown}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      className={`
-        group relative border-l-[2.5px] rounded-lg p-3
-        bg-[var(--surface-elevated)] border border-[var(--border)]
-        hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)]
-        transition-all duration-150 cursor-grab active:cursor-grabbing
-        ${isDragging ? "opacity-30 scale-[0.98]" : ""}
-        ${isOverdue ? "border-l-red-500" : priorityBorder[task.priority] || priorityBorder.medium}
-      `}
+      onClick={handleClick}
+      className={`group block bg-[var(--surface-elevated)] rounded-lg border border-[var(--border)] p-3.5 hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.97] cursor-grab ${
+        isDragging ? "opacity-40" : ""
+      } ${isOverdue ? "border-l-[3px] border-l-red-500" : ""}`}
     >
-      {/* Delete button on hover */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(task.id); }}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:text-red-400 transition-all"
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
+      <div className="flex items-start gap-2">
+        <div className="flex-1 min-w-0">
+          {/* Priority + Status */}
+          <div className="flex items-center gap-2 mb-2">
+            <span className={`text-[10px] font-semibold rounded-md px-1.5 py-0.5 ${priority.bg} ${priority.text}`}>
+              <span className={`inline-block h-1 w-1 rounded-full mr-1 ${priority.dot}`} />
+              {priority.label}
+            </span>
+            {isOverdue && (
+              <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 rounded-md px-1.5 py-0.5">Overdue</span>
+            )}
+          </div>
+
+          {/* Title */}
+          <h3 className="text-sm font-medium text-[var(--foreground)] leading-snug mb-1 truncate">{task.title}</h3>
+
+          {/* Project + Meta */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {project && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-[var(--foreground-tertiary)]">
+                <FolderKanban className="h-3 w-3" />
+                <span className="truncate max-w-[100px]">{project}</span>
+              </span>
+            )}
+            {task.due_date && (
+              <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? "text-red-400" : "text-[var(--foreground-tertiary)]"}`}>
+                <Calendar className="h-3 w-3" />
+                {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="text-[var(--foreground-quaternary)] opacity-0 group-hover:opacity-100 transition-opacity">
+          <GripVertical className="h-4 w-4" />
+        </div>
       </div>
-
-      <Link
-        href={`/tasks/${task.id}`}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick}
-        className="block"
-      >
-        {/* Priority badge */}
-        <div className="mb-2 flex items-center justify-between">
-          <span className={`status-pill ${priority.pill}`}>
-            <span className={`dot ${priority.dot}`} />
-            {priority.label}
-          </span>
-          <GripVertical className="h-3 w-3 text-[var(--foreground-quaternary)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-        </div>
-
-        <h4 className="mb-1 text-[13px] font-medium text-[var(--foreground)] leading-snug pr-8">
-          {task.title}
-        </h4>
-
-        {task.description && (
-          <p className="mb-3 text-[11px] text-[var(--foreground-tertiary)] line-clamp-2 leading-relaxed">
-            {task.description}
-          </p>
-        )}
-
-        <div className="flex items-center gap-2 text-[10px] text-[var(--foreground-quaternary)]">
-          {project && (
-            <div className="inline-flex items-center gap-1 bg-[var(--primary-subtle)] border border-[var(--primary-border)] rounded px-1.5 py-0.5">
-              <FolderKanban className="h-2.5 w-2.5 text-[var(--primary-light)]" />
-              <span className="text-[var(--primary-light)] truncate max-w-[80px]">{project}</span>
-            </div>
-          )}
-          {task.assignee && (
-            <span className="flex items-center gap-1">
-              <User className="h-2.5 w-2.5" />
-              Agent
-            </span>
-          )}
-          {task.due_date && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-2.5 w-2.5" />
-              {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
-            </span>
-          )}
-        </div>
-      </Link>
-    </div>
+    </Link>
   );
 }

@@ -104,13 +104,13 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Projects</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+          <div className="glass flex items-center gap-2 px-3.5 py-2">
             <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="text-sm font-semibold">{projects.length}</span>
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="liquid-glass-subtle flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-white/[0.06]"
+            className="glass flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-white/[0.06]"
           >
             <Plus className="h-4 w-4" />
             New Project
@@ -195,7 +195,7 @@ function ProjectCard({
 
   return (
     <div className="lg:group lg:relative">
-      {/* Mobile: Full-width card, no liquid-glass border, proper shadow */}
+      {/* Mobile: Full-width card, no glass-elevated border, proper shadow */}
       <div className="lg:hidden bg-[var(--surface-elevated)] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform">
         <Link href={`/projects/${project.id}`} className="block p-4">
           {/* Row 1: Status badge (left) + Delete (right) */}
@@ -255,7 +255,7 @@ function ProjectCard({
       </div>
 
       {/* Desktop: Liquid glass card */}
-      <div className="hidden lg:block liquid-glass group p-6 animated-card hover-lift relative">
+      <div className="hidden lg:block glass-elevated group p-6   relative">
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -288,7 +288,7 @@ function ProjectCard({
                 {project.name}
               </h3>
             </div>
-            <div className="liquid-glass-subtle flex items-center justify-center h-11 w-11 shrink-0">
+            <div className="glass flex items-center justify-center h-11 w-11 shrink-0">
               <FolderKanban className="h-5 w-5 text-[var(--primary-light)]" />
             </div>
           </div>
@@ -332,7 +332,7 @@ function ProjectsSkeleton() {
       {/* Desktop skeleton */}
       <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="skeleton h-52 rounded-[20px]" />
+          <div key={i} className="skeleton h-52 rounded-lg" />
         ))}
       </div>
     </div>

@@ -76,7 +76,7 @@ export default function GoalsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Goals</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+          <div className="glass flex items-center gap-2 px-3.5 py-2">
             <Target className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="text-sm font-semibold text-[var(--foreground)]">{goals.length}</span>
           </div>
@@ -191,7 +191,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
       </div>
 
       {/* Desktop card */}
-      <div className="hidden lg:block liquid-glass group p-6 animated-card hover-lift relative">
+      <div className="hidden lg:block glass-elevated group p-6   relative">
         <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-white/[0.06] hover:text-white transition-all">
@@ -213,7 +213,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
               </div>
               <h3 className="text-base font-semibold text-[var(--foreground)] leading-snug truncate">{goal.name}</h3>
             </div>
-            <div className="liquid-glass-subtle flex items-center justify-center h-11 w-11 shrink-0 ml-3">
+            <div className="glass flex items-center justify-center h-11 w-11 shrink-0 ml-3">
               <Target className="h-5 w-5 text-[var(--primary-light)]" />
             </div>
           </div>

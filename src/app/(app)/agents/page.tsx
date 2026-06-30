@@ -44,7 +44,7 @@ export default function AgentsPage() {
           <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Team</p>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
         </div>
-        <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+        <div className="glass flex items-center gap-2 px-3.5 py-2">
           <Bot className="h-4 w-4 text-[var(--primary-light)]" />
           <span className="text-sm font-semibold text-[var(--foreground)]">{agents.length}</span>
           <span className="text-xs text-[var(--foreground-tertiary)]">team members</span>

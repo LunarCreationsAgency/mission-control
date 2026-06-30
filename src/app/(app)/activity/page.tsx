@@ -108,7 +108,7 @@ export default function ActivityPage() {
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Activity</h1>
         </div>
-        <div className="liquid-glass border-red-500/20 p-8 text-center animated-card">
+        <div className="glass-elevated border-red-500/20 p-8 text-center ">
           <p className="text-sm text-red-400">Failed to load activity</p>
           <button onClick={fetchLogs} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">
             Retry
@@ -132,14 +132,14 @@ export default function ActivityPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2">
+          <div className="glass flex items-center gap-2 px-3.5 py-2">
             <Activity className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="text-sm font-semibold text-[var(--foreground)]">{filteredLogs.length}</span>
             <span className="text-xs text-[var(--foreground-tertiary)]">{hasFilters ? "filtered" : "events"}</span>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+            className={`glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
               hasFilters ? "text-[var(--primary-light)] bg-[var(--primary)]/10" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
             }`}
           >
@@ -156,7 +156,7 @@ export default function ActivityPage() {
 
       {/* Filter Bar */}
       {showFilters && (
-        <div className="flex flex-wrap items-end gap-3 animated-card" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
+        <div className="flex flex-wrap items-end gap-3 " style={{ animation: "fadeInScale 0.2s ease forwards" }}>
           <div className="w-full sm:w-auto sm:min-w-[180px] lg:min-w-[200px]">
             <CustomSelect
               label="Entity Type"
@@ -187,7 +187,7 @@ export default function ActivityPage() {
 
       {/* Activity Feed */}
       {filteredLogs.length === 0 ? (
-        <div className="liquid-glass p-12 text-center animated-card">
+        <div className="glass-elevated p-12 text-center ">
           <Activity className="h-12 w-12 text-[var(--foreground-tertiary)] mx-auto mb-4" />
           <p className="text-sm text-[var(--foreground-secondary)]">
             {hasFilters ? "No activity matches your filters" : "No activity yet. Actions will appear here."}
@@ -272,7 +272,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
 
   return (
     <div
-      className="group flex items-start gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 animated-card"
+      className="group flex items-start gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 "
       style={{ animationDelay: `${delay}s` }}
     >
       {/* Icon */}

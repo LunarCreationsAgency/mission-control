@@ -1405,7 +1405,7 @@ export default function NewProjectWizard() {
           <h1 className="text-2xl font-bold text-white mb-2">Your Project Plan</h1>
           <p className="text-sm text-[var(--foreground-secondary)] mb-6">Review the generated plan. You can edit tasks after the project is created.</p>
           {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-red-400 shrink-0" /><p className="text-xs text-red-400">{error}</p></div>}
-          <div className="liquid-glass p-5 mb-6">
+          <div className="glass-elevated p-5 mb-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">{plan.project_name}</h2>
             <p className="text-sm text-[var(--foreground-secondary)] mt-1">{plan.description}</p>
             <div className="flex gap-6 mt-4 pt-4 border-t border-white/[0.04]">

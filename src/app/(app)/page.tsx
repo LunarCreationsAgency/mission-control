@@ -120,7 +120,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/projects/new")} className="liquid-glass-subtle flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04]">
+          <button onClick={() => router.push("/projects/new")} className="glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04]">
             <FolderKanban className="h-4 w-4" />
             New Project
           </button>
