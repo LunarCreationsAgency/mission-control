@@ -25,7 +25,7 @@ const statusPillMap: Record<string, string> = {
 };
 
 const statusDotMap: Record<string, string> = {
-  todo: "bg-amber-400",
+  todo: "bg-[var(--warning)]",
   in_progress: "bg-blue-400",
   review: "bg-violet-400",
   done: "bg-emerald-400",

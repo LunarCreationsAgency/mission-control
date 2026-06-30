@@ -39,7 +39,7 @@ export default function CustomSelect({
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
     setMenuPos({
-      top: rect.bottom + 6,
+      top: rect.bottom + 4,
       left: rect.left,
       width: rect.width,
     });
@@ -48,21 +48,11 @@ export default function CustomSelect({
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as Node;
-      // Don't close if click is inside the trigger OR inside the menu
-      if (
-        containerRef.current?.contains(target) ||
-        menuRef.current?.contains(target)
-      ) {
-        return;
-      }
+      if (containerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
       setIsOpen(false);
     }
-    function handleScroll() {
-      if (isOpen) updatePosition();
-    }
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setIsOpen(false);
-    }
+    function handleScroll() { if (isOpen) updatePosition(); }
+    function handleEscape(e: KeyboardEvent) { if (e.key === "Escape") setIsOpen(false); }
 
     if (isOpen) {
       updatePosition();
@@ -96,11 +86,8 @@ export default function CustomSelect({
       }}
     >
       <div
-        className="overflow-hidden rounded-lg border border-[var(--border)]"
-        style={{
-          background: "var(--surface-elevated)",
-          boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-        }}
+        className="overflow-hidden rounded-md border border-[var(--border)] bg-[var(--surface-elevated)]"
+        style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
       >
         <div className="max-h-[240px] overflow-y-auto py-1">
           {options.map((option) => (
@@ -109,10 +96,10 @@ export default function CustomSelect({
               type="button"
               onClick={() => handleSelect(option.value)}
               className={`
-                flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
+                flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors
                 ${option.value === value
                   ? "bg-[var(--primary-subtle)] text-[var(--foreground)]"
-                  : "text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
+                  : "text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
                 }
               `}
             >
@@ -131,11 +118,8 @@ export default function CustomSelect({
   return (
     <div ref={containerRef} className="relative">
       {label && (
-        <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-1.5">
-          {label}
-        </label>
+        <label className="block text-xs font-medium text-[var(--foreground-tertiary)] mb-1.5">{label}</label>
       )}
-      {/* Trigger */}
       <button
         ref={triggerRef}
         type="button"
@@ -146,7 +130,7 @@ export default function CustomSelect({
           }
         }}
         className={`
-          flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-colors
+          flex w-full items-center justify-between rounded-md border px-3 py-2.5 text-sm transition-colors
           ${disabled
             ? "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-tertiary)] cursor-not-allowed"
             : "border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] cursor-pointer"
@@ -154,21 +138,11 @@ export default function CustomSelect({
         `}
       >
         <div className="flex items-center gap-2 truncate">
-          {selected?.icon && (
-            <span className="shrink-0">{selected.icon}</span>
-          )}
-          <span className={`truncate ${!selected ? "text-[var(--foreground-tertiary)]" : ""}`}>
-            {selected?.label || placeholder}
-          </span>
+          {selected?.icon && <span className="shrink-0">{selected.icon}</span>}
+          <span className={`truncate ${!selected ? "text-[var(--foreground-tertiary)]" : ""}`}>{selected?.label || placeholder}</span>
         </div>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-[var(--foreground-tertiary)] transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--foreground-tertiary)] ${isOpen ? "rotate-180" : ""}`} />
       </button>
-
-      {/* Dropdown — portaled to body */}
       {isOpen && menuPos && typeof window !== "undefined" && createPortal(dropdown, document.body)}
     </div>
   );

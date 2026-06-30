@@ -13,13 +13,13 @@ interface TaskListCardProps {
 
 const priorityConfig: Record<string, { pill: string; dot: string; label: string }> = {
   low: { pill: "bg-blue-500/10 text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
-  medium: { pill: "bg-amber-500/10 text-amber-400", dot: "bg-amber-400", label: "Medium" },
+  medium: { pill: "bg-[var(--warning-subtle)] text-[var(--warning)]", dot: "bg-[var(--warning)]", label: "Medium" },
   high: { pill: "bg-orange-500/10 text-orange-400", dot: "bg-orange-400", label: "High" },
   critical: { pill: "bg-red-500/10 text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
 };
 
 const statusConfig: Record<string, { dot: string; text: string }> = {
-  todo: { dot: "bg-amber-400", text: "text-amber-400" },
+  todo: { dot: "bg-[var(--warning)]", text: "text-[var(--warning)]" },
   in_progress: { dot: "bg-blue-400", text: "text-[var(--primary-light)]" },
   review: { dot: "bg-violet-400", text: "text-violet-400" },
   done: { dot: "bg-emerald-400", text: "text-[var(--success)]" },

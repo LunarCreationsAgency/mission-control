@@ -17,7 +17,7 @@ interface TaskCardProps {
 
 const priorityConfig: Record<string, { bg: string; text: string; dot: string; label: string }> = {
   low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
-  medium: { bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400", label: "Medium" },
+  medium: { bg: "bg-[var(--warning-subtle)]", text: "text-[var(--warning)]", dot: "bg-[var(--warning)]", label: "Medium" },
   high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400", label: "High" },
   critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
 };
