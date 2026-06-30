@@ -3,7 +3,7 @@
  * Each getter caches extracted data. apiGet is pure fetch (no caching).
  */
 
-import { type Task, type Project, type Goal, type Agent, type ActivityLog, type CompanySettings } from "@/types";
+import { type Task, type Project, type Goal, type Agent, type ActivityLog, type CompanySettings, type TaskComment } from "@/types";
 import { getCached, setCached, isStale, invalidateCache } from "./data-cache";
 
 async function apiGet(path: string): Promise<Record<string, unknown>> {
@@ -87,6 +87,18 @@ export async function deleteTask(id: string) {
   return result;
 }
 
+// --- TASK COMMENTS ---
+export async function getTaskComments(taskId: string): Promise<TaskComment[]> {
+  const data = await apiGet(`/api/tasks/${taskId}/comments`);
+  return (data.comments || []) as TaskComment[];
+}
+
+export async function createTaskComment(taskId: string, body: Record<string, unknown>) {
+  const result = await apiPost(`/api/tasks/${taskId}/comments`, body);
+  invalidateCache(`task-comments-${taskId}`);
+  return result;
+}
+
 // --- PROJECTS ---
 export async function getProjects(): Promise<Project[]> {
   return cachedGet<Project[]>("projects", async () => {
@@ -160,7 +172,6 @@ export async function updateAgent(id: string, body: Record<string, unknown>) {
 
 // --- ACTIVITY ---
 export async function getActivityLogs(): Promise<ActivityLog[]> {
-  // Always fresh — no cache
   const data = await apiGet("/api/activity-logs");
   return (data.logs || []) as ActivityLog[];
 }
