@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type Task, type Project, type Goal, type Agent, type ActivityLog } from "@/types";
 import {
   ListTodo, Bot, Target, FolderKanban, Plus,
-  Play, Pause, CheckCircle2, AlertCircle, ArrowUpRight, Loader2,
+  Play, Pause, CheckCircle2, AlertCircle, ArrowUpRight,
   Clock, CalendarDays, CircleDot,
 } from "lucide-react";
 import Link from "next/link";
@@ -18,12 +18,12 @@ const statusLabels: Record<string, string> = {
   done: "Done",
 };
 
-const actionIcons: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  created: { icon: <Plus className="h-3 w-3" />, color: "text-[var(--primary-light)]", bg: "bg-[var(--primary-subtle)]" },
-  updated: { icon: <AlertCircle className="h-3 w-3" />, color: "text-[var(--warning)]", bg: "bg-[var(--warning-subtle)]" },
-  completed: { icon: <CheckCircle2 className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success-subtle)]" },
-  paused: { icon: <Pause className="h-3 w-3" />, color: "text-[var(--foreground-tertiary)]", bg: "bg-[var(--foreground-quaternary)]/20" },
-  resumed: { icon: <Play className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success-subtle)]" },
+const actionIcons: Record<string, { icon: React.ReactNode; color: string }> = {
+  created: { icon: <Plus className="h-3 w-3" />, color: "text-[var(--primary-light)]" },
+  updated: { icon: <AlertCircle className="h-3 w-3" />, color: "text-[var(--warning)]" },
+  completed: { icon: <CheckCircle2 className="h-3 w-3" />, color: "text-[var(--success)]" },
+  paused: { icon: <Pause className="h-3 w-3" />, color: "text-[var(--foreground-tertiary)]" },
+  resumed: { icon: <Play className="h-3 w-3" />, color: "text-[var(--success)]" },
 };
 
 export default function DashboardPage() {
@@ -85,16 +85,16 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Dashboard</h1>
-          <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Overview of your agent operations</p>
+          <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">Dashboard</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">Overview of your agent operations</p>
         </div>
         <button
           onClick={() => setTaskModalOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--background)] hover:bg-[var(--primary-dark)] transition-all"
+          className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)] transition-colors"
         >
           <Plus className="h-4 w-4" />
           New Task
@@ -102,111 +102,81 @@ export default function DashboardPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-28 rounded-lg" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded-md bg-[var(--surface)] animate-pulse" />)}
         </div>
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Link href="/tasks" className="surface-hover p-5 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center">
-                  <ListTodo className="h-5 w-5 text-[var(--primary)]" />
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-[var(--foreground-tertiary)]">Tasks</span>
                 <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
               </div>
               <p className="text-2xl font-semibold text-[var(--foreground)]">{tasks.length}</p>
-              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Total Tasks</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
-                <span className="flex items-center gap-1">
-                  <CircleDot className="h-3 w-3 text-[var(--status-in-progress)]" />
-                  {tasksByStatus("in_progress").length} active
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3 text-[var(--status-review)]" />
-                  {tasksByStatus("review").length} review
-                </span>
+              <div className="flex items-center gap-4 mt-2 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">{tasksByStatus("in_progress").length} active</span>
+                <span className="flex items-center gap-1">{tasksByStatus("review").length} review</span>
               </div>
             </Link>
 
             <Link href="/agents" className="surface-hover p-5 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-[var(--agent)]" />
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-[var(--foreground-tertiary)]">Agents</span>
                 <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
               </div>
               <p className="text-2xl font-semibold text-[var(--foreground)]">{agents.length}</p>
-              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Agents</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
-                <span className="flex items-center gap-1">
-                  <Play className="h-3 w-3 text-[var(--success)]" />
-                  {activeAgents.length} running
-                </span>
-                <span className="flex items-center gap-1">
-                  <Pause className="h-3 w-3 text-[var(--foreground-tertiary)]" />
-                  {agents.filter((a) => a.paused).length} paused
-                </span>
+              <div className="flex items-center gap-4 mt-2 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">{activeAgents.length} running</span>
+                <span className="flex items-center gap-1">{agents.filter((a) => a.paused).length} paused</span>
               </div>
             </Link>
 
             <Link href="/projects" className="surface-hover p-5 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center">
-                  <FolderKanban className="h-5 w-5 text-[var(--coral)]" />
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-[var(--foreground-tertiary)]">Projects</span>
                 <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
               </div>
               <p className="text-2xl font-semibold text-[var(--foreground)]">{projects.length}</p>
-              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Projects</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
-                <span className="flex items-center gap-1">
-                  <CircleDot className="h-3 w-3 text-[var(--success)]" />
-                  {activeProjects.length} active
-                </span>
+              <div className="flex items-center gap-4 mt-2 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">{activeProjects.length} active</span>
               </div>
             </Link>
 
             <Link href="/goals" className="surface-hover p-5 group">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-[var(--success-subtle)] border border-[var(--success-border)] flex items-center justify-center">
-                  <Target className="h-5 w-5 text-[var(--success)]" />
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-[var(--foreground-tertiary)]">Goals</span>
                 <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
               </div>
               <p className="text-2xl font-semibold text-[var(--foreground)]">{goals.length}</p>
-              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Goals</p>
-              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
-                <span className="flex items-center gap-1">
-                  <CircleDot className="h-3 w-3 text-[var(--success)]" />
-                  {activeGoals.length} active
-                </span>
+              <div className="flex items-center gap-4 mt-2 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">{activeGoals.length} active</span>
               </div>
             </Link>
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Tasks Breakdown */}
             <div className="lg:col-span-2 surface p-5">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-[var(--foreground)]">Tasks by Status</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-sm font-semibold text-[var(--foreground)] tracking-tight">Tasks by Status</h2>
                 <Link href="/tasks" className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors">
                   View all →
                 </Link>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {["todo", "in_progress", "review", "done"].map((status) => {
                   const count = tasksByStatus(status).length;
                   const total = tasks.length || 1;
                   const pct = Math.round((count / total) * 100);
                   return (
                     <div key={status} className="flex items-center gap-4">
-                      <span className="w-20 text-xs font-medium text-[var(--foreground-tertiary)] capitalize">{statusLabels[status]}</span>
-                      <div className="flex-1 h-2 rounded-full bg-[var(--surface-hover)] overflow-hidden">
+                      <span className="w-24 text-xs text-[var(--foreground-tertiary)] capitalize">{statusLabels[status]}</span>
+                      <div className="flex-1 h-1.5 rounded-full bg-[var(--surface-hover)] overflow-hidden">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
+                          className="h-full rounded-full"
                           style={{
                             width: `${pct}%`,
                             backgroundColor:
@@ -217,27 +187,26 @@ export default function DashboardPage() {
                           }}
                         />
                       </div>
-                      <span className="w-10 text-right text-xs font-medium text-[var(--foreground-secondary)]">{count}</span>
+                      <span className="w-8 text-right text-xs font-medium text-[var(--foreground-secondary)]">{count}</span>
                     </div>
                   );
                 })}
               </div>
 
               {overdueTasks.length > 0 && (
-                <div className="mt-5 p-4 rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)]">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="mt-6 p-3 rounded-md bg-[var(--destructive-subtle)] border border-[var(--destructive-subtle)]">
+                  <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4 text-[var(--destructive)]" />
-                    <span className="text-sm font-semibold text-[var(--destructive)]">{overdueTasks.length} overdue task{overdueTasks.length > 1 ? "s" : ""}</span>
+                    <span className="text-sm font-medium text-[var(--destructive)]">{overdueTasks.length} overdue task{overdueTasks.length > 1 ? "s" : ""}</span>
                   </div>
-                  <p className="text-xs text-[var(--foreground-tertiary)]">Some tasks are past their due date and need attention.</p>
                 </div>
               )}
             </div>
 
             {/* Activity Feed */}
             <div className="surface p-5">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-[var(--foreground)]">Recent Activity</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-sm font-semibold text-[var(--foreground)] tracking-tight">Recent Activity</h2>
                 <Link href="/activity" className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors">
                   View all →
                 </Link>
@@ -253,14 +222,14 @@ export default function DashboardPage() {
                         key={i}
                         className="flex items-start gap-3 py-3 border-b border-[var(--border)] last:border-b-0"
                       >
-                        <div className={`mt-0.5 h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${action.bg}`}>
+                        <div className="mt-0.5 h-6 w-6 rounded-md bg-[var(--surface-hover)] flex items-center justify-center shrink-0">
                           <span className={action.color}>{action.icon}</span>
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm text-[var(--foreground-secondary)] leading-snug">
                             {log.description}
                           </p>
-                          <p className="text-xs text-[var(--foreground-quaternary)] mt-1">{formatTime(log.created)}</p>
+                          <p className="text-xs text-[var(--foreground-quaternary)] mt-0.5">{formatTime(log.created)}</p>
                         </div>
                       </div>
                     );
@@ -270,35 +239,35 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Access Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Link href="/tasks" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center shrink-0">
-                <ListTodo className="h-6 w-6 text-[var(--primary)]" />
+          {/* Quick Access */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <Link href="/tasks" className="surface-hover p-4 flex items-center gap-3 group">
+              <div className="h-9 w-9 rounded-md bg-[var(--primary-subtle)] flex items-center justify-center shrink-0">
+                <ListTodo className="h-4 w-4 text-[var(--primary)]" />
               </div>
               <div>
-                <p className="font-semibold text-[var(--foreground)]">Tasks</p>
-                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{tasks.length} total, {tasksByStatus("in_progress").length} in progress</p>
+                <p className="text-sm font-medium text-[var(--foreground)]">Tasks</p>
+                <p className="text-xs text-[var(--foreground-tertiary)]">{tasks.length} total · {tasksByStatus("in_progress").length} in progress</p>
               </div>
             </Link>
 
-            <Link href="/agents" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-lg bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center shrink-0">
-                <Bot className="h-6 w-6 text-[var(--agent)]" />
+            <Link href="/agents" className="surface-hover p-4 flex items-center gap-3 group">
+              <div className="h-9 w-9 rounded-md bg-[var(--agent-subtle)] flex items-center justify-center shrink-0">
+                <Bot className="h-4 w-4 text-[var(--agent)]" />
               </div>
               <div>
-                <p className="font-semibold text-[var(--foreground)]">Agents</p>
-                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{agents.length} total, {activeAgents.length} running</p>
+                <p className="text-sm font-medium text-[var(--foreground)]">Agents</p>
+                <p className="text-xs text-[var(--foreground-tertiary)]">{agents.length} total · {activeAgents.length} running</p>
               </div>
             </Link>
 
-            <Link href="/projects" className="surface-hover p-5 flex items-center gap-4 group">
-              <div className="h-12 w-12 rounded-lg bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center shrink-0">
-                <FolderKanban className="h-6 w-6 text-[var(--coral)]" />
+            <Link href="/projects" className="surface-hover p-4 flex items-center gap-3 group">
+              <div className="h-9 w-9 rounded-md bg-[var(--success-subtle)] flex items-center justify-center shrink-0">
+                <FolderKanban className="h-4 w-4 text-[var(--success)]" />
               </div>
               <div>
-                <p className="font-semibold text-[var(--foreground)]">Projects</p>
-                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{activeProjects.length} active</p>
+                <p className="text-sm font-medium text-[var(--foreground)]">Projects</p>
+                <p className="text-xs text-[var(--foreground-tertiary)]">{activeProjects.length} active</p>
               </div>
             </Link>
           </div>

@@ -1,80 +1,75 @@
 @import "tailwindcss";
 
 /* ========================================
-   MISSION CONTROL v2 — Warm Amber Dark
-   Inspired by Linear, Notion, Paperclip
-   Refined, warm, editorial
+   MISSION CONTROL — Minimalist Dark Modern
+   Clean, professional, no effects
    ======================================== */
 
 :root {
-  /* Surfaces — warm taupe dark, not pure black */
-  --background: #0c0a09;
-  --surface: #1c1917;
-  --surface-elevated: #292524;
-  --surface-hover: #44403c;
-  --surface-active: #57534e;
+  /* Base — cool charcoal, not warm */
+  --background: #0f0f11;
+  --surface: #18181b;
+  --surface-elevated: #1f1f23;
+  --surface-hover: #27272a;
+  --surface-active: #3f3f46;
 
-  /* Text — warm ivory with stone undertones */
-  --foreground: #fafaf9;
-  --foreground-secondary: #a8a29e;
-  --foreground-tertiary: #78716c;
-  --foreground-quaternary: #57534e;
+  /* Text — cool gray-white */
+  --foreground: #f4f4f5;
+  --foreground-secondary: #a1a1aa;
+  --foreground-tertiary: #71717a;
+  --foreground-quaternary: #52525b;
 
-  /* Accent — warm amber (like Linear's orange) */
-  --primary: #f59e0b;
-  --primary-light: #fbbf24;
-  --primary-dark: #d97706;
-  --primary-subtle: rgba(245, 158, 11, 0.1);
-  --primary-border: rgba(245, 158, 11, 0.25);
+  /* Accent — muted indigo */
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --primary-subtle: rgba(99, 102, 241, 0.08);
+  --primary-border: rgba(99, 102, 241, 0.2);
 
-  /* Secondary accent — warm coral */
-  --coral: #f97316;
-  --coral-subtle: rgba(249, 115, 22, 0.1);
+  /* Secondary — slate blue */
+  --secondary: #60a5fa;
+  --secondary-subtle: rgba(96, 165, 250, 0.08);
 
-  /* Semantic */
-  --success: #22c55e;
-  --success-subtle: rgba(34, 197, 94, 0.1);
-  --success-border: rgba(34, 197, 94, 0.25);
-  --warning: #f59e0b;
-  --warning-subtle: rgba(245, 158, 11, 0.1);
-  --warning-border: rgba(245, 158, 11, 0.25);
-  --destructive: #ef4444;
-  --destructive-subtle: rgba(239, 68, 68, 0.1);
-  --destructive-border: rgba(239, 68, 68, 0.25);
-  --info: #06b6d4;
-  --info-subtle: rgba(6, 182, 212, 0.1);
-  --info-border: rgba(6, 182, 212, 0.25);
+  /* Semantic — muted, not neon */
+  --success: #34d399;
+  --success-subtle: rgba(52, 211, 153, 0.08);
+  --warning: #fbbf24;
+  --warning-subtle: rgba(251, 191, 36, 0.08);
+  --destructive: #f87171;
+  --destructive-subtle: rgba(248, 113, 113, 0.08);
+  --info: #38bdf8;
+  --info-subtle: rgba(56, 189, 248, 0.08);
 
-  /* Agent accent — warm violet */
+  /* Agent — soft violet */
   --agent: #8b5cf6;
   --agent-light: #a78bfa;
-  --agent-subtle: rgba(139, 92, 246, 0.1);
-  --agent-border: rgba(139, 92, 246, 0.25);
+  --agent-subtle: rgba(139, 92, 246, 0.08);
+  --agent-border: rgba(139, 92, 246, 0.2);
 
-  /* Borders — warm stone tones */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.2);
+  /* Borders — barely visible */
+  --border: rgba(255, 255, 255, 0.04);
+  --border-hover: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
 
-  /* Radius — larger, friendlier */
-  --radius: 10px;
-  --radius-sm: 6px;
-  --radius-xs: 4px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  /* Radius — minimal */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-xs: 2px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-  /* Shadows — warm and soft */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.6);
+  /* Shadows — barely there */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
 
-  /* Status colors */
-  --status-backlog: #78716c;
-  --status-todo: #f59e0b;
-  --status-in-progress: #3b82f6;
+  /* Status */
+  --status-backlog: #71717a;
+  --status-todo: #fbbf24;
+  --status-in-progress: #60a5fa;
   --status-review: #8b5cf6;
-  --status-done: #22c55e;
-  --status-blocked: #ef4444;
+  --status-done: #34d399;
+  --status-blocked: #f87171;
 }
 
 html {
@@ -93,25 +88,25 @@ body {
 }
 
 /* ========================================
-   SCROLLBAR — Minimal & Warm
+   SCROLLBAR
    ======================================== */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ========================================
-   SURFACE CLASSES
+   SURFACES — flat, clean
    ======================================== */
 .surface {
   background: var(--surface);
@@ -129,66 +124,55 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: background 150ms, border-color 150ms;
+  transition: background 120ms ease, border-color 120ms ease;
 }
+
 .surface-hover:hover {
   background: var(--surface-hover);
   border-color: var(--border-hover);
 }
 
 /* ========================================
-   STATUS PILLS
+   STATUS PILLS — minimal, no glow
    ======================================== */
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 9999px;
   line-height: 1;
 }
 
 .status-pill .dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
 }
 
-.status-pill-todo { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
-.status-pill-todo .dot { background: #f59e0b; }
+.status-pill-todo { background: rgba(251, 191, 36, 0.08); color: #fbbf24; }
+.status-pill-todo .dot { background: #fbbf24; }
 
-.status-pill-in_progress { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-.status-pill-in_progress .dot { background: #3b82f6; animation: pulse-dot 2s ease-in-out infinite; }
+.status-pill-in_progress { background: rgba(96, 165, 250, 0.08); color: #60a5fa; }
+.status-pill-in_progress .dot { background: #60a5fa; }
 
-.status-pill-review { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+.status-pill-review { background: rgba(139, 92, 246, 0.08); color: #a78bfa; }
 .status-pill-review .dot { background: #8b5cf6; }
 
-.status-pill-done { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
-.status-pill-done .dot { background: #22c55e; }
+.status-pill-done { background: rgba(52, 211, 153, 0.08); color: #34d399; }
+.status-pill-done .dot { background: #34d399; }
 
 /* ========================================
-   ANIMATIONS
+   NO ANIMATIONS
    ======================================== */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+button, a, input, textarea, select {
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(8px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.animate-fade-in { animation: fadeIn 200ms ease forwards; }
-.animate-slide-up { animation: slideUp 250ms ease forwards; }
+/* No active scale — no effects */
 
 /* ========================================
    CHAT THREAD
@@ -196,14 +180,13 @@ body {
 .chat-thread {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .chat-message {
   display: flex;
-  gap: 12px;
-  padding: 12px 0;
-  animation: fadeIn 200ms ease forwards;
+  gap: 10px;
+  padding: 10px 0;
 }
 
 .chat-message.user {
@@ -212,25 +195,26 @@ body {
 
 .chat-avatar {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .chat-avatar.user { background: var(--primary-subtle); color: var(--primary-light); border: 1px solid var(--primary-border); }
 .chat-avatar.agent { background: var(--agent-subtle); color: var(--agent-light); border: 1px solid var(--agent-border); }
-.chat-avatar.system { background: rgba(120, 113, 108, 0.1); color: #78716c; border: 1px solid rgba(120, 113, 108, 0.2); }
+.chat-avatar.system { background: rgba(113, 113, 122, 0.08); color: #71717a; border: 1px solid rgba(113, 113, 122, 0.15); }
 
 .chat-bubble {
-  max-width: 80%;
+  max-width: 75%;
   border-radius: var(--radius-lg);
-  padding: 12px 16px;
+  padding: 10px 14px;
   line-height: 1.6;
+  font-size: 14px;
 }
 
 .chat-bubble.user {
@@ -257,7 +241,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 6px 0;
   font-size: 13px;
   border-bottom: 1px solid var(--border);
 }
@@ -268,7 +252,7 @@ body {
 
 .property-label {
   color: var(--foreground-tertiary);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .property-value {
@@ -278,28 +262,13 @@ body {
 }
 
 /* ========================================
-   SKELETON LOADING
-   ======================================== */
-.skeleton {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: var(--radius-sm);
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ========================================
-   DELIVERABLE CODE BLOCKS
+   DELIVERABLE BLOCKS
    ======================================== */
 .deliverable-block {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 14px;
   font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
   font-size: 13px;
   line-height: 1.7;
@@ -310,26 +279,15 @@ body {
 }
 
 /* ========================================
-   FOCUS STYLES
+   FOCUS — minimal ring
    ======================================== */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* ========================================
-   TRANSITIONS
-   ======================================== */
-button, a, input, textarea, select {
-  transition: background-color 150ms, border-color 150ms, color 150ms, box-shadow 150ms, transform 100ms;
-}
-
-button:active:not(:disabled) {
-  transform: scale(0.98);
+  outline: 1px solid var(--primary);
+  outline-offset: 1px;
 }
 
 /* ========================================
