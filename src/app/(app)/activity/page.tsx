@@ -272,7 +272,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
 
   return (
     <div
-      className="group flex items-start gap-3 p-3 rounded-2xl bg-white/[0.02] border border-[var(--border)] border-t-white/[0.06] hover:bg-[var(--surface-elevated)] transition-all duration-200 "
+      className="group flex items-start gap-3 p-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)] border-t-white/[0.06] hover:bg-[var(--surface-elevated)] transition-all duration-200 "
       style={{ animationDelay: `${delay}s` }}
     >
       {/* Icon */}

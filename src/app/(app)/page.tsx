@@ -120,7 +120,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/projects/new")} className="glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all hover:text-[var(--foreground)] hover:bg-white/[0.04]">
+          <button onClick={() => router.push("/projects/new")} className="glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]">
             <FolderKanban className="h-4 w-4" />
             New Project
           </button>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                       <span className="h-2 w-2 rounded-full shrink-0" style={{ background: statusColors[status] }} />
                       <span className="text-xs text-[var(--foreground-secondary)]">{statusLabels[status]}</span>
                     </div>
-                    <div className="flex-1 h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                    <div className="flex-1 h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: statusColors[status] }} />
                     </div>
                     <span className="text-xs font-semibold text-[var(--foreground)] w-6 text-right">{count}</span>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                         <h3 className="text-sm font-medium text-[var(--foreground)] truncate pr-4">{project.name}</h3>
                         <span className="text-xs font-semibold text-[var(--foreground)]">{progress}%</span>
                       </div>
-                      <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                      <div className="h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
                         <div className={`h-full rounded-full transition-all ${progress >= 80 ? "bg-[var(--success)]" : "bg-[var(--primary)]"}`} style={{ width: `${progress}%` }} />
                       </div>
                       <p className="mt-1 text-[11px] text-[var(--foreground-tertiary)]">{doneTasks.length}/{projectTasks.length} tasks</p>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-2">
                 {upcomingTasks.slice(0, 3).map((task) => (
-                  <Link key={task.id} href={`/tasks/${task.id}`} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] active:bg-white/[0.04] transition-colors">
+                  <Link key={task.id} href={`/tasks/${task.id}`} className="flex items-center gap-2 p-2 rounded-lg bg-[var(--surface)] active:bg-[var(--surface-elevated)] transition-colors">
                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)] shrink-0" />
                     <span className="text-xs text-[var(--foreground-secondary)] truncate">{task.title}</span>
                     <span className="text-[10px] text-[var(--foreground-tertiary)] shrink-0">{new Date(task.due_date!).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}</span>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                     <div key={agent.id} className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-[var(--foreground)] truncate">{agent.name}</p>
-                        <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden mt-1">
+                        <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden mt-1">
                           <div className="h-full rounded-full bg-[var(--primary)]/70 transition-all" style={{ width: `${loadPct}%` }} />
                         </div>
                       </div>
@@ -347,7 +347,7 @@ export default function DashboardPage() {
                       <span className="text-xs font-medium text-[var(--foreground)] truncate">{goal.name}</span>
                       <span className="text-xs font-semibold text-[var(--foreground)]">{goal.progress}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
                       <div className={`h-full rounded-full transition-all ${goal.progress >= 80 ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} style={{ width: `${goal.progress}%` }} />
                     </div>
                   </Link>
@@ -399,7 +399,7 @@ function KpiCard({ title, value, subtitle, icon, accent, href }: { title: string
             <h3 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{displayValue}</h3>
             <p className="mt-1 text-[11px] text-[var(--foreground-secondary)]">{subtitle}</p>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-elevated)]">
             <span style={{ color: accent }}>{icon}</span>
           </div>
         </div>

@@ -145,10 +145,10 @@ export default function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search tasks, projects, goals..."
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none"
           />
           {loading && <Loader2 className="h-4 w-4 text-[var(--foreground-tertiary)] animate-spin" />}
-          <button onClick={() => setOpen(false)} className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:bg-white/[0.06]">
+          <button onClick={() => setOpen(false)} className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:bg-[var(--surface-hover)]">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -173,11 +173,11 @@ export default function CommandPalette() {
                 { label: "Agents", href: "/agents", keys: ["G", "A"] },
               ].map((item) => (
                 <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.04] hover:text-[var(--foreground)] transition-all">
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)] transition-all">
                   <span>{item.label}</span>
                   <div className="flex gap-1">
                     {item.keys.map((k, i) => (
-                      <span key={i} className="flex h-5 w-5 items-center justify-center rounded-[4px] bg-white/[0.06] text-[10px] font-medium text-[var(--foreground-tertiary)]">{k}</span>
+                      <span key={i} className="flex h-5 w-5 items-center justify-center rounded-[4px] bg-[var(--surface-hover)] text-[10px] font-medium text-[var(--foreground-tertiary)]">{k}</span>
                     ))}
                   </div>
                 </Link>
@@ -191,12 +191,12 @@ export default function CommandPalette() {
               onClick={() => setOpen(false)}
               className={`flex items-center gap-3 px-5 py-3 transition-all ${
                 i === selectedIndex
-                  ? "bg-white/[0.06]"
-                  : "hover:bg-white/[0.03]"
+                  ? "bg-[var(--surface-hover)]"
+                  : "hover:bg-[var(--surface-hover)]"
               }`}
               onMouseEnter={() => setSelectedIndex(i)}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-elevated)]">
                 {typeIcon[r.type]}
               </div>
               <div className="min-w-0 flex-1">

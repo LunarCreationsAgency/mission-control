@@ -106,7 +106,7 @@ export default function BudgetsPage() {
                     href={`/projects/${project.id}`}
                     className="block active:scale-[0.98] transition-transform"
                   >
-                    <div className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.02]">
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-[var(--surface)]">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[var(--foreground)] truncate">{project.name}</p>
                         <p className="text-[11px] text-[var(--foreground-tertiary)]">{project.status}</p>

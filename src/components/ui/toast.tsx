@@ -80,7 +80,7 @@ function ToastItem({ toast, index, onDismiss }: { toast: Toast; index: number; o
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-[16px] p-4 pr-3 ${borders[toast.type]} border-l-[3px] shadow-lg backdrop-blur-xl`}
+      className={`flex items-center gap-3 rounded-lg p-4 pr-3 ${borders[toast.type]} border-l-[3px] shadow-lg backdrop-blur-xl`}
       style={{
         background: "rgba(22,22,30,0.95)",
         border: "1px solid rgba(255,255,255,0.06)",
@@ -92,7 +92,7 @@ function ToastItem({ toast, index, onDismiss }: { toast: Toast; index: number; o
       <p className="flex-1 text-sm text-[var(--foreground)]">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.06] transition-all"
+        className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
       >
         <X className="h-3.5 w-3.5" />
       </button>

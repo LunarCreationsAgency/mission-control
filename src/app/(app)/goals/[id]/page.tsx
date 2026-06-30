@@ -84,7 +84,6 @@ export default function GoalDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex-shrink-0 px-4 lg:px-6 py-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 text-xs text-[var(--foreground-tertiary)] mb-3">
           <Link href="/goals" className="hover:text-[var(--foreground-secondary)] transition-colors">Goals</Link>
@@ -130,11 +129,9 @@ export default function GoalDetailPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            {/* Progress */}
             <div className="glass p-5">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-[var(--foreground)]">Progress</h2>
@@ -148,14 +145,12 @@ export default function GoalDetailPage() {
               </p>
             </div>
 
-            {/* Description */}
             <div className="glass p-5">
               <h2 className="text-sm font-semibold text-[var(--foreground)] mb-3">Description</h2>
               <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">{goal.description || "No description provided."}</p>
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-4">
             <div className="glass p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-4">Details</h3>

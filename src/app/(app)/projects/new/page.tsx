@@ -1379,7 +1379,7 @@ export default function NewProjectWizard() {
           <div className="w-20 h-20 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
             <Sparkles className="h-10 w-10 text-[var(--primary-light)]" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">New Project</h1>
+          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-3">New Project</h1>
           <p className="text-sm text-[var(--foreground-secondary)] mb-8">
             Answer a few questions and we'll generate a complete project plan with all the tasks you need.
           </p>
@@ -1402,7 +1402,7 @@ export default function NewProjectWizard() {
           <div className="flex items-center gap-3 mb-6">
             <button onClick={() => router.push("/projects")} className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"><ArrowLeft className="h-4 w-4" /> Back</button>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Your Project Plan</h1>
+          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Your Project Plan</h1>
           <p className="text-sm text-[var(--foreground-secondary)] mb-6">Review the generated plan. You can edit tasks after the project is created.</p>
           {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-red-400 shrink-0" /><p className="text-xs text-red-400">{error}</p></div>}
           <div className="glass-elevated p-5 mb-6">
@@ -1415,7 +1415,7 @@ export default function NewProjectWizard() {
           </div>
           <div className="space-y-2 mb-8">
             {plan.tasks.map((task, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-[var(--border)]">
+              <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
                 <span className="text-lg shrink-0">{getTypeIcon(task.type)}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--foreground)]">{task.title}</p>
@@ -1462,7 +1462,7 @@ export default function NewProjectWizard() {
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-2">{currentStep.question}</h2>
+          <h2 className="text-xl font-bold text-[var(--foreground)] mb-2">{currentStep.question}</h2>
           {currentStep.description && <p className="text-sm text-[var(--foreground-secondary)]">{currentStep.description}</p>}
         </div>
 
@@ -1475,7 +1475,7 @@ export default function NewProjectWizard() {
               const isSelected = isMulti ? selectedMulti.has(opt.value) : selectedSingle === opt.value;
               return (
                 <button key={opt.value} onClick={() => { if (isMulti) toggleMulti(opt.value); else setSelectedSingle(opt.value); setError(null); }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary)]/10" : "border-[var(--border)] bg-white/[0.02] hover:bg-[var(--surface-hover)]"}`}>
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary)]/10" : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-hover)]"}`}>
                   <span className="text-2xl">{opt.icon}</span>
                   <span className="text-sm font-medium text-[var(--foreground)]">{opt.label}</span>
                   {isSelected && <Check className="h-4 w-4 text-[var(--primary-light)] ml-auto shrink-0" />}
@@ -1490,7 +1490,7 @@ export default function NewProjectWizard() {
           <div className="mb-8">
             <input type={currentStep.type === "url" || currentStep.type === "url_multi" ? "url" : "text"} value={textAnswer} onChange={(e) => { setTextAnswer(e.target.value); setError(null); }}
               placeholder={currentStep.placeholder || "Type your answer..."}
-              className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all" />
+              className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all" />
           </div>
         )}
 

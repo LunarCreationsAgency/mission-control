@@ -119,26 +119,26 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Company Name</label>
-                <input type="text" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="text" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]/40" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Currency</label>
-                  <input type="text" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                  <input type="text" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]/40" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Timezone</label>
-                  <input type="text" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                  <input type="text" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]/40" />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Vercel Token</label>
-                <input type="password" value={form.vercel_token} onChange={(e) => setForm({ ...form, vercel_token: e.target.value })} placeholder="vc_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="password" value={form.vercel_token} onChange={(e) => setForm({ ...form, vercel_token: e.target.value })} placeholder="vc_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]/40" />
                 <p className="text-[10px] text-[var(--foreground-tertiary)]">vercel.com/account/tokens</p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">GitHub Token</label>
-                <input type="password" value={form.github_token} onChange={(e) => setForm({ ...form, github_token: e.target.value })} placeholder="ghp_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="password" value={form.github_token} onChange={(e) => setForm({ ...form, github_token: e.target.value })} placeholder="ghp_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]/40" />
                 <p className="text-[10px] text-[var(--foreground-tertiary)]">github.com/settings/tokens</p>
               </div>
               <div className="flex gap-3 pt-2">
@@ -187,7 +187,7 @@ export default function SettingsPage() {
 
 function SettingCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02]">
+    <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface)]">
       <div className="text-[var(--foreground-tertiary)]">{icon}</div>
       <div className="min-w-0">
         <p className="text-[11px] text-[var(--foreground-tertiary)]">{label}</p>
