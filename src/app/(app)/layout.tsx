@@ -11,9 +11,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <ToastProvider>
         <Navbar />
         <CommandPalette />
-        <main className="min-h-screen lg:pl-20">
-          {/* Mobile: tighter padding, safe areas; Desktop: spacious */}
-          <div className="mx-auto max-w-7xl px-3 pt-14 pb-24 sm:px-4 lg:px-8 lg:pt-8 lg:pb-8">
+        <main className="min-h-screen lg:pl-[52px]">
+          <div className="mx-auto max-w-[1600px]">
             {children}
           </div>
         </main>

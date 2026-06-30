@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ListTodo,
@@ -9,15 +12,9 @@ import {
   Activity,
   Wallet,
   Settings,
-  Menu,
-  X,
-  LogOut,
   Search,
-  MoreHorizontal,
+  LogOut,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 
 const primaryNav = [
   { href: "/", label: "Home", icon: LayoutDashboard },
@@ -35,7 +32,6 @@ const secondaryNav = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -45,15 +41,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    setMoreOpen(false);
-  }, [pathname]);
+  useEffect(() => { setMoreOpen(false); }, [pathname]);
 
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
+      window.location.href = "/login";
     } catch (e) {
       console.error("Logout failed:", e);
     }
@@ -61,71 +54,23 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop: Floating Dock Sidebar */}
-      <aside className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-2 py-4 px-2 rounded-[28px] liquid-glass-strong">
-        <div className="mb-2 p-2">
-          <Bot className="h-6 w-6 text-[var(--primary-light)]" />
-        </div>
+      {/* ── Desktop: Minimal Icon Sidebar ── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[52px] z-50 flex-col items-center border-r border-[var(--border)] bg-[var(--background)]">
+        <div className="flex flex-col items-center gap-1 pt-3 flex-1">
+          <div className="mb-4 p-2 rounded-md hover:bg-[var(--surface-hover)] transition-colors cursor-pointer">
+            <Bot className="h-5 w-5 text-[var(--primary-light)]" />
+          </div>
 
-        <button
-          onClick={() => document.dispatchEvent(new CustomEvent("openCommandPalette"))}
-          className="mb-1 group relative flex items-center justify-center rounded-[14px] p-3 transition-all duration-300 text-[var(--foreground-tertiary)] hover:bg-white/[0.04] hover:text-[var(--foreground-secondary)]"
-        >
-          <Search className="h-[20px] w-[20px]" />
-          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
-            Search (⌘K)
-          </span>
-        </button>
+          <button
+            onClick={() => document.dispatchEvent(new CustomEvent("openCommandPalette"))}
+            className="p-2 rounded-md text-[var(--foreground-quaternary)] hover:text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-all"
+            title="Search (⌘K)"
+          >
+            <Search className="h-[18px] w-[18px]" />
+          </button>
 
-        <nav className="flex flex-col gap-1">
-          {[...primaryNav, ...secondaryNav].map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  group relative flex items-center justify-center rounded-[14px] p-3 transition-all duration-300
-                  ${isActive
-                    ? "bg-white/[0.08] text-[var(--primary-light)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
-                    : "text-[var(--foreground-tertiary)] hover:bg-white/[0.04] hover:text-[var(--foreground-secondary)]"
-                  }
-                `}
-              >
-                <Icon className="h-[20px] w-[20px]" />
-                <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
-                  {item.label}
-                </span>
-                {isActive && (
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 h-1 w-1 rounded-full bg-[var(--primary-light)]" />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+          <div className="w-6 h-px bg-[var(--border)] my-1" />
 
-        <button
-          onClick={handleLogout}
-          className="mt-2 group relative flex items-center justify-center rounded-[14px] p-3 transition-all duration-300 text-[var(--foreground-tertiary)] hover:bg-red-500/10 hover:text-red-400"
-        >
-          <LogOut className="h-[20px] w-[20px]" />
-          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-white/[0.08] text-[11px] font-medium text-[var(--foreground)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/[0.08]">
-            Logout
-          </span>
-        </button>
-      </aside>
-
-      {/* Mobile: Bottom Navigation Bar — iOS app-style dock */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]"
-        style={{
-          background: "linear-gradient(to top, rgba(10,10,18,0.98) 0%, rgba(10,10,18,0.95) 70%, rgba(10,10,18,0.85) 100%)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          backdropFilter: "blur(24px) saturate(160%)",
-          WebkitBackdropFilter: "blur(24px) saturate(160%)",
-        }}
-      >
-        <div className="flex items-center justify-around px-2 pt-2">
           {primaryNav.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
@@ -133,108 +78,113 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 min-w-[68px] min-h-[56px] select-none active:scale-95 ${
+                className={`p-2 rounded-md transition-all relative group ${
                   isActive
-                    ? "text-[var(--primary-light)]"
-                    : "text-[var(--foreground-tertiary)]"
+                    ? "bg-[var(--surface-hover)] text-[var(--primary-light)]"
+                    : "text-[var(--foreground-quaternary)] hover:text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
                 }`}
+                title={item.label}
               >
-                <div className={`p-1.5 rounded-xl transition-all ${isActive ? "bg-white/[0.08]" : ""}`}>
-                  <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-                <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+                <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
                 {isActive && (
-                  <span className="absolute bottom-1.5 h-[3px] w-[3px] rounded-full bg-[var(--primary-light)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-px h-4 w-[3px] rounded-r-full bg-[var(--primary-light)]" />
                 )}
               </Link>
             );
           })}
 
-          {/* More button */}
+          <div className="w-6 h-px bg-[var(--border)] my-1" />
+
+          {secondaryNav.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`p-2 rounded-md transition-all ${
+                  isActive
+                    ? "bg-[var(--surface-hover)] text-[var(--primary-light)]"
+                    : "text-[var(--foreground-quaternary)] hover:text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
+                }`}
+                title={item.label}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="pb-3">
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-md text-[var(--foreground-quaternary)] hover:text-red-400 hover:bg-red-500/10 transition-all"
+            title="Logout"
+          >
+            <LogOut className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Mobile: Bottom Tab Bar ── */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]"
+        style={{
+          background: "rgba(9,9,11,0.95)",
+          borderTop: "1px solid var(--border)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+        }}
+      >
+        <div className="flex items-center justify-around px-1 pt-1.5 pb-1">
+          {primaryNav.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-lg transition-all min-w-[56px] ${
+                  isActive ? "text-[var(--primary-light)]" : "text-[var(--foreground-quaternary)]"
+                }`}
+              >
+                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.2 : 1.8} />
+                <span className="text-[10px] font-medium mt-0.5">{item.label}</span>
+              </Link>
+            );
+          })}
           <button
             onClick={() => setMoreOpen(!moreOpen)}
-            className={`flex flex-col items-center justify-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 min-w-[68px] min-h-[56px] select-none active:scale-95 ${
-              moreOpen ? "text-[var(--primary-light)]" : "text-[var(--foreground-tertiary)]"
+            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-lg transition-all min-w-[56px] ${
+              moreOpen ? "text-[var(--primary-light)]" : "text-[var(--foreground-quaternary)]"
             }`}
           >
-            <div className={`p-1.5 rounded-xl transition-all ${moreOpen ? "bg-white/[0.08]" : ""}`}>
-              <MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={moreOpen ? 2.5 : 2} />
-            </div>
-            <span className="text-[10px] font-semibold leading-none">More</span>
+            <Activity className="h-5 w-5" />
+            <span className="text-[10px] font-medium mt-0.5">More</span>
           </button>
         </div>
       </nav>
 
-      {/* Mobile: More Sheet */}
-      {moreOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] flex items-end"
-          onClick={() => setMoreOpen(false)}
-        >
-          <div className="absolute inset-0 bg-[#0a0a0f]/60" />
-          <div
-            className="relative w-full rounded-t-[24px] p-6 pb-[calc(80px+env(safe-area-inset-bottom,0px))]"
-            style={{
-              background: "#16161e",
-              borderTop: "1px solid rgba(255,255,255,0.1)",
-              animation: "slideUp 0.2s ease forwards",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-6" />
-
-            <div className="space-y-1">
-              {secondaryNav.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all ${
-                      isActive
-                        ? "bg-white/[0.06] text-[var(--foreground)] font-medium"
-                        : "text-[var(--foreground-secondary)] hover:bg-white/[0.04]"
-                    }`}
-                    onClick={() => setMoreOpen(false)}
-                  >
-                    <Icon className={`h-5 w-5 ${isActive ? "text-[var(--primary-light)]" : ""}`} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-              <button
-                onClick={() => { setMoreOpen(false); handleLogout(); }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-400 transition-all hover:bg-red-500/10"
-              >
-                <LogOut className="h-5 w-5" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Top Header */}
-      <header className={`lg:hidden fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? "glass-header" : ""}`}>
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Bot className="h-6 w-6 text-[var(--primary-light)]" />
-            <div>
-              <h1 className="text-sm font-semibold text-[var(--foreground)]">Mission Control</h1>
-              <p className="text-[10px] text-[var(--foreground-tertiary)]">AI Orchestration</p>
-            </div>
+      {/* ── Mobile: Top Header ── */}
+      <header className={`lg:hidden fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${scrolled ? "border-b border-[var(--border)]" : ""}`}
+        style={{ background: scrolled ? "rgba(9,9,11,0.92)" : "transparent", backdropFilter: scrolled ? "blur(20px)" : "none", WebkitBackdropFilter: scrolled ? "blur(20px)" : "none" }}
+      >
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-[var(--primary-light)]" />
+            <span className="text-sm font-semibold text-[var(--foreground)]">Mission Control</span>
           </div>
           <button
             onClick={() => document.dispatchEvent(new CustomEvent("openCommandPalette"))}
-            className="liquid-glass-subtle p-2.5 rounded-xl"
+            className="p-2 rounded-md hover:bg-[var(--surface-hover)] transition-colors"
           >
-            <Search className="h-5 w-5 text-[var(--foreground-tertiary)]" />
+            <Search className="h-4 w-4 text-[var(--foreground-tertiary)]" />
           </button>
         </div>
       </header>
 
       {/* Mobile spacers */}
-      <div className="lg:hidden h-14" />
+      <div className="lg:hidden h-12" />
       <div className="lg:hidden h-16" />
     </>
   );
