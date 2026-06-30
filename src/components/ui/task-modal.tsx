@@ -18,7 +18,7 @@ interface TaskModalProps {
 const priorityOptions: { value: string; label: string; icon: React.ReactNode }[] = [
   { value: "low", label: "Low", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--secondary)]" /> },
   { value: "medium", label: "Medium", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" /> },
-  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
+  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--secondary)]" /> },
   { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--destructive)]" /> },
 ];
 

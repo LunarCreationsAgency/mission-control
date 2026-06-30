@@ -16,11 +16,11 @@ export default function BudgetsPage() {
   if (loading) {
     return (
       <div className="p-8 space-y-6">
-        <div className="h-7 w-32 bg-[var(--surface)] rounded-md animate-pulse mb-2" />
+        <div className="h-7 w-32 bg-[var(--surface)] rounded-md  mb-2" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[1,2,3].map(i => <div key={i} className="h-28 bg-[var(--surface)] rounded-md animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-28 bg-[var(--surface)] rounded-md " />)}
         </div>
-        <div className="h-64 bg-[var(--surface)] rounded-md animate-pulse" />
+        <div className="h-64 bg-[var(--surface)] rounded-md " />
       </div>
     );
   }

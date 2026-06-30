@@ -129,10 +129,10 @@ function AgentCard({
 function AgentsSkeleton() {
   return (
     <div className="p-8">
-      <div className="h-8 w-32 rounded-md bg-[var(--surface)] animate-pulse mb-8" />
+      <div className="h-8 w-32 rounded-md bg-[var(--surface)]  mb-8" />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-28 rounded-md bg-[var(--surface)] animate-pulse" />
+          <div key={i} className="h-28 rounded-md bg-[var(--surface)] " />
         ))}
       </div>
     </div>

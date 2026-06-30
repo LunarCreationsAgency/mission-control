@@ -16,10 +16,10 @@ interface TaskCardProps {
 }
 
 const priorityConfig: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
+  low: { bg: "bg-[var(--info-subtle)]", text: "text-[var(--primary-light)]", dot: "bg-[var(--info)]", label: "Low" },
   medium: { bg: "bg-[var(--warning-subtle)]", text: "text-[var(--warning)]", dot: "bg-[var(--warning)]", label: "Medium" },
-  high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400", label: "High" },
-  critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
+  high: { bg: "bg-[var(--secondary-subtle)]", text: "text-[var(--secondary)]", dot: "bg-[var(--secondary)]", label: "High" },
+  critical: { bg: "bg-[var(--destructive-subtle)]", text: "text-[var(--destructive)]", dot: "bg-[var(--destructive)]", label: "Critical" },
 };
 
 export default function TaskCard({
@@ -88,7 +88,7 @@ export default function TaskCard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onClick={handleClick}
-      className={`group block bg-[var(--surface-elevated)] rounded-lg border border-[var(--border)] p-3.5 hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.97] cursor-grab ${
+      className={`group block bg-[var(--surface-elevated)] rounded-lg border border-[var(--border)] p-3.5 hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-all  cursor-grab ${
         isDragging ? "opacity-40" : ""
       } ${isOverdue ? "border-l-[3px] border-l-red-500" : ""}`}
     >
@@ -101,7 +101,7 @@ export default function TaskCard({
               {priority.label}
             </span>
             {isOverdue && (
-              <span className="text-[10px] font-semibold text-[var(--destructive)] bg-red-500/10 rounded-md px-1.5 py-0.5">Overdue</span>
+              <span className="text-[10px] font-semibold text-[var(--destructive)] bg-[var(--destructive-subtle)] rounded-md px-1.5 py-0.5">Overdue</span>
             )}
           </div>
 

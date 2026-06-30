@@ -26,9 +26,9 @@ const statusPillMap: Record<string, string> = {
 
 const statusDotMap: Record<string, string> = {
   todo: "bg-[var(--warning)]",
-  in_progress: "bg-blue-400",
-  review: "bg-violet-400",
-  done: "bg-emerald-400",
+  in_progress: "bg-[var(--info)]",
+  review: "bg-[var(--agent-light)]",
+  done: "bg-[var(--success)]",
 };
 
 export default function KanbanColumn({

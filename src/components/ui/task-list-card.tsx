@@ -12,17 +12,17 @@ interface TaskListCardProps {
 }
 
 const priorityConfig: Record<string, { pill: string; dot: string; label: string }> = {
-  low: { pill: "bg-blue-500/10 text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
+  low: { pill: "bg-[var(--info-subtle)] text-[var(--primary-light)]", dot: "bg-[var(--info)]", label: "Low" },
   medium: { pill: "bg-[var(--warning-subtle)] text-[var(--warning)]", dot: "bg-[var(--warning)]", label: "Medium" },
-  high: { pill: "bg-orange-500/10 text-orange-400", dot: "bg-orange-400", label: "High" },
-  critical: { pill: "bg-red-500/10 text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
+  high: { pill: "bg-[var(--secondary-subtle)] text-[var(--secondary)]", dot: "bg-[var(--secondary)]", label: "High" },
+  critical: { pill: "bg-[var(--destructive-subtle)] text-[var(--destructive)]", dot: "bg-[var(--destructive)]", label: "Critical" },
 };
 
 const statusConfig: Record<string, { dot: string; text: string }> = {
   todo: { dot: "bg-[var(--warning)]", text: "text-[var(--warning)]" },
-  in_progress: { dot: "bg-blue-400", text: "text-[var(--primary-light)]" },
-  review: { dot: "bg-violet-400", text: "text-violet-400" },
-  done: { dot: "bg-emerald-400", text: "text-[var(--success)]" },
+  in_progress: { dot: "bg-[var(--info)]", text: "text-[var(--primary-light)]" },
+  review: { dot: "bg-[var(--agent-light)]", text: "text-[var(--agent-light)]" },
+  done: { dot: "bg-[var(--success)]", text: "text-[var(--success)]" },
 };
 
 export default function TaskListCard({ task, project, agent, onDelete }: TaskListCardProps) {
@@ -33,7 +33,7 @@ export default function TaskListCard({ task, project, agent, onDelete }: TaskLis
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className={`group block rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] p-4 transition-all active:scale-[0.97] select-none touch-manipulation ${
+      className={`group block rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] p-4 transition-all  select-none touch-manipulation ${
         isOverdue ? "border-l-[3px] border-l-red-500" : ""
       } hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)]`}
     >

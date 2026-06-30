@@ -178,14 +178,14 @@ function GoalsSkeleton() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="h-7 w-24 bg-[var(--surface)] rounded-md animate-pulse mb-1" />
-          <div className="h-4 w-48 bg-[var(--surface)] rounded-md animate-pulse" />
+          <div className="h-7 w-24 bg-[var(--surface)] rounded-md  mb-1" />
+          <div className="h-4 w-48 bg-[var(--surface)] rounded-md " />
         </div>
-        <div className="h-9 w-28 bg-[var(--surface)] rounded-md animate-pulse" />
+        <div className="h-9 w-28 bg-[var(--surface)] rounded-md " />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-40 bg-[var(--surface)] rounded-md animate-pulse" />
+          <div key={i} className="h-40 bg-[var(--surface)] rounded-md " />
         ))}
       </div>
     </div>

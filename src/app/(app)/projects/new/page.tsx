@@ -1422,7 +1422,7 @@ export default function NewProjectWizard() {
                   <p className="text-xs text-[var(--foreground-tertiary)] mt-0.5">{task.description}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}>{task.type}</span>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${task.priority === "high" ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : task.priority === "medium" ? "bg-[var(--warning-subtle)] text-orange-400" : "bg-[var(--surface)] text-[var(--foreground-tertiary)]"}`}>{task.priority}</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${task.priority === "high" ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : task.priority === "medium" ? "bg-[var(--warning-subtle)] text-[var(--secondary)]" : "bg-[var(--surface)] text-[var(--foreground-tertiary)]"}`}>{task.priority}</span>
                     <span className="text-[10px] text-[var(--foreground-tertiary)]">~{task.estimated_hours}h</span>
                   </div>
                 </div>

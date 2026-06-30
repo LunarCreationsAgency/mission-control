@@ -56,14 +56,14 @@ export default function GoalDetailPage() {
   if (loading) {
     return (
       <div className="p-8 space-y-4">
-        <div className="h-5 w-32 bg-[var(--surface)] rounded-md animate-pulse" />
-        <div className="h-8 w-48 bg-[var(--surface)] rounded-md animate-pulse mb-4" />
+        <div className="h-5 w-32 bg-[var(--surface)] rounded-md " />
+        <div className="h-8 w-48 bg-[var(--surface)] rounded-md  mb-4" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <div className="h-32 bg-[var(--surface)] rounded-md animate-pulse" />
-            <div className="h-48 bg-[var(--surface)] rounded-md animate-pulse" />
+            <div className="h-32 bg-[var(--surface)] rounded-md " />
+            <div className="h-48 bg-[var(--surface)] rounded-md " />
           </div>
-          <div className="h-64 bg-[var(--surface)] rounded-md animate-pulse" />
+          <div className="h-64 bg-[var(--surface)] rounded-md " />
         </div>
       </div>
     );

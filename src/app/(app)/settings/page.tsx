@@ -57,9 +57,9 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="p-8 space-y-6">
-        <div className="h-7 w-32 bg-[var(--surface)] rounded-md animate-pulse mb-2" />
-        <div className="h-64 bg-[var(--surface)] rounded-md animate-pulse" />
-        <div className="h-64 bg-[var(--surface)] rounded-md animate-pulse" />
+        <div className="h-7 w-32 bg-[var(--surface)] rounded-md  mb-2" />
+        <div className="h-64 bg-[var(--surface)] rounded-md " />
+        <div className="h-64 bg-[var(--surface)] rounded-md " />
       </div>
     );
   }

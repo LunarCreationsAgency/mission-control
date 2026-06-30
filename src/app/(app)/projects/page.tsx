@@ -68,9 +68,9 @@ export default function ProjectsPage() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="h-8 w-32 rounded-md bg-[var(--surface)] animate-pulse mb-8" />
+        <div className="h-8 w-32 rounded-md bg-[var(--surface)]  mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded-md bg-[var(--surface)] animate-pulse" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded-md bg-[var(--surface)] " />)}
         </div>
       </div>
     );

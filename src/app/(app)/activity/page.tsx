@@ -220,17 +220,17 @@ function ActivitySkeleton() {
     <div className="p-8 space-y-6">
       <div className="flex items-end justify-between">
         <div>
-          <div className="h-3 w-20 bg-[var(--surface)] rounded-md animate-pulse mb-2" />
-          <div className="h-7 w-28 bg-[var(--surface)] rounded-md animate-pulse" />
+          <div className="h-3 w-20 bg-[var(--surface)] rounded-md  mb-2" />
+          <div className="h-7 w-28 bg-[var(--surface)] rounded-md " />
         </div>
-        <div className="h-9 w-28 bg-[var(--surface)] rounded-md animate-pulse" />
+        <div className="h-9 w-28 bg-[var(--surface)] rounded-md " />
       </div>
       <div className="space-y-6">
         <div>
-          <div className="h-4 w-24 bg-[var(--surface)] rounded-md animate-pulse mb-3" />
+          <div className="h-4 w-24 bg-[var(--surface)] rounded-md  mb-3" />
           <div className="space-y-1">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-14 w-full bg-[var(--surface)] rounded-md animate-pulse" />
+              <div key={i} className="h-14 w-full bg-[var(--surface)] rounded-md " />
             ))}
           </div>
         </div>

@@ -66,9 +66,9 @@ export default function AgentDetailPage() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="h-5 w-32 rounded-md bg-[var(--surface)] animate-pulse mb-6" />
-        <div className="h-24 rounded-md bg-[var(--surface)] animate-pulse mb-4" />
-        <div className="h-48 rounded-md bg-[var(--surface)] animate-pulse" />
+        <div className="h-5 w-32 rounded-md bg-[var(--surface)]  mb-6" />
+        <div className="h-24 rounded-md bg-[var(--surface)]  mb-4" />
+        <div className="h-48 rounded-md bg-[var(--surface)] " />
       </div>
     );
   }
