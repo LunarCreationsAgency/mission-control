@@ -411,7 +411,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
                             task.priority === "critical" ? "bg-red-500/15 text-[var(--destructive)]" :
                             task.priority === "high" ? "bg-orange-500/15 text-[var(--warning)]" :
-                            task.priority === "medium" ? "bg-amber-500/15 text-[var(--warning)]" :
+                            task.priority === "medium" ? "bg-[var(--warning-subtle)] text-[var(--warning)]" :
                             "bg-blue-500/15 text-[var(--primary-light)]"
                           }`}>
                             {task.priority}
