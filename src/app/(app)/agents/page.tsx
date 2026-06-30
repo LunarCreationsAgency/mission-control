@@ -118,9 +118,6 @@ function AgentCard({
           <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-[var(--destructive)]" : "bg-[var(--success)]"}`} />
           {agent.paused ? "Paused" : "Running"}
         </span>
-        {agent.model && (
-          <span className="text-xs text-[var(--foreground-quaternary)]">{agent.model}</span>
-        )}
       </div>
     </div>
   );

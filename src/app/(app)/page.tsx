@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import TaskModal from "@/components/ui/task-modal";
+import { useToast } from "@/components/ui/toast";
 
 const statusLabels: Record<string, string> = {
   todo: "To Do",
@@ -27,6 +28,7 @@ const actionIcons: Record<string, { icon: React.ReactNode; color: string }> = {
 };
 
 export default function DashboardPage() {
+  const { success } = useToast();
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -227,7 +229,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm text-[var(--foreground-secondary)] leading-snug">
-                            {log.description}
+                            {log.entity_name} — {log.action}
                           </p>
                           <p className="text-xs text-[var(--foreground-quaternary)] mt-0.5">{formatTime(log.created)}</p>
                         </div>
@@ -274,7 +276,21 @@ export default function DashboardPage() {
         </>
       )}
 
-      <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} />
+      <TaskModal
+        isOpen={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        onSubmit={async (data) => {
+          await fetch("/api/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          success("Task created");
+          refetchTasks();
+          setTaskModalOpen(false);
+        }}
+        mode="create"
+      />
     </div>
   );
 }
