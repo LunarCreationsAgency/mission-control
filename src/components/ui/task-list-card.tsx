@@ -12,17 +12,17 @@ interface TaskListCardProps {
 }
 
 const priorityConfig: Record<string, { pill: string; dot: string; label: string }> = {
-  low: { pill: "bg-blue-500/10 text-blue-400", dot: "bg-blue-400", label: "Low" },
+  low: { pill: "bg-blue-500/10 text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
   medium: { pill: "bg-amber-500/10 text-amber-400", dot: "bg-amber-400", label: "Medium" },
   high: { pill: "bg-orange-500/10 text-orange-400", dot: "bg-orange-400", label: "High" },
-  critical: { pill: "bg-red-500/10 text-red-400", dot: "bg-red-400", label: "Critical" },
+  critical: { pill: "bg-red-500/10 text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
 };
 
 const statusConfig: Record<string, { dot: string; text: string }> = {
   todo: { dot: "bg-amber-400", text: "text-amber-400" },
-  in_progress: { dot: "bg-blue-400", text: "text-blue-400" },
+  in_progress: { dot: "bg-blue-400", text: "text-[var(--primary-light)]" },
   review: { dot: "bg-violet-400", text: "text-violet-400" },
-  done: { dot: "bg-emerald-400", text: "text-emerald-400" },
+  done: { dot: "bg-emerald-400", text: "text-[var(--success)]" },
 };
 
 export default function TaskListCard({ task, project, agent, onDelete }: TaskListCardProps) {
@@ -72,7 +72,7 @@ export default function TaskListCard({ task, project, agent, onDelete }: TaskLis
               <span className="text-[11px] text-[var(--foreground-tertiary)]">{agent.name}</span>
             )}
             {task.due_date && (
-              <span className={`flex items-center gap-1 text-[11px] ${isOverdue ? "text-red-400 font-medium" : "text-[var(--foreground-tertiary)]"}`}>
+              <span className={`flex items-center gap-1 text-[11px] ${isOverdue ? "text-[var(--destructive)] font-medium" : "text-[var(--foreground-tertiary)]"}`}>
                 {isOverdue ? <Clock className="h-3 w-3" /> : <Calendar className="h-3 w-3" />}
                 {new Date(task.due_date).toLocaleDateString("de-DE")}
               </span>
@@ -84,7 +84,7 @@ export default function TaskListCard({ task, project, agent, onDelete }: TaskLis
           {onDelete && (
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(task.id); }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground-tertiary)] active:bg-[var(--destructive-subtle)] active:text-red-400 active:border-[var(--destructive-border)] transition-all lg:opacity-0 lg:group-hover:opacity-100"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground-tertiary)] active:bg-[var(--destructive-subtle)] active:text-[var(--destructive)] active:border-[var(--destructive-border)] transition-all lg:opacity-0 lg:group-hover:opacity-100"
             >
               <Trash2 className="h-4 w-4" />
             </button>

@@ -40,23 +40,26 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+      {/* Background */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, var(--background) 0%, var(--surface) 100%)" }} />
+
       {/* Content */}
-      <div className="relative z-10 w-full max-w-[400px]">
+      <div className="relative z-10 w-full max-w-[380px]">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="glass flex h-14 w-14 items-center justify-center mb-4">
-            <Bot className="h-7 w-7 text-[var(--primary-light)]" />
+          <div className="h-14 w-14 rounded-xl bg-[var(--primary)] flex items-center justify-center mb-4 shadow-lg shadow-[var(--primary)]/20">
+            <Bot className="h-7 w-7 text-[var(--background)]" />
           </div>
           <h1 className="text-xl font-bold text-[var(--foreground)]">Mission Control</h1>
-          <p className="text-[13px] text-[var(--foreground-secondary)] mt-1">Sign in to your workspace</p>
+          <p className="text-[13px] text-[var(--foreground-tertiary)] mt-1">Sign in to your workspace</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="glass p-6 space-y-4">
+          <div className="surface-elevated p-6 space-y-4">
             {error && (
-              <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3">
-                <p className="text-xs text-red-400">{error}</p>
+              <div className="rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)] p-3">
+                <p className="text-xs text-[var(--destructive)]">{error}</p>
               </div>
             )}
 
@@ -100,7 +103,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium py-3 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold py-3 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg shadow-[var(--primary)]/20"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

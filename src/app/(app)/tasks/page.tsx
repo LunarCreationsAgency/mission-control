@@ -134,8 +134,8 @@ export default function TasksPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <p className="text-sm text-red-400 mb-4">Failed to load tasks</p>
-        <button onClick={refetchTasks} className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+        <p className="text-sm text-[var(--destructive)] mb-4">Failed to load tasks</p>
+        <button onClick={refetchTasks} className="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
           Retry
         </button>
       </div>
@@ -151,27 +151,27 @@ export default function TasksPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Tasks</h1>
         </div>
         <div className="flex items-center gap-2">
-          <div className="glass flex items-center gap-2 px-3 py-2 text-sm">
+          <div className="surface flex items-center gap-2 px-3 py-2 text-sm">
             <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="font-semibold text-[var(--foreground)]">{sortedTasks.length}</span>
             <span className="text-xs text-[var(--foreground-tertiary)]">{hasFilters ? "filtered" : "total"}</span>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`glass flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+            className={`surface flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
               hasFilters ? "text-[var(--primary-light)] bg-[var(--primary-subtle)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
             }`}
           >
             <Filter className="h-4 w-4" /> Filter
             {hasFilters && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--foreground)]">
                 {[filterProject, filterPriority].filter(Boolean).length}
               </span>
             )}
           </button>
           <button
             onClick={() => setModalOpen(true)}
-            className="glass flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.98]"
+            className="surface flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" /> New
           </button>
@@ -251,7 +251,7 @@ export default function TasksPage() {
 
         <div className="space-y-3">
           {mobileFiltered.length === 0 ? (
-            <div className="glass p-12 text-center">
+            <div className="surface p-12 text-center">
               <p className="text-sm text-[var(--foreground-tertiary)]">
                 {hasFilters ? "No tasks match your filters" : `No tasks in ${statuses.find((s) => s.status === activeStatus)?.label}`}
               </p>
@@ -281,10 +281,10 @@ export default function TasksPage() {
       {deleteConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
           <div className="absolute inset-0 bg-[var(--background)]/90" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative w-full max-w-sm z-10 glass-elevated p-5 space-y-4 animate-fade-in">
+          <div className="relative w-full max-w-sm z-10 surface-elevated p-5 space-y-4 animate-fade-in">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)]">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
+                <AlertTriangle className="h-4 w-4 text-[var(--destructive)]" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Delete Task?</h3>
@@ -300,7 +300,7 @@ export default function TasksPage() {
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-4 py-2 text-sm transition-all"
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-[var(--destructive)] font-medium px-4 py-2 text-sm transition-all"
               >
                 <Trash2 className="h-4 w-4" /> Delete
               </button>

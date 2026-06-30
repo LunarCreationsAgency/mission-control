@@ -110,7 +110,7 @@ export default function CommandPalette() {
   }, [open, results, selectedIndex]);
 
   const typeIcon = {
-    task: <ListTodo className="h-4 w-4 text-blue-400" />,
+    task: <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />,
     project: <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />,
     goal: <Target className="h-4 w-4 text-purple-400" />,
   };

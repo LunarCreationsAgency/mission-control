@@ -33,10 +33,10 @@ import CustomSelect from "@/components/ui/custom-select";
 import { useToast } from "@/components/ui/toast";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string; icon: typeof Flag }> = {
-  low: { bg: "bg-blue-500/10", text: "text-blue-400", label: "Low", icon: Flag },
+  low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]", label: "Low", icon: Flag },
   medium: { bg: "bg-amber-500/10", text: "text-amber-400", label: "Medium", icon: Flag },
   high: { bg: "bg-orange-500/10", text: "text-orange-400", label: "High", icon: Flag },
-  critical: { bg: "bg-red-500/10", text: "text-red-400", label: "Critical", icon: Flag },
+  critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]", label: "Critical", icon: Flag },
 };
 
 const statusConfig: Record<string, { label: string; pill: string; dot: string }> = {
@@ -281,7 +281,7 @@ export default function TaskDetailPage() {
                   </span>
                 )}
                 {isOverdue && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--destructive)] bg-red-500/10 px-2 py-0.5 rounded-full">
                     <Clock className="h-3 w-3" /> Overdue
                   </span>
                 )}
@@ -300,7 +300,7 @@ export default function TaskDetailPage() {
               {!deleteConfirm ? (
                 <button
                   onClick={() => setDeleteConfirm(true)}
-                  className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-red-400 transition-all"
+                  className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-[var(--destructive)] transition-all"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -315,7 +315,7 @@ export default function TaskDetailPage() {
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="flex items-center gap-1.5 rounded-md bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-md bg-red-500 px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] hover:bg-red-600 disabled:opacity-50"
                   >
                     {deleting && <Loader2 className="h-3 w-3 animate-spin" />} Delete
                   </button>
@@ -444,7 +444,7 @@ export default function TaskDetailPage() {
                 <button
                   onClick={handleSendFeedback}
                   disabled={!feedbackText.trim() || sendingFeedback}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-3 text-sm transition-all disabled:opacity-40 disabled:hover:bg-[var(--primary)]"
+                  className="flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-3 text-sm transition-all disabled:opacity-40 disabled:hover:bg-[var(--primary)]"
                 >
                   {sendingFeedback ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>
@@ -455,7 +455,7 @@ export default function TaskDetailPage() {
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--border)]">
                   <button
                     onClick={handleApprove}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 text-sm transition-all"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[var(--foreground)] font-medium px-4 py-2 text-sm transition-all"
                   >
                     <Check className="h-4 w-4" /> Approve
                   </button>
@@ -518,7 +518,7 @@ export default function TaskDetailPage() {
                   <button
                     onClick={handleReassign}
                     disabled={!newAssignee || reassigning}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-3 py-1.5 text-xs transition-all disabled:opacity-40"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-3 py-1.5 text-xs transition-all disabled:opacity-40"
                   >
                     {reassigning && <Loader2 className="h-3 w-3 animate-spin" />}
                     Reassign
@@ -564,7 +564,7 @@ export default function TaskDetailPage() {
               {task.due_date && (
                 <div className="property-row">
                   <span className="property-label">Due</span>
-                  <span className={`text-sm ${isOverdue ? "text-red-400 font-medium" : "text-[var(--foreground)]"}`}>
+                  <span className={`text-sm ${isOverdue ? "text-[var(--destructive)] font-medium" : "text-[var(--foreground)]"}`}>
                     {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
                   </span>
                 </div>

@@ -68,7 +68,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 function ToastItem({ toast, index, onDismiss }: { toast: Toast; index: number; onDismiss: () => void }) {
   const icons = {
     success: <CheckCircle className="h-4 w-4 text-[var(--success)]" />,
-    error: <AlertTriangle className="h-4 w-4 text-red-400" />,
+    error: <AlertTriangle className="h-4 w-4 text-[var(--destructive)]" />,
     info: <Info className="h-4 w-4 text-[var(--primary-light)]" />,
   };
 

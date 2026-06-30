@@ -60,10 +60,10 @@ export default function GoalDetailPage() {
         <div className="skeleton h-8 w-48 mb-6" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <div className="glass skeleton h-32" />
-            <div className="glass skeleton h-48" />
+            <div className="surface skeleton h-32" />
+            <div className="surface skeleton h-48" />
           </div>
-          <div className="glass skeleton h-64" />
+          <div className="surface skeleton h-64" />
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ export default function GoalDetailPage() {
             </button>
             {!deleteConfirm ? (
               <button onClick={() => setDeleteConfirm(true)}
-                className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-red-400 transition-all"
+                className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-[var(--destructive)] transition-all"
               >
                 <Trash2 className="h-3 w-3" />
               </button>
@@ -119,7 +119,7 @@ export default function GoalDetailPage() {
                   className="rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
                 >Cancel</button>
                 <button onClick={handleDelete} disabled={deleting}
-                  className="flex items-center gap-1.5 rounded-md bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md bg-red-500 px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] hover:bg-red-600 disabled:opacity-50"
                 >
                   {deleting && <Loader2 className="h-3 w-3 animate-spin" />} Delete
                 </button>
@@ -132,7 +132,7 @@ export default function GoalDetailPage() {
       <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <div className="glass p-5">
+            <div className="surface p-5">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-[var(--foreground)]">Progress</h2>
                 <span className="text-xl font-bold text-[var(--foreground)]">{progress}%</span>
@@ -145,14 +145,14 @@ export default function GoalDetailPage() {
               </p>
             </div>
 
-            <div className="glass p-5">
+            <div className="surface p-5">
               <h2 className="text-sm font-semibold text-[var(--foreground)] mb-3">Description</h2>
               <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">{goal.description || "No description provided."}</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="glass p-5">
+            <div className="surface p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-4">Details</h3>
               <div className="space-y-0">
                 <div className="property-row">
@@ -181,7 +181,7 @@ export default function GoalDetailPage() {
               </div>
             </div>
 
-            <div className="glass p-4">
+            <div className="surface p-4">
               <div className="flex justify-between text-[11px] text-[var(--foreground-quaternary)]">
                 <span>Created {new Date(goal.created).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}</span>
                 <span>Updated {new Date(goal.updated).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}</span>

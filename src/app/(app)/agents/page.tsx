@@ -44,7 +44,7 @@ export default function AgentsPage() {
           <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Team</p>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
         </div>
-        <div className="glass flex items-center gap-2 px-3.5 py-2">
+        <div className="surface flex items-center gap-2 px-3.5 py-2">
           <Bot className="h-4 w-4 text-[var(--primary-light)]" />
           <span className="text-sm font-semibold text-[var(--foreground)]">{agents.length}</span>
           <span className="text-xs text-[var(--foreground-tertiary)]">team members</span>
@@ -79,25 +79,25 @@ function AgentCard({
   const initials = agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
   const deptColors: Record<string, string> = {
-    development: "bg-blue-500/10 text-blue-400",
+    development: "bg-blue-500/10 text-[var(--primary-light)]",
     design: "bg-purple-500/10 text-purple-400",
     ops: "bg-amber-500/10 text-amber-400",
-    strategy: "bg-emerald-500/10 text-emerald-400",
+    strategy: "bg-emerald-500/10 text-[var(--success)]",
   };
-  const deptColor = deptColors[agent.department || ""] || "bg-white/5 text-[var(--foreground-tertiary)]";
+  const deptColor = deptColors[agent.department || ""] || "bg-[var(--surface)] text-[var(--foreground-tertiary)]";
 
   return (
     <Link href={`/agents/${agent.id}`} className="block active:scale-[0.98] transition-transform">
       <div className="bg-[var(--surface-elevated)] rounded-lg p-4">
         {/* Top row: avatar + name + status toggle */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary-light)]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-light)]">
             <Bot className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-base font-semibold text-[var(--foreground)] truncate">{agent.name}</h3>
-              <span className={`inline-flex items-center gap-1 text-[10px] font-medium rounded-lg px-2 py-0.5 ${agent.paused ? "bg-red-500/10 text-red-400" : "bg-[var(--success)]/10 text-[var(--success)]"}`}>
+              <span className={`inline-flex items-center gap-1 text-[10px] font-medium rounded-lg px-2 py-0.5 ${agent.paused ? "bg-red-500/10 text-[var(--destructive)]" : "bg-[var(--success-subtle)] text-[var(--success)]"}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-red-400" : "bg-[var(--success)]"}`} />
                 {agent.paused ? "Paused" : "Active"}
               </span>
@@ -113,8 +113,8 @@ function AgentCard({
             disabled={isUpdating}
             className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
               agent.paused
-                ? "bg-[var(--success)]/10 text-[var(--success)] active:bg-[var(--success)]/20"
-                : "bg-red-500/10 text-red-400 active:bg-red-500/20"
+                ? "bg-[var(--success-subtle)] text-[var(--success)] active:bg-[var(--success-subtle)]"
+                : "bg-red-500/10 text-[var(--destructive)] active:bg-red-500/20"
             }`}
           >
             {isUpdating ? (

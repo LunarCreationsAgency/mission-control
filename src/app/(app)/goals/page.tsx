@@ -62,19 +62,19 @@ export default function GoalsPage() {
   if (loading) return <GoalsSkeleton />;
 
   return (
-    <div className="px-4 lg:px-6 py-4 lg:py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-1">Objectives</p>
-          <h1 className="text-2xl font-semibold text-[var(--foreground)] tracking-tight">Goals</h1>
+          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Goals</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Track objectives and milestones</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5">
-            <Target className="h-4 w-4 text-[var(--primary-light)]" />
+          <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5">
+            <Target className="h-4 w-4 text-[var(--primary)]" />
             <span className="text-sm font-semibold text-[var(--foreground)]">{goals.length}</span>
           </div>
           <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-4 py-2 text-sm transition-all"
+            className="flex items-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold px-4 py-2.5 text-sm transition-all"
           >
             <Plus className="h-4 w-4" /> New Goal
           </button>
@@ -82,17 +82,17 @@ export default function GoalsPage() {
       </div>
 
       {goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24">
+        <div className="flex flex-col items-center justify-center py-24 surface">
           <Target className="h-10 w-10 text-[var(--foreground-quaternary)] mb-4" />
           <p className="text-sm text-[var(--foreground-tertiary)] mb-4">No goals yet</p>
           <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)]"
+            className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--background)] hover:bg-[var(--primary-dark)]"
           >
             <Plus className="h-4 w-4" /> Create Goal
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {goals.map((goal) => (
             <GoalCard key={goal.id} goal={goal}
               onEdit={() => { setEditingGoal(goal); setModalOpen(true); }}
@@ -124,7 +124,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
   const isDeleting = deletingId === goal.id;
 
   return (
-    <div className="group glass-hover relative">
+    <div className="group surface-hover relative">
       <Link href={`/goals/${goal.id}`} className="block p-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
           </div>
           <div className="flex items-center gap-1">
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--foreground-quaternary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground-secondary)] transition-all"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--foreground-quaternary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground-secondary)] transition-all"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
@@ -144,7 +144,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
               e.stopPropagation();
               if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); }
             }}
-              className={`flex h-7 w-7 items-center justify-center rounded-md transition-all ${isDeleting ? "bg-[var(--destructive-subtle)] text-red-400" : "text-[var(--foreground-quaternary)] hover:bg-[var(--destructive-subtle)] hover:text-red-400"}`}
+              className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${isDeleting ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : "text-[var(--foreground-quaternary)] hover:bg-[var(--destructive-subtle)] hover:text-[var(--destructive)]"}`}
             >
               {isDeleting ? <span className="text-[10px] font-bold">OK?</span> : <Trash2 className="h-3.5 w-3.5" />}
             </button>
@@ -184,17 +184,17 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
 
 function GoalsSkeleton() {
   return (
-    <div className="px-4 lg:px-6 py-4 lg:py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <div className="skeleton h-3 w-16 mb-2" />
-          <div className="skeleton h-8 w-24" />
+          <div className="skeleton h-8 w-24 mb-2" />
+          <div className="skeleton h-4 w-48" />
         </div>
-        <div className="skeleton h-9 w-28" />
+        <div className="skeleton h-10 w-28" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="glass skeleton h-40" />
+          <div key={i} className="surface skeleton h-40" />
         ))}
       </div>
     </div>

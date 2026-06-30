@@ -111,7 +111,7 @@ export default function CustomSelect({
               className={`
                 flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
                 ${option.value === value
-                  ? "bg-[var(--primary)]/10 text-[var(--foreground)]"
+                  ? "bg-[var(--primary-subtle)] text-[var(--foreground)]"
                   : "text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)]"
                 }
               `}

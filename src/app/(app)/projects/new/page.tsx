@@ -1376,18 +1376,18 @@ export default function NewProjectWizard() {
     return (
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center ">
         <div className="text-center max-w-md mx-auto px-6">
-          <div className="w-20 h-20 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 rounded-lg bg-[var(--primary-subtle)] flex items-center justify-center mx-auto mb-6">
             <Sparkles className="h-10 w-10 text-[var(--primary-light)]" />
           </div>
           <h1 className="text-2xl font-bold text-[var(--foreground)] mb-3">New Project</h1>
           <p className="text-sm text-[var(--foreground-secondary)] mb-8">
             Answer a few questions and we'll generate a complete project plan with all the tasks you need.
           </p>
-          <button onClick={startWizard} disabled={loading} className="flex items-center justify-center gap-2 mx-auto rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-8 py-4 text-sm transition-all disabled:opacity-50">
+          <button onClick={startWizard} disabled={loading} className="flex items-center justify-center gap-2 mx-auto rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-8 py-4 text-sm transition-all disabled:opacity-50">
             {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Starting...</> : <><Sparkles className="h-4 w-4" /> Start Project Wizard</>}
           </button>
           <button onClick={() => router.push("/projects")} className="mt-4 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors">Cancel</button>
-          {error && <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-red-400 shrink-0" /><p className="text-xs text-red-400">{error}</p></div>}
+          {error && <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-[var(--destructive)] shrink-0" /><p className="text-xs text-[var(--destructive)]">{error}</p></div>}
         </div>
       </div>
     );
@@ -1404,8 +1404,8 @@ export default function NewProjectWizard() {
           </div>
           <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Your Project Plan</h1>
           <p className="text-sm text-[var(--foreground-secondary)] mb-6">Review the generated plan. You can edit tasks after the project is created.</p>
-          {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-red-400 shrink-0" /><p className="text-xs text-red-400">{error}</p></div>}
-          <div className="glass-elevated p-5 mb-6">
+          {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-[var(--destructive)] shrink-0" /><p className="text-xs text-[var(--destructive)]">{error}</p></div>}
+          <div className="surface-elevated p-5 mb-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">{plan.project_name}</h2>
             <p className="text-sm text-[var(--foreground-secondary)] mt-1">{plan.description}</p>
             <div className="flex gap-6 mt-4 pt-4 border-t border-[var(--border)]">
@@ -1422,7 +1422,7 @@ export default function NewProjectWizard() {
                   <p className="text-xs text-[var(--foreground-tertiary)] mt-0.5">{task.description}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${getTypeColor(task.type)}`}>{task.type}</span>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${task.priority === "high" ? "bg-red-500/10 text-red-400" : task.priority === "medium" ? "bg-orange-500/10 text-orange-400" : "bg-slate-500/10 text-slate-400"}`}>{task.priority}</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${task.priority === "high" ? "bg-red-500/10 text-[var(--destructive)]" : task.priority === "medium" ? "bg-orange-500/10 text-orange-400" : "bg-slate-500/10 text-slate-400"}`}>{task.priority}</span>
                     <span className="text-[10px] text-[var(--foreground-tertiary)]">~{task.estimated_hours}h</span>
                   </div>
                 </div>
@@ -1430,7 +1430,7 @@ export default function NewProjectWizard() {
             ))}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={approvePlan} disabled={creating} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] hover:bg-emerald-600 text-white font-medium px-6 py-4 text-sm transition-all disabled:opacity-50">
+            <button onClick={approvePlan} disabled={creating} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] hover:bg-emerald-600 text-[var(--foreground)] font-medium px-6 py-4 text-sm transition-all disabled:opacity-50">
               {creating ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating...</> : <><Check className="h-4 w-4" /> Approve & Create Project</>}
             </button>
             <button onClick={() => router.push("/projects")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-4 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
@@ -1466,7 +1466,7 @@ export default function NewProjectWizard() {
           {currentStep.description && <p className="text-sm text-[var(--foreground-secondary)]">{currentStep.description}</p>}
         </div>
 
-        {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-red-400 shrink-0" /><p className="text-xs text-red-400">{error}</p></div>}
+        {error && <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3"><AlertTriangle className="h-4 w-4 text-[var(--destructive)] shrink-0" /><p className="text-xs text-[var(--destructive)]">{error}</p></div>}
 
         {/* Options */}
         {currentStep.options && (
@@ -1475,7 +1475,7 @@ export default function NewProjectWizard() {
               const isSelected = isMulti ? selectedMulti.has(opt.value) : selectedSingle === opt.value;
               return (
                 <button key={opt.value} onClick={() => { if (isMulti) toggleMulti(opt.value); else setSelectedSingle(opt.value); setError(null); }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary)]/10" : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-hover)]"}`}>
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary-subtle)]" : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-hover)]"}`}>
                   <span className="text-2xl">{opt.icon}</span>
                   <span className="text-sm font-medium text-[var(--foreground)]">{opt.label}</span>
                   {isSelected && <Check className="h-4 w-4 text-[var(--primary-light)] ml-auto shrink-0" />}
@@ -1497,7 +1497,7 @@ export default function NewProjectWizard() {
         {/* Navigation */}
         <div className="flex gap-3">
           <button onClick={submitAnswer} disabled={loading || (currentStep.required && !hasAnswer)}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium px-6 py-4 text-sm transition-all disabled:opacity-50">
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-6 py-4 text-sm transition-all disabled:opacity-50">
             {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</> : (
               progress.current === progress.total
                 ? <>Generate Plan <Sparkles className="h-4 w-4" /></>

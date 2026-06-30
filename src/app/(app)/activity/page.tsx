@@ -108,8 +108,8 @@ export default function ActivityPage() {
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Activity</h1>
         </div>
-        <div className="glass-elevated border-red-500/20 p-8 text-center ">
-          <p className="text-sm text-red-400">Failed to load activity</p>
+        <div className="surface-elevated border-red-500/20 p-8 text-center ">
+          <p className="text-sm text-[var(--destructive)]">Failed to load activity</p>
           <button onClick={fetchLogs} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">
             Retry
           </button>
@@ -132,21 +132,21 @@ export default function ActivityPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="glass flex items-center gap-2 px-3.5 py-2">
+          <div className="surface flex items-center gap-2 px-3.5 py-2">
             <Activity className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="text-sm font-semibold text-[var(--foreground)]">{filteredLogs.length}</span>
             <span className="text-xs text-[var(--foreground-tertiary)]">{hasFilters ? "filtered" : "events"}</span>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
-              hasFilters ? "text-[var(--primary-light)] bg-[var(--primary)]/10" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+            className={`surface flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+              hasFilters ? "text-[var(--primary-light)] bg-[var(--primary-subtle)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
             }`}
           >
             <Filter className="h-4 w-4" />
             Filter
             {hasFilters && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--foreground)]">
                 {[filterEntity, filterAction].filter(Boolean).length}
               </span>
             )}
@@ -187,7 +187,7 @@ export default function ActivityPage() {
 
       {/* Activity Feed */}
       {filteredLogs.length === 0 ? (
-        <div className="glass-elevated p-12 text-center ">
+        <div className="surface-elevated p-12 text-center ">
           <Activity className="h-12 w-12 text-[var(--foreground-tertiary)] mx-auto mb-4" />
           <p className="text-sm text-[var(--foreground-secondary)]">
             {hasFilters ? "No activity matches your filters" : "No activity yet. Actions will appear here."}
@@ -223,37 +223,37 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
     created: {
       icon: <Plus className="h-3.5 w-3.5" />,
       color: "text-[var(--primary-light)]",
-      bg: "bg-[var(--primary)]/15",
+      bg: "bg-[var(--primary-subtle)]",
       label: "Created",
     },
     updated: {
       icon: <Pencil className="h-3.5 w-3.5" />,
       color: "text-[var(--warning)]",
-      bg: "bg-[var(--warning)]/15",
+      bg: "bg-[var(--warning-subtle)]",
       label: "Updated",
     },
     deleted: {
       icon: <Trash2 className="h-3.5 w-3.5" />,
-      color: "text-red-400",
+      color: "text-[var(--destructive)]",
       bg: "bg-red-500/15",
       label: "Deleted",
     },
     paused: {
       icon: <Pause className="h-3.5 w-3.5" />,
       color: "text-[var(--foreground-tertiary)]",
-      bg: "bg-white/5",
+      bg: "bg-[var(--surface)]",
       label: "Paused",
     },
     resumed: {
       icon: <Play className="h-3.5 w-3.5" />,
       color: "text-[var(--success)]",
-      bg: "bg-[var(--success)]/15",
+      bg: "bg-[var(--success-subtle)]",
       label: "Resumed",
     },
     completed: {
       icon: <CheckCircle2 className="h-3.5 w-3.5" />,
       color: "text-[var(--success)]",
-      bg: "bg-[var(--success)]/15",
+      bg: "bg-[var(--success-subtle)]",
       label: "Completed",
     },
   };
@@ -261,7 +261,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
   const config = actionConfig[log.action] || {
     icon: <Clock className="h-3.5 w-3.5" />,
     color: "text-[var(--foreground-tertiary)]",
-    bg: "bg-white/5",
+    bg: "bg-[var(--surface)]",
     label: log.action,
   };
 

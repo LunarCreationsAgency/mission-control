@@ -71,8 +71,8 @@ export default function SettingsPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <p className="text-sm text-red-400 mb-4">Failed to load settings</p>
-        <button className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-medium">Retry</button>
+        <p className="text-sm text-[var(--destructive)] mb-4">Failed to load settings</p>
+        <button className="px-4 py-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium">Retry</button>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function SettingsPage() {
       {/* Company Settings */}
       <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary-subtle)] text-[var(--primary-light)]">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setEditing(false)} className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)]">Cancel</button>
-                <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-white font-medium px-4 py-2.5 text-sm disabled:opacity-50">
+                <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] font-medium px-4 py-2.5 text-sm disabled:opacity-50">
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   <Check className="h-4 w-4" /> Save
                 </button>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
       {/* App Info */}
       <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary-light)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary-subtle)] text-[var(--primary-light)]">
             <Settings className="h-5 w-5" />
           </div>
           <div>

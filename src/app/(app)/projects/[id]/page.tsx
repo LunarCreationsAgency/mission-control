@@ -14,9 +14,9 @@ import ProjectModal from "@/components/ui/project-modal";
 import { useToast } from "@/components/ui/toast";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  active: { label: "Active", color: "text-[var(--primary-light)]", bg: "bg-[var(--primary)]/15", dot: "bg-[var(--primary)]" },
-  completed: { label: "Completed", color: "text-[var(--success)]", bg: "bg-[var(--success)]/15", dot: "bg-[var(--success)]" },
-  archived: { label: "Archived", color: "text-[var(--foreground-tertiary)]", bg: "bg-white/5", dot: "bg-[var(--foreground-tertiary)]" },
+  active: { label: "Active", color: "text-[var(--primary-light)]", bg: "bg-[var(--primary-subtle)]", dot: "bg-[var(--primary)]" },
+  completed: { label: "Completed", color: "text-[var(--success)]", bg: "bg-[var(--success-subtle)]", dot: "bg-[var(--success)]" },
+  archived: { label: "Archived", color: "text-[var(--foreground-tertiary)]", bg: "bg-[var(--surface)]", dot: "bg-[var(--foreground-tertiary)]" },
 };
 
 const taskStatusConfig: Record<string, { label: string; dot: string }> = {
@@ -138,7 +138,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)]">
           <ArrowLeft className="h-4 w-4" /> Back to Projects
         </Link>
-        <div className="glass-elevated p-12 text-center">
+        <div className="surface-elevated p-12 text-center">
           <p className="text-[var(--foreground-secondary)]">Project not found.</p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   const status = statusConfig[project.status] || statusConfig.active;
   const progress = Math.min(100, Math.max(0, project.progress || 0));
-  const progressColor = progress >= 80 ? "bg-[var(--success)]" : progress >= 40 ? "bg-[var(--primary)]" : "bg-[var(--primary)]/60";
+  const progressColor = progress >= 80 ? "bg-[var(--success)]" : progress >= 40 ? "bg-[var(--primary)]" : "bg-[var(--primary-subtle)]";
   const doneTasks = projectTasks.filter((t) => t.status === "done");
 
   return (
@@ -172,7 +172,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               href={project.deployed_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 bg-[var(--success)]/15 text-[var(--success)] hover:bg-[var(--success)]/25 transition-colors"
+              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg px-2.5 py-1 bg-[var(--success-subtle)] text-[var(--success)] hover:bg-[var(--success-subtle)] transition-colors"
             >
               <Globe className="h-3 w-3" />
               Live
@@ -220,7 +220,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               onClick={() => setActiveTab(tab.id)}
               className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
                 isActive
-                  ? "bg-[var(--primary)]/15 text-[var(--primary-light)]"
+                  ? "bg-[var(--primary-subtle)] text-[var(--primary-light)]"
                   : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
               }`}
             >
@@ -242,7 +242,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-4 lg:space-y-6">
             {/* Progress */}
-            <div className="glass-elevated p-5 lg:p-6">
+            <div className="surface-elevated p-5 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Progress</h2>
                 <span className="text-2xl font-bold text-[var(--foreground)]">{progress}%</span>
@@ -259,7 +259,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Description */}
-            <div className="glass-elevated p-5 lg:p-6">
+            <div className="surface-elevated p-5 lg:p-6">
               <h2 className="mb-3 lg:mb-4 text-base lg:text-lg font-semibold text-[var(--foreground)]">Description</h2>
               <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
                 {project.description || "No description provided."}
@@ -267,7 +267,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Recent Tasks */}
-            <div className="glass-elevated p-5 lg:p-6">
+            <div className="surface-elevated p-5 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Recent Tasks</h2>
                 <button
@@ -313,7 +313,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Right Column - Meta */}
           <div className="space-y-4">
-            <div className="glass-elevated p-5">
+            <div className="surface-elevated p-5">
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                 Details
               </h3>
@@ -328,7 +328,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {project.deployed_url && (
-              <div className="glass-elevated p-5">
+              <div className="surface-elevated p-5">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Live URL
                 </h3>
@@ -346,7 +346,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   href={project.deployed_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 mt-3 rounded-xl bg-[var(--primary)]/15 text-[var(--primary-light)] py-2.5 text-sm font-medium hover:bg-[var(--primary)]/25 transition-colors"
+                  className="flex items-center justify-center gap-2 mt-3 rounded-xl bg-[var(--primary-subtle)] text-[var(--primary-light)] py-2.5 text-sm font-medium hover:bg-[var(--primary-subtle)] transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Open Site
@@ -358,8 +358,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               onClick={handleDelete}
               className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl text-sm font-medium transition-all ${
                 deleting
-                  ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
-                  : "bg-[var(--surface)] text-[var(--foreground-tertiary)] hover:bg-red-500/15 hover:text-red-400"
+                  ? "bg-red-500/15 text-[var(--destructive)] hover:bg-red-500/25"
+                  : "bg-[var(--surface)] text-[var(--foreground-tertiary)] hover:bg-red-500/15 hover:text-[var(--destructive)]"
               }`}
             >
               <Trash2 className="h-4 w-4" />
@@ -379,7 +379,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {projectTasks.length === 0 ? (
-            <div className="glass-elevated p-12 text-center">
+            <div className="surface-elevated p-12 text-center">
               <p className="text-[var(--foreground-secondary)]">No tasks yet.</p>
               <p className="text-xs text-[var(--foreground-tertiary)] mt-1">
                 Tasks are created automatically when you use the planning wizard.
@@ -495,7 +495,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   return (
     <div className="space-y-6">
       {/* Color Palette */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Palette className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Color Palette</h2>
@@ -566,7 +566,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Typography */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Type className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Typography</h2>
@@ -602,7 +602,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Logo */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Image className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Logo</h2>
@@ -627,7 +627,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* Design Vibe */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Design Vibe</h2>
@@ -649,7 +649,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl bg-[var(--primary)] text-white px-5 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] px-5 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {saving ? "Saving..." : "Save Design Tokens"}
@@ -805,7 +805,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   return (
     <div className="space-y-6">
       {/* Vercel Connection */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <Rocket className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Vercel Connection</h2>
@@ -833,7 +833,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                     {copied ? <Check className="h-4 w-4 text-[var(--success)]" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
-                <a href={project.deployed_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-white py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+                <a href={project.deployed_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
                   <ExternalLink className="h-4 w-4" /> Open Live Site
                 </a>
               </div>
@@ -844,7 +844,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             <button
               onClick={handleDeploy}
               disabled={deploying}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-white py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--primary)] text-[var(--foreground)] py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
             >
               <Rocket className="h-4 w-4" />
               {deploying ? "Deploying..." : "Deploy to Production"}
@@ -868,7 +868,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                 <button
                   onClick={handleCreateProject}
                   disabled={creating || !newProjectName.trim()}
-                  className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+                  className="rounded-lg bg-[var(--primary)] text-[var(--foreground)] px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
                 >
                   {creating ? "..." : "Create"}
                 </button>
@@ -879,7 +879,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
       </div>
 
       {/* GitHub Repo */}
-      <div className="glass-elevated p-5 lg:p-6">
+      <div className="surface-elevated p-5 lg:p-6">
         <div className="flex items-center gap-2 mb-5">
           <ExternalLink className="h-5 w-5 text-[var(--primary-light)]" />
           <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">GitHub Repository</h2>
@@ -904,7 +904,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
               </div>
               <button
                 onClick={() => { setGithubRepo(""); onUpdate({ github_repo: "" }); }}
-                className="text-xs text-[var(--foreground-tertiary)] hover:text-red-400 transition-colors"
+                className="text-xs text-[var(--foreground-tertiary)] hover:text-[var(--destructive)] transition-colors"
               >
                 Unlink repository
               </button>
@@ -927,7 +927,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                   <button
                     onClick={handleCreateRepo}
                     disabled={creating || !githubRepo.trim()}
-                    className="rounded-lg bg-[var(--primary)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
+                    className="rounded-lg bg-[var(--primary)] text-[var(--foreground)] px-4 py-2.5 text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50"
                   >
                     {creating ? "..." : "Create"}
                   </button>
@@ -960,7 +960,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
       {/* Deployment History */}
       {project.vercel_project_id && (
-        <div className="glass-elevated p-5 lg:p-6">
+        <div className="surface-elevated p-5 lg:p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Deployment History</h2>
             <button onClick={loadDeployments} disabled={loadingDeployments} className="text-xs text-[var(--primary-light)] hover:underline">

@@ -76,10 +76,10 @@ export default function ProjectsPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <p className="text-sm text-red-400 mb-4">Failed to load projects</p>
+        <p className="text-sm text-[var(--destructive)] mb-4">Failed to load projects</p>
         <button
           onClick={fetchData}
-          className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-medium"
+          className="px-4 py-2 rounded-xl bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium"
         >
           Retry
         </button>
@@ -104,13 +104,13 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Projects</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="glass flex items-center gap-2 px-3.5 py-2">
+          <div className="surface flex items-center gap-2 px-3.5 py-2">
             <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />
             <span className="text-sm font-semibold">{projects.length}</span>
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="glass flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-[var(--surface-hover)]"
+            className="surface flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-[var(--surface-hover)]"
           >
             <Plus className="h-4 w-4" />
             New Project
@@ -125,7 +125,7 @@ export default function ProjectsPage() {
           <p className="text-sm text-[var(--foreground-secondary)] mb-6">No projects yet</p>
           <button
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-medium text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-medium text-[var(--foreground)]"
           >
             <Plus className="h-4 w-4" />
             Create Project
@@ -149,7 +149,7 @@ export default function ProjectsPage() {
       {/* Mobile: Floating Action Button */}
       <button
         onClick={() => setModalOpen(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[var(--primary)] text-white shadow-lg shadow-blue-500/30 active:scale-90 transition-transform"
+        className="lg:hidden fixed bottom-24 right-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[var(--primary)] text-[var(--foreground)] shadow-lg shadow-blue-500/30 active:scale-90 transition-transform"
         aria-label="New project"
       >
         <Plus className="h-6 w-6" />
@@ -184,18 +184,18 @@ function ProjectCard({
       ? "bg-[var(--success)]"
       : progress >= 40
       ? "bg-[var(--primary)]"
-      : "bg-[var(--primary)]/60";
+      : "bg-[var(--primary-subtle)]";
 
   const statusStyle: Record<string, { label: string; dot: string; bg: string }> = {
-    active: { label: "Active", dot: "bg-[var(--primary)]", bg: "bg-[var(--primary)]/15" },
-    completed: { label: "Done", dot: "bg-[var(--success)]", bg: "bg-[var(--success)]/15" },
-    archived: { label: "Archived", dot: "bg-slate-500", bg: "bg-white/5" },
+    active: { label: "Active", dot: "bg-[var(--primary)]", bg: "bg-[var(--primary-subtle)]" },
+    completed: { label: "Done", dot: "bg-[var(--success)]", bg: "bg-[var(--success-subtle)]" },
+    archived: { label: "Archived", dot: "bg-slate-500", bg: "bg-[var(--surface)]" },
   };
   const status = statusStyle[project.status] || statusStyle.active;
 
   return (
     <div className="lg:group lg:relative">
-      {/* Mobile: Full-width card, no glass-elevated border, proper shadow */}
+      {/* Mobile: Full-width card, no surface-elevated border, proper shadow */}
       <div className="lg:hidden bg-[var(--surface-elevated)] rounded-lg overflow-hidden active:scale-[0.98] transition-transform">
         <Link href={`/projects/${project.id}`} className="block p-4">
           {/* Row 1: Status badge (left) + Delete (right) */}
@@ -212,8 +212,8 @@ function ProjectCard({
               }}
               className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${
                 isDeleting
-                  ? "bg-red-500/20 text-red-400"
-                  : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"
+                  ? "bg-red-500/20 text-[var(--destructive)]"
+                  : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-[var(--destructive)]"
               }`}
             >
               {isDeleting ? (
@@ -254,8 +254,8 @@ function ProjectCard({
         </Link>
       </div>
 
-      {/* Desktop: Liquid glass card */}
-      <div className="hidden lg:block glass-elevated group p-6   relative">
+      {/* Desktop: Liquid surface card */}
+      <div className="hidden lg:block surface-elevated group p-6   relative">
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -264,8 +264,8 @@ function ProjectCard({
           }}
           className={`absolute top-3 right-3 z-10 flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
             isDeleting
-              ? "bg-red-500/20 text-red-400"
-              : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-red-400"
+              ? "bg-red-500/20 text-[var(--destructive)]"
+              : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-[var(--destructive)]"
           }`}
         >
           {isDeleting ? (
@@ -288,7 +288,7 @@ function ProjectCard({
                 {project.name}
               </h3>
             </div>
-            <div className="glass flex items-center justify-center h-11 w-11 shrink-0">
+            <div className="surface flex items-center justify-center h-11 w-11 shrink-0">
               <FolderKanban className="h-5 w-5 text-[var(--primary-light)]" />
             </div>
           </div>

@@ -18,10 +18,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="absolute inset-0 bg-black opacity-10"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--foreground)] tracking-tight">
             {title}
           </h1>
-          <p className="mt-6 text-xl text-white max-w-2xl mx-auto opacity-90">
+          <p className="mt-6 text-xl text-[var(--foreground)] max-w-2xl mx-auto opacity-90">
             {subtitle}
           </p>
           <div className="mt-10">

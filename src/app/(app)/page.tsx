@@ -11,13 +11,6 @@ import {
 import Link from "next/link";
 import TaskModal from "@/components/ui/task-modal";
 
-const statusColors: Record<string, string> = {
-  todo: "#94a3b8",
-  in_progress: "#3b82f6",
-  review: "#f59e0b",
-  done: "#10b981",
-};
-
 const statusLabels: Record<string, string> = {
   todo: "To Do",
   in_progress: "In Progress",
@@ -26,11 +19,11 @@ const statusLabels: Record<string, string> = {
 };
 
 const actionIcons: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  created: { icon: <Plus className="h-3 w-3" />, color: "text-[var(--primary-light)]", bg: "bg-[var(--primary)]/15" },
-  updated: { icon: <AlertCircle className="h-3 w-3" />, color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/15" },
-  completed: { icon: <CheckCircle2 className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success)]/15" },
-  paused: { icon: <Pause className="h-3 w-3" />, color: "text-[var(--foreground-tertiary)]", bg: "bg-white/5" },
-  resumed: { icon: <Play className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success)]/15" },
+  created: { icon: <Plus className="h-3 w-3" />, color: "text-[var(--primary-light)]", bg: "bg-[var(--primary-subtle)]" },
+  updated: { icon: <AlertCircle className="h-3 w-3" />, color: "text-[var(--warning)]", bg: "bg-[var(--warning-subtle)]" },
+  completed: { icon: <CheckCircle2 className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success-subtle)]" },
+  paused: { icon: <Pause className="h-3 w-3" />, color: "text-[var(--foreground-tertiary)]", bg: "bg-[var(--foreground-quaternary)]/20" },
+  resumed: { icon: <Play className="h-3 w-3" />, color: "text-[var(--success)]", bg: "bg-[var(--success-subtle)]" },
 };
 
 export default function DashboardPage() {
@@ -42,7 +35,6 @@ export default function DashboardPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
-  const [workerRunning, setWorkerRunning] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -77,358 +69,243 @@ export default function DashboardPage() {
   const recentLogs = logs.slice(0, 6);
   const overdueTasks = tasks.filter((t) => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done");
   const completionRate = tasks.length > 0 ? Math.round((tasksByStatus("done").length / tasks.length) * 100) : 0;
-  const next7Days = new Date();
-  next7Days.setDate(next7Days.getDate() + 7);
-  const upcomingTasks = tasks.filter((t) => t.due_date && new Date(t.due_date) >= new Date() && new Date(t.due_date) <= next7Days && t.status !== "done");
-  const agentTaskCounts = agents.map((a) => ({
-    ...a,
-    taskCount: tasks.filter((t) => t.assignee === a.id).length,
-  })).sort((a, b) => b.taskCount - a.taskCount);
 
-  const reviewCount = tasks.filter((t) => t.status === "review").length;
-
-  const handleCreateTask = async (taskData: Partial<Task>) => {
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(taskData),
-    });
-    if (!res.ok) throw new Error("Failed");
-    await fetchData();
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  if (loading) return <DashboardSkeleton />;
-
   return (
-    <div className="space-y-5 lg:space-y-8  pt-2 lg:pt-0 pb-24 lg:pb-0">
-      {/* Mobile: compact header */}
-      <div className="lg:hidden flex items-center justify-between px-1">
-        <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Dashboard</h1>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Dashboard</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Overview of your agent operations</p>
+        </div>
         <button
           onClick={() => setTaskModalOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3 py-2 text-sm font-medium text-white active:scale-[0.98] transition-all"
+          className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--background)] hover:bg-[var(--primary-dark)] transition-all"
         >
           <Plus className="h-4 w-4" />
-          <span className="text-xs">Task</span>
+          New Task
         </button>
       </div>
 
-      {/* Desktop: full header */}
-      <div className="hidden lg:flex items-end justify-between">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Overview</p>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Dashboard</h1>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-28 rounded-lg" />)}
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/projects/new")} className="glass flex items-center gap-2 px-3.5 py-2 text-sm font-medium transition-all hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]">
-            <FolderKanban className="h-4 w-4" />
-            New Project
-          </button>
-          <button onClick={() => setTaskModalOpen(true)} className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-hover)] transition-all">
-            <Plus className="h-4 w-4" />New Task
-          </button>
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <Link href="/tasks" className="surface-hover p-5 group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center">
+                  <ListTodo className="h-5 w-5 text-[var(--primary)]" />
+                </div>
+                <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
+              </div>
+              <p className="text-2xl font-semibold text-[var(--foreground)]">{tasks.length}</p>
+              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Total Tasks</p>
+              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">
+                  <CircleDot className="h-3 w-3 text-[var(--status-in-progress)]" />
+                  {tasksByStatus("in_progress").length} active
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-[var(--status-review)]" />
+                  {tasksByStatus("review").length} review
+                </span>
+              </div>
+            </Link>
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard title="Tasks" value={tasks.length} subtitle={`${tasksByStatus("in_progress").length} active`} icon={<ListTodo className="h-5 w-5" />} accent="var(--primary)" href="/tasks" />
-        <KpiCard title="Agents" value={activeAgents.length} subtitle={`${agents.length} total`} icon={<Bot className="h-5 w-5" />} accent="var(--success)" href="/agents" />
-        <KpiCard title="Goals" value={activeGoals.length} subtitle={`${goals.length} total`} icon={<Target className="h-5 w-5" />} accent="var(--warning)" href="/goals" />
-        <KpiCard title="Projects" value={projects.length} subtitle={`${activeProjects.length} active`} icon={<FolderKanban className="h-5 w-5" />} accent="#a855f7" href="/projects" />
-      </div>
+            <Link href="/agents" className="surface-hover p-5 group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 rounded-lg bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-[var(--agent)]" />
+                </div>
+                <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
+              </div>
+              <p className="text-2xl font-semibold text-[var(--foreground)]">{agents.length}</p>
+              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Agents</p>
+              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">
+                  <Play className="h-3 w-3 text-[var(--success)]" />
+                  {activeAgents.length} running
+                </span>
+                <span className="flex items-center gap-1">
+                  <Pause className="h-3 w-3 text-[var(--foreground-tertiary)]" />
+                  {agents.filter((a) => a.paused).length} paused
+                </span>
+              </div>
+            </Link>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
-        {/* Left Column — 2/3 */}
-        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-          {/* Task Distribution */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[var(--foreground)]">Task Distribution</h2>
-              <Link href="/tasks" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View all <ArrowUpRight className="h-3 w-3" /></Link>
-            </div>
-            <div className="space-y-3">
-              {["todo", "in_progress", "review", "done"].map((status) => {
-                const count = tasksByStatus(status).length;
-                const pct = tasks.length > 0 ? (count / tasks.length) * 100 : 0;
-                return (
-                  <div key={status} className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 w-24 shrink-0">
-                      <span className="h-2 w-2 rounded-full shrink-0" style={{ background: statusColors[status] }} />
-                      <span className="text-xs text-[var(--foreground-secondary)]">{statusLabels[status]}</span>
-                    </div>
-                    <div className="flex-1 h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: statusColors[status] }} />
-                    </div>
-                    <span className="text-xs font-semibold text-[var(--foreground)] w-6 text-right">{count}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <Link href="/projects" className="surface-hover p-5 group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 rounded-lg bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center">
+                  <FolderKanban className="h-5 w-5 text-[var(--coral)]" />
+                </div>
+                <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
+              </div>
+              <p className="text-2xl font-semibold text-[var(--foreground)]">{projects.length}</p>
+              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Projects</p>
+              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">
+                  <CircleDot className="h-3 w-3 text-[var(--success)]" />
+                  {activeProjects.length} active
+                </span>
+              </div>
+            </Link>
+
+            <Link href="/goals" className="surface-hover p-5 group">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 rounded-lg bg-[var(--success-subtle)] border border-[var(--success-border)] flex items-center justify-center">
+                  <Target className="h-5 w-5 text-[var(--success)]" />
+                </div>
+                <ArrowUpRight className="h-4 w-4 text-[var(--foreground-quaternary)] group-hover:text-[var(--foreground-secondary)] transition-colors" />
+              </div>
+              <p className="text-2xl font-semibold text-[var(--foreground)]">{goals.length}</p>
+              <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Goals</p>
+              <div className="flex items-center gap-3 mt-3 text-xs text-[var(--foreground-quaternary)]">
+                <span className="flex items-center gap-1">
+                  <CircleDot className="h-3 w-3 text-[var(--success)]" />
+                  {activeGoals.length} active
+                </span>
+              </div>
+            </Link>
           </div>
 
-          {/* Active Projects */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[var(--foreground)]">Active Projects</h2>
-              <Link href="/projects" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View all <ArrowUpRight className="h-3 w-3" /></Link>
-            </div>
-            {activeProjects.length === 0 ? (
-              <p className="text-sm text-[var(--foreground-tertiary)]">No active projects</p>
-            ) : (
-              <div className="space-y-4">
-                {activeProjects.slice(0, 4).map((project) => {
-                  const projectTasks = tasks.filter((t) => t.project === project.id);
-                  const doneTasks = projectTasks.filter((t) => t.status === "done");
-                  const progress = projectTasks.length > 0
-                    ? Math.round((doneTasks.length / projectTasks.length) * 100)
-                    : project.progress || 0;
-                  return (
-                    <Link key={project.id} href={`/projects/${project.id}`} className="block group active:scale-[0.98] transition-transform">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <h3 className="text-sm font-medium text-[var(--foreground)] truncate pr-4">{project.name}</h3>
-                        <span className="text-xs font-semibold text-[var(--foreground)]">{progress}%</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
-                        <div className={`h-full rounded-full transition-all ${progress >= 80 ? "bg-[var(--success)]" : "bg-[var(--primary)]"}`} style={{ width: `${progress}%` }} />
-                      </div>
-                      <p className="mt-1 text-[11px] text-[var(--foreground-tertiary)]">{doneTasks.length}/{projectTasks.length} tasks</p>
-                    </Link>
-                  );
-                })}
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* Tasks Breakdown */}
+            <div className="lg:col-span-2 surface p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-semibold text-[var(--foreground)]">Tasks by Status</h2>
+                <Link href="/tasks" className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors">
+                  View all →
+                </Link>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column — 1/3 */}
-        <div className="space-y-4 lg:space-y-6">
-          {/* Overdue */}
-          {overdueTasks.length > 0 && (
-            <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5 border-l-[3px] border-l-red-500">
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="h-4 w-4 text-red-400" />
-                <h2 className="text-sm font-semibold text-red-400">Overdue</h2>
-                <span className="text-xs font-bold text-red-400">{overdueTasks.length}</span>
-              </div>
-              <div className="space-y-2">
-                {overdueTasks.slice(0, 3).map((task) => (
-                  <Link key={task.id} href={`/tasks/${task.id}`} className="flex items-center gap-2 p-2 rounded-lg bg-red-500/5 active:bg-red-500/10 transition-colors">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0" />
-                    <span className="text-xs text-[var(--foreground-secondary)] truncate">{task.title}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Upcoming */}
-          {upcomingTasks.length > 0 && (
-            <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <CalendarDays className="h-4 w-4 text-[var(--primary-light)]" />
-                <h2 className="text-sm font-semibold text-[var(--foreground)]">Upcoming</h2>
-                <span className="text-xs font-bold text-[var(--primary-light)]">{upcomingTasks.length}</span>
-              </div>
-              <div className="space-y-2">
-                {upcomingTasks.slice(0, 3).map((task) => (
-                  <Link key={task.id} href={`/tasks/${task.id}`} className="flex items-center gap-2 p-2 rounded-lg bg-[var(--surface)] active:bg-[var(--surface-elevated)] transition-colors">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary-light)] shrink-0" />
-                    <span className="text-xs text-[var(--foreground-secondary)] truncate">{task.title}</span>
-                    <span className="text-[10px] text-[var(--foreground-tertiary)] shrink-0">{new Date(task.due_date!).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Agent Load */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Agent Load</h2>
-              <Link href="/agents" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
-            </div>
-            {agentTaskCounts.length === 0 ? (
-              <p className="text-sm text-[var(--foreground-tertiary)]">No agents</p>
-            ) : (
               <div className="space-y-3">
-                {agentTaskCounts.slice(0, 5).map((agent) => {
-                  const maxTasks = Math.max(...agentTaskCounts.map((a) => a.taskCount), 1);
-                  const loadPct = (agent.taskCount / maxTasks) * 100;
+                {["todo", "in_progress", "review", "done"].map((status) => {
+                  const count = tasksByStatus(status).length;
+                  const total = tasks.length || 1;
+                  const pct = Math.round((count / total) * 100);
                   return (
-                    <div key={agent.id} className="flex items-center gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-[var(--foreground)] truncate">{agent.name}</p>
-                        <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden mt-1">
-                          <div className="h-full rounded-full bg-[var(--primary)]/70 transition-all" style={{ width: `${loadPct}%` }} />
-                        </div>
+                    <div key={status} className="flex items-center gap-4">
+                      <span className="w-20 text-xs font-medium text-[var(--foreground-tertiary)] capitalize">{statusLabels[status]}</span>
+                      <div className="flex-1 h-2 rounded-full bg-[var(--surface-hover)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor:
+                              status === "todo" ? "var(--status-todo)" :
+                              status === "in_progress" ? "var(--status-in-progress)" :
+                              status === "review" ? "var(--status-review)" :
+                              "var(--status-done)"
+                          }}
+                        />
                       </div>
-                      <span className="text-[11px] font-semibold text-[var(--foreground)]">{agent.taskCount}</span>
+                      <span className="w-10 text-right text-xs font-medium text-[var(--foreground-secondary)]">{count}</span>
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
 
-          {/* Worker Control */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Worker</h2>
-              {reviewCount > 0 && (
-                <span className="text-[10px] font-bold text-[var(--warning)]">{reviewCount} in review</span>
+              {overdueTasks.length > 0 && (
+                <div className="mt-5 p-4 rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <AlertCircle className="h-4 w-4 text-[var(--destructive)]" />
+                    <span className="text-sm font-semibold text-[var(--destructive)]">{overdueTasks.length} overdue task{overdueTasks.length > 1 ? "s" : ""}</span>
+                  </div>
+                  <p className="text-xs text-[var(--foreground-tertiary)]">Some tasks are past their due date and need attention.</p>
+                </div>
               )}
             </div>
-            <button
-              onClick={async () => {
-                try {
-                  setWorkerRunning(true);
-                  const res = await fetch("/api/worker/run", { method: "POST" });
-                  const data = await res.json();
-                  if (data.ok) {
-                    await fetchData();
-                  }
-                } catch { /* ignore */ }
-                setWorkerRunning(false);
-              }}
-              disabled={workerRunning}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)]/15 border border-[var(--primary)]/20 px-4 py-3 text-sm font-medium text-[var(--primary-light)] hover:bg-[var(--primary)]/25 active:scale-[0.98] transition-all disabled:opacity-50"
-            >
-              {workerRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              {workerRunning ? "Running..." : "Run Worker"}
-            </button>
-          </div>
 
-          {/* Activity */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Activity</h2>
-              <Link href="/activity" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
-            </div>
-            {recentLogs.length === 0 ? (
-              <p className="text-sm text-[var(--foreground-tertiary)]">No recent activity</p>
-            ) : (
-              <div className="space-y-3">
-                {recentLogs.map((log) => {
-                  const config = actionIcons[log.action] || { icon: <CircleDot className="h-3 w-3" />, color: "text-[var(--foreground-tertiary)]", bg: "bg-white/5" };
-                  const time = new Date(log.created).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-                  return (
-                    <div key={log.id} className="flex items-start gap-2.5">
-                      <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${config.bg} ${config.color}`}>
-                        {config.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-[var(--foreground)] truncate">
-                          <span className="capitalize">{log.action}</span> {log.entity_type}
-                        </p>
-                        <p className="text-[10px] text-[var(--foreground-tertiary)] truncate">{log.entity_name || time}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Activity Feed */}
+            <div className="surface p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-semibold text-[var(--foreground)]">Recent Activity</h2>
+                <Link href="/activity" className="text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors">
+                  View all →
+                </Link>
               </div>
-            )}
-          </div>
-
-          {/* Goals */}
-          <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">Goals</h2>
-              <Link href="/goals" className="hidden lg:flex items-center gap-1 text-xs text-[var(--foreground-tertiary)]">View <ArrowUpRight className="h-3 w-3" /></Link>
-            </div>
-            {activeGoals.length === 0 ? (
-              <p className="text-sm text-[var(--foreground-tertiary)]">No active goals</p>
-            ) : (
-              <div className="space-y-3">
-                {activeGoals.slice(0, 3).map((goal) => (
-                  <Link key={goal.id} href={`/goals/${goal.id}`} className="block active:scale-[0.98] transition-transform">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-[var(--foreground)] truncate">{goal.name}</span>
-                      <span className="text-xs font-semibold text-[var(--foreground)]">{goal.progress}%</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${goal.progress >= 80 ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} style={{ width: `${goal.progress}%` }} />
-                    </div>
-                  </Link>
-                ))}
+              <div className="space-y-0">
+                {recentLogs.length === 0 ? (
+                  <p className="text-sm text-[var(--foreground-tertiary)] py-8 text-center">No recent activity.</p>
+                ) : (
+                  recentLogs.map((log, i) => {
+                    const action = actionIcons[log.action] || actionIcons.updated;
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 py-3 border-b border-[var(--border)] last:border-b-0"
+                      >
+                        <div className={`mt-0.5 h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${action.bg}`}>
+                          <span className={action.color}>{action.icon}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm text-[var(--foreground-secondary)] leading-snug">
+                            {log.description}
+                          </p>
+                          <p className="text-xs text-[var(--foreground-quaternary)] mt-1">{formatTime(log.created)}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* FAB on mobile */}
-      <button
-        onClick={() => setTaskModalOpen(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[var(--primary)] text-white shadow-lg shadow-blue-500/30 active:scale-90 transition-transform"
-        aria-label="New task"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
+          {/* Quick Access Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Link href="/tasks" className="surface-hover p-5 flex items-center gap-4 group">
+              <div className="h-12 w-12 rounded-xl bg-[var(--primary-subtle)] border border-[var(--primary-border)] flex items-center justify-center shrink-0">
+                <ListTodo className="h-6 w-6 text-[var(--primary)]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[var(--foreground)]">Tasks</p>
+                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{tasks.length} total, {tasksByStatus("in_progress").length} in progress</p>
+              </div>
+            </Link>
 
-      <TaskModal isOpen={taskModalOpen} onClose={() => setTaskModalOpen(false)} onSubmit={handleCreateTask} mode="create" />
-    </div>
-  );
-}
+            <Link href="/agents" className="surface-hover p-5 flex items-center gap-4 group">
+              <div className="h-12 w-12 rounded-xl bg-[var(--agent-subtle)] border border-[var(--agent-border)] flex items-center justify-center shrink-0">
+                <Bot className="h-6 w-6 text-[var(--agent)]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[var(--foreground)]">Agents</p>
+                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{agents.length} total, {activeAgents.length} running</p>
+              </div>
+            </Link>
 
-/* --- Sub-components --- */
-
-function KpiCard({ title, value, subtitle, icon, accent, href }: { title: string; value: number; subtitle: string; icon: React.ReactNode; accent: string; href: string }) {
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    const duration = 800;
-    const steps = 30;
-    const increment = value / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) { setDisplayValue(value); clearInterval(timer); }
-      else { setDisplayValue(Math.floor(current)); }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [value]);
-
-  return (
-    <Link href={href} className="block">
-      <div className="bg-[var(--surface-elevated)] rounded-lg p-4 lg:p-5 active:scale-[0.98] transition-transform">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--foreground-tertiary)]">{title}</p>
-            <h3 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--foreground)]">{displayValue}</h3>
-            <p className="mt-1 text-[11px] text-[var(--foreground-secondary)]">{subtitle}</p>
+            <Link href="/projects" className="surface-hover p-5 flex items-center gap-4 group">
+              <div className="h-12 w-12 rounded-xl bg-[var(--coral-subtle)] border border-[var(--coral)]/25 flex items-center justify-center shrink-0">
+                <FolderKanban className="h-6 w-6 text-[var(--coral)]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[var(--foreground)]">Projects</p>
+                <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{activeProjects.length} active</p>
+              </div>
+            </Link>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-elevated)]">
-            <span style={{ color: accent }}>{icon}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+        </>
+      )}
 
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-5 lg:space-y-8 pt-2 lg:pt-0 pb-24 lg:pb-0">
-      <div className="lg:hidden skeleton h-6 w-24 rounded-lg mb-2" />
-      <div className="hidden lg:flex items-end justify-between">
-        <div><div className="skeleton h-3 w-20 mb-2" /><div className="skeleton h-8 w-32" /></div>
-        <div className="flex gap-2"><div className="skeleton h-9 w-24 rounded-xl" /><div className="skeleton h-9 w-28 rounded-xl" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        {[1,2,3,4].map((i) => <div key={i} className="skeleton h-24 lg:h-28 rounded-lg" />)}
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="skeleton h-56 rounded-lg" />
-          <div className="skeleton h-48 rounded-lg" />
-        </div>
-        <div className="space-y-4">
-          <div className="skeleton h-40 rounded-lg" />
-          <div className="skeleton h-40 rounded-lg" />
-        </div>
-      </div>
+      <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} />
     </div>
   );
 }

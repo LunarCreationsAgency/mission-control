@@ -158,8 +158,8 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
             {error && (
               <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
-                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
-                <p className="text-xs text-red-400">{error}</p>
+                <AlertTriangle className="h-4 w-4 text-[var(--destructive)] shrink-0" />
+                <p className="text-xs text-[var(--destructive)]">{error}</p>
               </div>
             )}
 

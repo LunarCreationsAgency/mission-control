@@ -1,22 +1,26 @@
-"use client";
-
-import type { ReactNode } from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "../globals.css";
 import Navbar from "@/components/layout/navbar";
-import CommandPalette from "@/components/ui/command-palette";
-import { ToastProvider } from "@/components/ui/toast";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Mission Control",
+  description: "AI Agent Management Dashboard",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <ToastProvider>
-        <Navbar />
-        <CommandPalette />
-        <main className="min-h-screen lg:pl-[52px]">
-          <div className="mx-auto max-w-[1600px]">
+    <html lang="en">
+      <body className={inter.className}>
+        <div className="flex h-screen">
+          <Navbar />
+          <main className="flex-1 overflow-auto p-6 lg:p-8">
             {children}
-          </div>
-        </main>
-      </ToastProvider>
-    </>
+          </main>
+        </div>
+      </body>
+    </html>
   );
 }

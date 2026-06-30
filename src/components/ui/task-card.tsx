@@ -16,10 +16,10 @@ interface TaskCardProps {
 }
 
 const priorityConfig: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  low: { bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400", label: "Low" },
+  low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]", dot: "bg-blue-400", label: "Low" },
   medium: { bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400", label: "Medium" },
   high: { bg: "bg-orange-500/10", text: "text-orange-400", dot: "bg-orange-400", label: "High" },
-  critical: { bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400", label: "Critical" },
+  critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]", dot: "bg-red-400", label: "Critical" },
 };
 
 export default function TaskCard({
@@ -101,7 +101,7 @@ export default function TaskCard({
               {priority.label}
             </span>
             {isOverdue && (
-              <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 rounded-md px-1.5 py-0.5">Overdue</span>
+              <span className="text-[10px] font-semibold text-[var(--destructive)] bg-red-500/10 rounded-md px-1.5 py-0.5">Overdue</span>
             )}
           </div>
 
@@ -117,7 +117,7 @@ export default function TaskCard({
               </span>
             )}
             {task.due_date && (
-              <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? "text-red-400" : "text-[var(--foreground-tertiary)]"}`}>
+              <span className={`inline-flex items-center gap-1 text-[11px] ${isOverdue ? "text-[var(--destructive)]" : "text-[var(--foreground-tertiary)]"}`}>
                 <Calendar className="h-3 w-3" />
                 {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
               </span>

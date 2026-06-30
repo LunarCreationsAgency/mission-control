@@ -50,10 +50,10 @@ export default function AgentDetailPage() {
   };
 
   const priorityConfig: Record<string, { bg: string; text: string }> = {
-    low: { bg: "bg-blue-500/10", text: "text-blue-400" },
+    low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]" },
     medium: { bg: "bg-amber-500/10", text: "text-amber-400" },
     high: { bg: "bg-orange-500/10", text: "text-orange-400" },
-    critical: { bg: "bg-red-500/10", text: "text-red-400" },
+    critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]" },
   };
 
   const relativeTime = (date: string) => {
@@ -74,8 +74,8 @@ export default function AgentDetailPage() {
     return (
       <div className="space-y-6 animate-fade-in">
         <div className="skeleton h-5 w-32" />
-        <div className="glass h-28 skeleton" />
-        <div className="glass h-48 skeleton" />
+        <div className="surface h-28 skeleton" />
+        <div className="surface h-48 skeleton" />
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function AgentDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">{agent.name}</h1>
-              <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${agent.paused ? "bg-red-500/10 text-red-400" : "bg-emerald-500/10 text-emerald-400"}`}>
+              <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${agent.paused ? "bg-red-500/10 text-[var(--destructive)]" : "bg-emerald-500/10 text-[var(--success)]"}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-red-400" : "bg-emerald-400"} ${!agent.paused ? "animate-pulse" : ""}`} />
                 {agent.paused ? "Paused" : "Active"}
               </span>
@@ -129,7 +129,7 @@ export default function AgentDetailPage() {
           disabled={toggling}
           className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
             agent.paused
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+              ? "border-emerald-500/20 bg-emerald-500/10 text-[var(--success)] hover:bg-emerald-500/20"
               : "border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
           }`}
         >
@@ -140,23 +140,23 @@ export default function AgentDetailPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="glass p-4">
+        <div className="surface p-4">
           <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
             <Activity className="h-3.5 w-3.5" />
             <span className="text-[11px] font-semibold uppercase tracking-wider">Status</span>
           </div>
-          <p className={`text-lg font-semibold ${agent.paused ? "text-[var(--foreground-tertiary)]" : "text-emerald-400"}`}>
+          <p className={`text-lg font-semibold ${agent.paused ? "text-[var(--foreground-tertiary)]" : "text-[var(--success)]"}`}>
             {agent.paused ? "Paused" : "Active"}
           </p>
         </div>
-        <div className="glass p-4">
+        <div className="surface p-4">
           <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
             <ListTodo className="h-3.5 w-3.5" />
             <span className="text-[11px] font-semibold uppercase tracking-wider">Active</span>
           </div>
           <p className="text-lg font-semibold text-[var(--foreground)]">{activeTasks}</p>
         </div>
-        <div className="glass p-4">
+        <div className="surface p-4">
           <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span className="text-[11px] font-semibold uppercase tracking-wider">Done</span>
@@ -166,7 +166,7 @@ export default function AgentDetailPage() {
       </div>
 
       {/* About */}
-      <div className="glass p-5">
+      <div className="surface p-5">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-3">About</h3>
         <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
           {agent.description || "No description provided."}
@@ -174,7 +174,7 @@ export default function AgentDetailPage() {
       </div>
 
       {/* Assigned Tasks */}
-      <div className="glass p-5">
+      <div className="surface p-5">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-3">Assigned Tasks</h3>
         {agentTasks.length === 0 ? (
           <p className="text-sm text-[var(--foreground-tertiary)]">No tasks assigned</p>
@@ -214,7 +214,7 @@ export default function AgentDetailPage() {
       </div>
 
       {/* Heartbeat */}
-      <div className="glass px-5 py-3">
+      <div className="surface px-5 py-3">
         <div className="flex items-center gap-2 text-xs text-[var(--foreground-tertiary)]">
           <Clock className="h-3.5 w-3.5" />
           <span>Last heartbeat: {agent.last_heartbeat ? relativeTime(agent.last_heartbeat) : "Never"}</span>
