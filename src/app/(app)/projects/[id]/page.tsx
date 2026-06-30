@@ -20,19 +20,19 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
 };
 
 const taskStatusConfig: Record<string, { label: string; dot: string }> = {
-  todo: { label: "To Do", dot: "bg-slate-400" },
+  todo: { label: "To Do", dot: "bg-[var(--foreground-tertiary)]" },
   in_progress: { label: "In Progress", dot: "bg-[var(--primary)]" },
   review: { label: "Review", dot: "bg-[var(--warning)]" },
   done: { label: "Done", dot: "bg-[var(--success)]" },
 };
 
 const taskTypeConfig: Record<string, { icon: string; color: string; bg: string }> = {
-  design: { icon: "🎨", color: "text-purple-300", bg: "bg-purple-500/15" },
-  code: { icon: "💻", color: "text-blue-300", bg: "bg-blue-500/15" },
-  content: { icon: "📝", color: "text-emerald-300", bg: "bg-emerald-500/15" },
-  deploy: { icon: "🚀", color: "text-orange-300", bg: "bg-orange-500/15" },
-  planning: { icon: "📋", color: "text-slate-300", bg: "bg-slate-500/15" },
-  shop: { icon: "🛒", color: "text-pink-300", bg: "bg-pink-500/15" },
+  design: { icon: "🎨", color: "text-[var(--agent-light)]", bg: "bg-purple-500/15" },
+  code: { icon: "💻", color: "text-[var(--primary-light)]", bg: "bg-blue-500/15" },
+  content: { icon: "📝", color: "text-[var(--success)]", bg: "bg-emerald-500/15" },
+  deploy: { icon: "🚀", color: "text-[var(--warning)]", bg: "bg-orange-500/15" },
+  planning: { icon: "📋", color: "text-[var(--foreground-secondary)]", bg: "bg-slate-500/15" },
+  shop: { icon: "🛒", color: "text-[var(--coral)]", bg: "bg-pink-500/15" },
 };
 
 const tabs = [
@@ -124,10 +124,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   if (loading) {
     return (
       <div className="space-y-6 pt-2 lg:pt-0">
-        <div className="skeleton h-8 w-48" />
-        <div className="skeleton h-4 w-32" />
-        <div className="skeleton h-10 w-96 rounded-lg" />
-        <div className="skeleton h-64 rounded-lg" />
+        <div className="surface h-8 w-48" />
+        <div className="surface h-4 w-32" />
+        <div className="surface h-10 w-96 rounded-lg" />
+        <div className="surface h-64 rounded-lg" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
+              className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap min-h-[44px] select-none  ${
                 isActive
                   ? "bg-[var(--primary-subtle)] text-[var(--primary-light)]"
                   : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
@@ -249,7 +249,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="h-3 rounded-full bg-[var(--surface-elevated)] overflow-hidden mb-2">
                 <div
-                  className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor}`}
+                  className={`h-full rounded-full transition-colors ${progressColor}`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -288,7 +288,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                       <Link
                         key={task.id}
                         href={`/tasks/${task.id}`}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors"
                       >
                         <span className="text-lg">{typeConfig.icon}</span>
                         <div className={`h-2 w-2 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -356,7 +356,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
             <button
               onClick={handleDelete}
-              className={`w-full flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
+              className={`w-full flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-colors ${
                 deleting
                   ? "bg-red-500/15 text-[var(--destructive)] hover:bg-red-500/25"
                   : "bg-[var(--surface)] text-[var(--foreground-tertiary)] hover:bg-red-500/15 hover:text-[var(--destructive)]"
@@ -394,7 +394,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   <Link
                     key={task.id}
                     href={`/tasks/${task.id}`}
-                    className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
+                    className="flex items-center gap-3 p-4 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors"
                   >
                     <span className="text-xl">{typeConfig.icon}</span>
                     <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -409,10 +409,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                         </span>
                         {task.priority && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                            task.priority === "critical" ? "bg-red-500/15 text-red-300" :
-                            task.priority === "high" ? "bg-orange-500/15 text-orange-300" :
-                            task.priority === "medium" ? "bg-amber-500/15 text-amber-300" :
-                            "bg-blue-500/15 text-blue-300"
+                            task.priority === "critical" ? "bg-red-500/15 text-[var(--destructive)]" :
+                            task.priority === "high" ? "bg-orange-500/15 text-[var(--warning)]" :
+                            task.priority === "medium" ? "bg-amber-500/15 text-[var(--warning)]" :
+                            "bg-blue-500/15 text-[var(--primary-light)]"
                           }`}>
                             {task.priority}
                           </span>
@@ -465,10 +465,10 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
   const colorPresets = [
     { name: "Cyberpunk", colors: { primary: "#00f0ff", secondary: "#7000ff", accent: "#ff0055", background: "#0a0a1a" } },
     { name: "Minimal", colors: { primary: "#171717", secondary: "#525252", accent: "#ef4444", background: "#fafafa" } },
-    { name: "Nature", colors: { primary: "#059669", secondary: "#10b981", accent: "#f59e0b", background: "#f0fdf4" } },
+    { name: "Nature", colors: { primary: "#059669", secondary: "#10b981", accent: "[var(--primary)]", background: "#f0fdf4" } },
     { name: "Ocean", colors: { primary: "#2563eb", secondary: "#3b82f6", accent: "#06b6d4", background: "#f0f9ff" } },
-    { name: "Sunset", colors: { primary: "#ea580c", secondary: "#f97316", accent: "#eab308", background: "#fff7ed" } },
-    { name: "Dark Luxury", colors: { primary: "#d4af37", secondary: "#a855f7", accent: "#ec4899", background: "#0c0a09" } },
+    { name: "Sunset", colors: { primary: "#ea580c", secondary: "[var(--coral)]", accent: "#eab308", background: "#fff7ed" } },
+    { name: "Dark Luxury", colors: { primary: "#d4af37", secondary: "#a855f7", accent: "#ec4899", background: "[var(--background)]" } },
   ];
 
   const fontOptions = ["Inter", "Roboto", "Poppins", "Playfair Display", "Montserrat", "Space Grotesk", "JetBrains Mono", "Fira Code"];
@@ -509,7 +509,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] transition-colors"
               >
                 <div className="flex gap-0.5">
                   <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.primary }} />
@@ -974,7 +974,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             <div className="space-y-2">
               {deployments.slice(0, 10).map((d) => (
                 <div key={d.id} className="flex items-center gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
-                  <div className={`h-2 w-2 rounded-full ${statusColors[d.state] || "bg-slate-400"}`} />
+                  <div className={`h-2 w-2 rounded-full ${statusColors[d.state] || "bg-[var(--foreground-tertiary)]"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-[var(--foreground)] truncate">{d.meta?.githubCommitMessage || d.id.slice(0, 8)}</p>
                     <p className="text-xs text-[var(--foreground-tertiary)]">{new Date(d.createdAt).toLocaleDateString()}</p>

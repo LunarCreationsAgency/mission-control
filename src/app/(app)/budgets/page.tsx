@@ -16,12 +16,12 @@ export default function BudgetsPage() {
   if (loading) {
     return (
       <div className="space-y-6 pt-2 lg:pt-0 pb-24 lg:pb-0">
-        <div className="lg:hidden skeleton h-6 w-24 rounded-lg mb-2" />
-        <div className="hidden lg:block"><div className="skeleton h-3 w-20 mb-2" /><div className="skeleton h-8 w-32" /></div>
+        <div className="lg:hidden surface h-6 w-24 rounded-lg mb-2" />
+        <div className="hidden lg:block"><div className="surface h-3 w-20 mb-2" /><div className="surface h-8 w-32" /></div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[1,2,3].map(i => <div key={i} className="skeleton h-28 rounded-lg" />)}
+          {[1,2,3].map(i => <div key={i} className="surface h-28 rounded-lg" />)}
         </div>
-        <div className="skeleton h-64 rounded-lg" />
+        <div className="surface h-64 rounded-lg" />
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function BudgetsPage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="block active:scale-[0.98] transition-transform"
+                    className="block  transition-transform"
                   >
                     <div className="flex items-center gap-4 p-3 rounded-lg bg-[var(--surface)]">
                       <div className="flex-1 min-w-0">

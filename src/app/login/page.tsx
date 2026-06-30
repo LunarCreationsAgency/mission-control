@@ -44,7 +44,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="h-12 w-12 rounded-md bg-[var(--primary)] flex items-center justify-center mb-3">
-            <Bot className="h-6 w-6 text-white" />
+            <Bot className="h-6 w-6 text-[var(--foreground)]" />
           </div>
           <h1 className="text-lg font-semibold text-[var(--foreground)] tracking-tight">Mission Control</h1>
           <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Sign in to your workspace</p>
@@ -99,7 +99,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium py-2.5 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium py-2.5 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

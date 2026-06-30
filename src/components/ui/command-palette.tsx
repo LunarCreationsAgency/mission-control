@@ -112,7 +112,7 @@ export default function CommandPalette() {
   const typeIcon = {
     task: <ListTodo className="h-4 w-4 text-[var(--primary-light)]" />,
     project: <FolderKanban className="h-4 w-4 text-[var(--primary-light)]" />,
-    goal: <Target className="h-4 w-4 text-purple-400" />,
+    goal: <Target className="h-4 w-4 text-[var(--agent-light)]" />,
   };
 
   const typeLabel = {
@@ -126,7 +126,7 @@ export default function CommandPalette() {
   const palette = (
     <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] px-4" style={{ isolation: "isolate" }}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
+      <div className="absolute inset-0 bg-[[var(--background)]]/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
       {/* Palette */}
       <div className="relative w-full max-w-xl overflow-hidden rounded-xl" style={{
@@ -173,7 +173,7 @@ export default function CommandPalette() {
                 { label: "Agents", href: "/agents", keys: ["G", "A"] },
               ].map((item) => (
                 <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)] transition-all">
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-elevated)] hover:text-[var(--foreground)] transition-colors">
                   <span>{item.label}</span>
                   <div className="flex gap-1">
                     {item.keys.map((k, i) => (
@@ -189,7 +189,7 @@ export default function CommandPalette() {
               key={`${r.type}-${r.id}`}
               href={r.href}
               onClick={() => setOpen(false)}
-              className={`flex items-center gap-3 px-5 py-3 transition-all ${
+              className={`flex items-center gap-3 px-5 py-3 transition-colors ${
                 i === selectedIndex
                   ? "bg-[var(--surface-hover)]"
                   : "hover:bg-[var(--surface-hover)]"

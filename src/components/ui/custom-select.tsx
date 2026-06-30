@@ -146,7 +146,7 @@ export default function CustomSelect({
           }
         }}
         className={`
-          flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-all
+          flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-colors
           ${disabled
             ? "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-tertiary)] cursor-not-allowed"
             : "border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] cursor-pointer"

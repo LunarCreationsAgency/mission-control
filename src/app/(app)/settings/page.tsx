@@ -57,10 +57,10 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="space-y-6 pt-2 lg:pt-0 pb-24 lg:pb-0">
-        <div className="lg:hidden skeleton h-6 w-24 rounded-lg mb-2" />
+        <div className="lg:hidden surface h-6 w-24 rounded-lg mb-2" />
         <div className="hidden lg:block mb-8">
-          <div className="skeleton h-3 w-20 mb-2" />
-          <div className="skeleton h-8 w-32" />
+          <div className="surface h-3 w-20 mb-2" />
+          <div className="surface h-8 w-32" />
         </div>
         <div className="bg-[var(--surface-elevated)] rounded-lg h-64 animate-pulse" />
         <div className="bg-[var(--surface-elevated)] rounded-lg h-64 animate-pulse" />

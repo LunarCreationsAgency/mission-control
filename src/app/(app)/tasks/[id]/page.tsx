@@ -33,10 +33,10 @@ import CustomSelect from "@/components/ui/custom-select";
 import { useToast } from "@/components/ui/toast";
 
 const priorityConfig: Record<string, { bg: string; text: string; label: string; icon: typeof Flag }> = {
-  low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]", label: "Low", icon: Flag },
-  medium: { bg: "bg-amber-500/10", text: "text-amber-400", label: "Medium", icon: Flag },
-  high: { bg: "bg-orange-500/10", text: "text-orange-400", label: "High", icon: Flag },
-  critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]", label: "Critical", icon: Flag },
+  low: { bg: "bg-[var(--primary-subtle)]", text: "text-[var(--primary-light)]", label: "Low", icon: Flag },
+  medium: { bg: "bg-[var(--warning-subtle)]", text: "text-[var(--warning)]", label: "Medium", icon: Flag },
+  high: { bg: "bg-[var(--warning-subtle)]", text: "text-orange-400", label: "High", icon: Flag },
+  critical: { bg: "bg-[var(--destructive-subtle)]", text: "text-[var(--destructive)]", label: "Critical", icon: Flag },
 };
 
 const statusConfig: Record<string, { label: string; pill: string; dot: string }> = {
@@ -208,12 +208,12 @@ export default function TaskDetailPage() {
     return (
       <div className="flex flex-col h-full">
         <div className="px-6 pt-6 pb-4">
-          <div className="skeleton h-5 w-32 mb-4" />
-          <div className="skeleton h-8 w-64 mb-2" />
-          <div className="skeleton h-4 w-48" />
+          <div className="surface h-5 w-32 mb-4" />
+          <div className="surface h-8 w-64 mb-2" />
+          <div className="surface h-4 w-48" />
         </div>
         <div className="flex-1 px-6">
-          <div className="skeleton h-full w-full rounded-lg" />
+          <div className="surface h-full w-full rounded-lg" />
         </div>
       </div>
     );
@@ -281,7 +281,7 @@ export default function TaskDetailPage() {
                   </span>
                 )}
                 {isOverdue && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--destructive)] bg-red-500/10 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--destructive)] bg-[var(--destructive-subtle)] px-2 py-0.5 rounded-full">
                     <Clock className="h-3 w-3" /> Overdue
                   </span>
                 )}
@@ -293,14 +293,14 @@ export default function TaskDetailPage() {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setEditModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] transition-all"
+                className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] transition-colors"
               >
                 <Pencil className="h-3 w-3" /> Edit
               </button>
               {!deleteConfirm ? (
                 <button
                   onClick={() => setDeleteConfirm(true)}
-                  className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-[var(--destructive)] transition-all"
+                  className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:bg-[var(--destructive-subtle)] hover:border-[var(--destructive-border)] hover:text-[var(--destructive)] transition-colors"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -384,7 +384,7 @@ export default function TaskDetailPage() {
                             {comment.author}
                           </span>
                           {comment.comment_type === "feedback" && (
-                            <span className="text-[10px] font-medium text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">feedback</span>
+                            <span className="text-[10px] font-medium text-[var(--warning)] bg-[var(--warning-subtle)] px-1.5 py-0.5 rounded">feedback</span>
                           )}
                           {comment.comment_type === "reassignment" && (
                             <span className="text-[10px] font-medium text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">reassigned</span>
@@ -432,7 +432,7 @@ export default function TaskDetailPage() {
                     onChange={(e) => setFeedbackText(e.target.value)}
                     placeholder={isReview ? "Tell the agent what to fix…" : "Add a comment…"}
                     rows={1}
-                    className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-quaternary)] focus:outline-none focus:border-[var(--primary-border)] focus:bg-[var(--surface-elevated)] transition-all resize-none overflow-hidden"
+                    className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-quaternary)] focus:outline-none focus:border-[var(--primary-border)] focus:bg-[var(--surface-elevated)] transition-colors resize-none overflow-hidden"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault();
@@ -444,7 +444,7 @@ export default function TaskDetailPage() {
                 <button
                   onClick={handleSendFeedback}
                   disabled={!feedbackText.trim() || sendingFeedback}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-3 text-sm transition-all disabled:opacity-40 disabled:hover:bg-[var(--primary)]"
+                  className="flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-4 py-3 text-sm transition-colors disabled:opacity-40 disabled:hover:bg-[var(--primary)]"
                 >
                   {sendingFeedback ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>
@@ -455,13 +455,13 @@ export default function TaskDetailPage() {
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--border)]">
                   <button
                     onClick={handleApprove}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[var(--foreground)] font-medium px-4 py-2 text-sm transition-all"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[var(--foreground)] font-medium px-4 py-2 text-sm transition-colors"
                   >
                     <Check className="h-4 w-4" /> Approve
                   </button>
                   <button
                     onClick={handleReject}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] px-4 py-2 text-sm transition-all"
+                    className="flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] px-4 py-2 text-sm transition-colors"
                   >
                     <X className="h-4 w-4" /> Request Changes
                   </button>
@@ -501,7 +501,7 @@ export default function TaskDetailPage() {
 
             {/* Reassign Panel */}
             {reassignOpen && (
-              <div className="mt-3 pt-3 border-t border-[var(--border)] animate-fade-in">
+              <div className="mt-3 pt-3 border-t border-[var(--border)] ">
                 <CustomSelect
                   label=""
                   value={newAssignee}
@@ -518,7 +518,7 @@ export default function TaskDetailPage() {
                   <button
                     onClick={handleReassign}
                     disabled={!newAssignee || reassigning}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-3 py-1.5 text-xs transition-all disabled:opacity-40"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] font-medium px-3 py-1.5 text-xs transition-colors disabled:opacity-40"
                   >
                     {reassigning && <Loader2 className="h-3 w-3 animate-spin" />}
                     Reassign

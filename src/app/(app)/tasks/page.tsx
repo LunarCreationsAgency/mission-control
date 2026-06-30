@@ -135,7 +135,7 @@ export default function TasksPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <p className="text-sm text-[var(--destructive)] mb-4">Failed to load tasks</p>
-        <button onClick={refetchTasks} className="px-4 py-2 rounded-md bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+        <button onClick={refetchTasks} className="px-4 py-2 rounded-md bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
           Retry
         </button>
       </div>
@@ -164,14 +164,14 @@ export default function TasksPage() {
           >
             <Filter className="h-4 w-4" /> Filter
             {hasFilters && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--foreground)]">
                 {[filterProject, filterPriority].filter(Boolean).length}
               </span>
             )}
           </button>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)] transition-colors"
+            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--primary-dark)] transition-colors"
           >
             <Plus className="h-4 w-4" /> New
           </button>

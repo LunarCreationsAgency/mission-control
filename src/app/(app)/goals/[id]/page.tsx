@@ -120,7 +120,7 @@ export default function GoalDetailPage() {
                 className="rounded-md border border-[var(--border)] px-3 py-2 text-xs text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
               >Cancel</button>
               <button onClick={handleDelete} disabled={deleting}
-                className="flex items-center gap-1.5 rounded-md bg-[var(--destructive)] px-3 py-2 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 rounded-md bg-[var(--destructive)] px-3 py-2 text-xs font-medium text-[var(--foreground)] hover:bg-red-600 disabled:opacity-50 transition-colors"
               >
                 {deleting && <Loader2 className="h-3 w-3 animate-spin" />} Delete
               </button>

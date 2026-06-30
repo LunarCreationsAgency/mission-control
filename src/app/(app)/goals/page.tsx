@@ -69,7 +69,7 @@ export default function GoalsPage() {
           <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">Track objectives and milestones</p>
         </div>
         <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-          className="flex items-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white px-4 py-2 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--foreground)] px-4 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> New Goal
         </button>
@@ -80,7 +80,7 @@ export default function GoalsPage() {
           <Target className="h-8 w-8 text-[var(--foreground-quaternary)] mb-3" />
           <p className="text-sm text-[var(--foreground-tertiary)] mb-4">No goals yet</p>
           <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)]"
+            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--primary-dark)]"
           >
             <Plus className="h-4 w-4" /> Create Goal
           </button>
