@@ -14,23 +14,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   onCTAClick 
 }) => {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-20"></div>
+    <div className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
             {title}
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-10">
+          <p className="mt-6 text-xl text-gray-100 max-w-3xl mx-auto">
             {subtitle}
           </p>
-          <div className="flex justify-center">
+          <div className="mt-10">
             <button
               onClick={onCTAClick}
-              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg shadow-lg hover:bg-blue-50 hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-500 focus:ring-white transition-colors duration-300"
               aria-label={`Click to ${ctaText.toLowerCase()}`}
             >
-              <span className="text-lg">{ctaText}</span>
+              {ctaText}
             </button>
           </div>
         </div>
