@@ -3,32 +3,37 @@ import React from 'react';
 interface HeroSectionProps {
   title: string;
   subtitle: string;
-  ctaText: string;
-  onCTAClick: () => void;
+  buttonText: string;
+  onButtonClick: () => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ 
-  title, 
-  subtitle, 
-  ctaText, 
-  onCTAClick 
+const HeroSection: React.FC<HeroSectionProps> = ({
+  title,
+  subtitle,
+  buttonText,
+  onButtonClick
 }) => {
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-full py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6">
-          {title}
-        </h1>
-        <p className="text-xl sm:text-2xl text-blue-100 mb-10 max-w-3xl mx-auto">
-          {subtitle}
-        </p>
-        <button
-          onClick={onCTAClick}
-          className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 shadow-lg"
-          aria-label={`Click to ${ctaText.toLowerCase()}`}
-        >
-          {ctaText}
-        </button>
+    <div className="relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600">
+      <div className="absolute inset-0 bg-black opacity-10"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+        <div className="text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
+            {title}
+          </h1>
+          <p className="mt-6 text-xl text-white max-w-3xl mx-auto opacity-90">
+            {subtitle}
+          </p>
+          <div className="mt-10">
+            <button
+              onClick={onButtonClick}
+              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg shadow-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-50"
+              aria-label={`Click to ${buttonText.toLowerCase()}`}
+            >
+              {buttonText}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
