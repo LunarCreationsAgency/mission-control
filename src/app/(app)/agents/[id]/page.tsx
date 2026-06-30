@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useData } from "@/lib/use-data";
 import { getAgents, getTasks } from "@/lib/data";
 import { type Agent, type Task } from "@/types";
-import { ArrowLeft, Bot, Pause, Play, Clock, Activity, ListTodo, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Bot, Pause, Play, ListTodo, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
@@ -42,18 +42,11 @@ export default function AgentDetailPage() {
     }
   };
 
-  const statusConfig: Record<string, { label: string; pill: string; dot: string }> = {
-    todo: { label: "To Do", pill: "status-pill-todo", dot: "bg-amber-400" },
-    in_progress: { label: "In Progress", pill: "status-pill-in_progress", dot: "bg-blue-400" },
-    review: { label: "Review", pill: "status-pill-review", dot: "bg-violet-400" },
-    done: { label: "Done", pill: "status-pill-done", dot: "bg-emerald-400" },
-  };
-
-  const priorityConfig: Record<string, { bg: string; text: string }> = {
-    low: { bg: "bg-blue-500/10", text: "text-[var(--primary-light)]" },
-    medium: { bg: "bg-amber-500/10", text: "text-amber-400" },
-    high: { bg: "bg-orange-500/10", text: "text-orange-400" },
-    critical: { bg: "bg-red-500/10", text: "text-[var(--destructive)]" },
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    todo: { label: "To Do", color: "text-[var(--warning)]" },
+    in_progress: { label: "In Progress", color: "text-[var(--secondary)]" },
+    review: { label: "Review", color: "text-[var(--agent-light)]" },
+    done: { label: "Done", color: "text-[var(--success)]" },
   };
 
   const relativeTime = (date: string) => {
@@ -72,20 +65,20 @@ export default function AgentDetailPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="skeleton h-5 w-32" />
-        <div className="surface h-28 skeleton" />
-        <div className="surface h-48 skeleton" />
+      <div className="p-8">
+        <div className="h-5 w-32 rounded-md bg-[var(--surface)] animate-pulse mb-6" />
+        <div className="h-24 rounded-md bg-[var(--surface)] animate-pulse mb-4" />
+        <div className="h-48 rounded-md bg-[var(--surface)] animate-pulse" />
       </div>
     );
   }
 
   if (!agent) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="p-8 flex flex-col items-center justify-center h-full">
         <Bot className="h-10 w-10 text-[var(--foreground-quaternary)] mb-3" />
         <p className="text-sm text-[var(--foreground-secondary)]">Agent not found</p>
-        <Link href="/agents" className="mt-3 text-sm text-[var(--primary-light)] hover:underline">
+        <Link href="/agents" className="mt-3 text-sm text-[var(--primary)] hover:text-[var(--primary-light)] transition-colors">
           ← Back to Agents
         </Link>
       </div>
@@ -96,9 +89,9 @@ export default function AgentDetailPage() {
   const completedTasks = agentTasks.filter((t) => t.status === "done").length;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="p-8">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-[var(--foreground-tertiary)]">
+      <div className="flex items-center gap-2 text-xs text-[var(--foreground-tertiary)] mb-6">
         <Link href="/agents" className="hover:text-[var(--foreground-secondary)] transition-colors">
           Agents
         </Link>
@@ -107,16 +100,18 @@ export default function AgentDetailPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)]">
-            <Bot className="h-6 w-6 text-[var(--primary-light)]" />
+          <div className="h-12 w-12 flex items-center justify-center rounded-md bg-[var(--surface-hover)]">
+            <Bot className="h-6 w-6 text-[var(--primary)]" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">{agent.name}</h1>
-              <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${agent.paused ? "bg-red-500/10 text-[var(--destructive)]" : "bg-emerald-500/10 text-[var(--success)]"}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-red-400" : "bg-emerald-400"} ${!agent.paused ? "animate-pulse" : ""}`} />
+              <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md
+                ${agent.paused ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : "bg-[var(--success-subtle)] text-[var(--success)]"}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-[var(--destructive)]" : "bg-[var(--success)]"}`} />
                 {agent.paused ? "Paused" : "Active"}
               </span>
             </div>
@@ -127,85 +122,72 @@ export default function AgentDetailPage() {
         <button
           onClick={() => toggleAgent(agent.paused)}
           disabled={toggling}
-          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
-            agent.paused
-              ? "border-emerald-500/20 bg-emerald-500/10 text-[var(--success)] hover:bg-emerald-500/20"
+          className={`flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors
+            ${agent.paused
+              ? "border-[var(--success)]/20 bg-[var(--success-subtle)] text-[var(--success)] hover:bg-[var(--success)]/15"
               : "border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
-          }`}
+            }`}
         >
-          {toggling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : agent.paused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-          {agent.paused ? "Resume" : "Pause"}
+          {toggling ? (
+            <div className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+          ) : agent.paused ? (
+            <><Play className="h-3.5 w-3.5" /> Resume</>
+          ) : (
+            <><Pause className="h-3.5 w-3.5" /> Pause</>
+          )}
         </button>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="surface p-4">
-          <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
-            <Activity className="h-3.5 w-3.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Status</span>
-          </div>
-          <p className={`text-lg font-semibold ${agent.paused ? "text-[var(--foreground-tertiary)]" : "text-[var(--success)]"}`}>
+          <span className="text-[11px] font-medium text-[var(--foreground-tertiary)] uppercase tracking-wider">Status</span>
+          <p className={`text-lg font-semibold mt-1 ${agent.paused ? "text-[var(--foreground-tertiary)]" : "text-[var(--success)]"}`}>
             {agent.paused ? "Paused" : "Active"}
           </p>
         </div>
         <div className="surface p-4">
-          <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
-            <ListTodo className="h-3.5 w-3.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Active</span>
-          </div>
-          <p className="text-lg font-semibold text-[var(--foreground)]">{activeTasks}</p>
+          <span className="text-[11px] font-medium text-[var(--foreground-tertiary)] uppercase tracking-wider">Active</span>
+          <p className="text-lg font-semibold mt-1 text-[var(--foreground)]">{activeTasks}</p>
         </div>
         <div className="surface p-4">
-          <div className="flex items-center gap-1.5 mb-2 text-[var(--foreground-tertiary)]">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">Done</span>
-          </div>
-          <p className="text-lg font-semibold text-[var(--foreground)]">{completedTasks}</p>
+          <span className="text-[11px] font-medium text-[var(--foreground-tertiary)] uppercase tracking-wider">Done</span>
+          <p className="text-lg font-semibold mt-1 text-[var(--foreground)]">{completedTasks}</p>
         </div>
       </div>
 
       {/* About */}
-      <div className="surface p-5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-3">About</h3>
+      <div className="surface p-5 mb-6">
+        <h3 className="text-xs font-semibold text-[var(--foreground-tertiary)] uppercase tracking-wider mb-3">About</h3>
         <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
           {agent.description || "No description provided."}
         </p>
       </div>
 
       {/* Assigned Tasks */}
-      <div className="surface p-5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-3">Assigned Tasks</h3>
+      <div className="surface p-5 mb-6">
+        <h3 className="text-xs font-semibold text-[var(--foreground-tertiary)] uppercase tracking-wider mb-3">Assigned Tasks</h3>
         {agentTasks.length === 0 ? (
           <p className="text-sm text-[var(--foreground-tertiary)]">No tasks assigned</p>
         ) : (
           <div className="space-y-1">
             {agentTasks.map((task) => {
               const status = statusConfig[task.status] || statusConfig.todo;
-              const priority = priorityConfig[task.priority] || priorityConfig.medium;
               return (
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="flex items-center justify-between rounded-md px-3 py-2.5 hover:bg-[var(--surface-hover)] transition-colors group"
+                  className="flex items-center justify-between rounded-md px-3 py-2.5 hover:bg-[var(--surface-hover)] transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-[var(--foreground)] truncate">{task.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-[10px] font-semibold ${priority.bg} ${priority.text} px-1.5 py-0.5 rounded-full`}>
-                        {task.priority}
+                    {task.due_date && (
+                      <span className="text-[11px] text-[var(--foreground-tertiary)]">
+                        {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
                       </span>
-                      {task.due_date && (
-                        <span className="text-[11px] text-[var(--foreground-tertiary)]">
-                          {new Date(task.due_date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
-                  <span className={`status-pill ${status.pill}`}>
-                    <span className={`dot ${status.dot}`} />
-                    {status.label}
-                  </span>
+                  <span className={`text-xs font-medium ${status.color}`}>{status.label}</span>
                 </Link>
               );
             })}

@@ -20,16 +20,16 @@ const statuses: { status: Task["status"]; label: string }[] = [
 
 const priorities = [
   { value: "", label: "All Priorities", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--foreground-tertiary)]" /> },
-  { value: "low", label: "Low", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
-  { value: "medium", label: "Medium", icon: <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> },
-  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-orange-400" /> },
-  { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
+  { value: "low", label: "Low", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--info)]" /> },
+  { value: "medium", label: "Medium", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" /> },
+  { value: "high", label: "High", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--secondary)]" /> },
+  { value: "critical", label: "Critical", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--destructive)]" /> },
 ];
 
 const sortOptions = [
   { value: "created", label: "Created", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--foreground-tertiary)]" /> },
-  { value: "priority", label: "Priority", icon: <span className="h-1.5 w-1.5 rounded-full bg-red-400" /> },
-  { value: "due_date", label: "Due Date", icon: <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> },
+  { value: "priority", label: "Priority", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--destructive)]" /> },
+  { value: "due_date", label: "Due Date", icon: <span className="h-1.5 w-1.5 rounded-full bg-[var(--info)]" /> },
 ];
 
 const priorityValue: Record<string, number> = {
@@ -44,7 +44,7 @@ export default function TasksPage() {
   const { data: tasks = [], loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useData<Task[]>("tasks", getTasks, { refreshInterval: 30000 });
   const { data: projects = [], loading: projectsLoading } = useData<Project[]>("projects", getProjects, { refreshInterval: 30000 });
 
-  const [activeStatus, setActiveStatus] = useState<Task["status"]>"todo");
+  const [activeStatus, setActiveStatus] = useState<Task["status"]>("todo");
   const [filterProject, setFilterProject] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
   const [sortBy, setSortBy] = useState("created");
@@ -135,7 +135,7 @@ export default function TasksPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <p className="text-sm text-[var(--destructive)] mb-4">Failed to load tasks</p>
-        <button onClick={refetchTasks} className="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--foreground)] text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
+        <button onClick={refetchTasks} className="px-4 py-2 rounded-md bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors">
           Retry
         </button>
       </div>
@@ -143,12 +143,12 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="space-y-6 pt-2 lg:pt-6 pb-24 lg:pb-8">
-      {/* ── Header ── */}
-      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 px-3 lg:px-6">
+    <div className="p-8 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)] mb-1">Task Management</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Tasks</h1>
+          <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">Tasks</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">Manage your agent work items</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="surface flex items-center gap-2 px-3 py-2 text-sm">
@@ -158,29 +158,29 @@ export default function TasksPage() {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`surface flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] ${
-              hasFilters ? "text-[var(--primary-light)] bg-[var(--primary-subtle)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+            className={`surface flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors ${
+              hasFilters ? "bg-[var(--primary-subtle)] text-[var(--primary-light)]" : "text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
             }`}
           >
             <Filter className="h-4 w-4" /> Filter
             {hasFilters && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--foreground)]">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
                 {[filterProject, filterPriority].filter(Boolean).length}
               </span>
             )}
           </button>
           <button
             onClick={() => setModalOpen(true)}
-            className="surface flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.98]"
+            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)] transition-colors"
           >
             <Plus className="h-4 w-4" /> New
           </button>
         </div>
       </div>
 
-      {/* ── Filter Bar ── */}
+      {/* Filter Bar */}
       {showFilters && (
-        <div className="px-3 lg:px-6 flex flex-wrap items-end gap-3 animate-fade-in">
+        <div className="flex flex-wrap items-end gap-3">
           <div className="w-full sm:w-auto sm:min-w-[200px]">
             <CustomSelect label="Project" value={filterProject} options={projectOptions} onChange={(v) => setFilterProject(v)} />
           </div>
@@ -193,7 +193,7 @@ export default function TasksPage() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
+              className="flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors"
             >
               <X className="h-3.5 w-3.5" /> Clear
             </button>
@@ -201,8 +201,8 @@ export default function TasksPage() {
         </div>
       )}
 
-      {/* ── Desktop: Kanban ── */}
-      <div className="hidden lg:flex gap-4 overflow-x-auto pb-4 px-3 lg:px-6">
+      {/* Desktop: Kanban */}
+      <div className="hidden lg:flex gap-4 overflow-x-auto">
         {statuses.map((col) => (
           <KanbanColumn
             key={col.status}
@@ -219,9 +219,9 @@ export default function TasksPage() {
         ))}
       </div>
 
-      {/* ── Mobile: Tab + List ── */}
-      <div className="lg:hidden space-y-4 px-3">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Mobile: Tab + List */}
+      <div className="lg:hidden space-y-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {statuses.map((s) => {
             const count = filteredByStatus(s.status).length;
             const isActive = activeStatus === s.status;
@@ -235,7 +235,7 @@ export default function TasksPage() {
               <button
                 key={s.status}
                 onClick={() => setActiveStatus(s.status)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive ? "bg-[var(--surface-hover)] text-[var(--foreground)] border border-[var(--border-hover)]" : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground-secondary)]"
                 }`}
               >
@@ -256,7 +256,7 @@ export default function TasksPage() {
                 {hasFilters ? "No tasks match your filters" : `No tasks in ${statuses.find((s) => s.status === activeStatus)?.label}`}
               </p>
               {hasFilters && (
-                <button onClick={clearFilters} className="mt-3 text-xs text-[var(--primary-light)] hover:underline">
+                <button onClick={clearFilters} className="mt-3 text-xs text-[var(--primary-light)] hover:text-[var(--primary)] transition-colors">
                   Clear filters
                 </button>
               )}
@@ -274,16 +274,16 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* ── Create Modal ── */}
+      {/* Create Modal */}
       <TaskModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleCreate} mode="create" />
 
-      {/* ── Delete Confirm ── */}
+      {/* Delete Confirm */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
           <div className="absolute inset-0 bg-[var(--background)]/90" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative w-full max-w-sm z-10 surface-elevated p-5 space-y-4 animate-fade-in">
+          <div className="relative w-full max-w-sm z-10 surface-elevated p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--destructive-subtle)] border border-[var(--destructive-subtle)]">
                 <AlertTriangle className="h-4 w-4 text-[var(--destructive)]" />
               </div>
               <div>
@@ -294,13 +294,13 @@ export default function TasksPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-all"
+                className="flex-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-[var(--destructive)] font-medium px-4 py-2 text-sm transition-all"
+                className="flex-1 flex items-center justify-center gap-2 rounded-md bg-[var(--destructive-subtle)] border border-[var(--destructive-subtle)] text-[var(--destructive)] font-medium px-4 py-2 text-sm transition-colors"
               >
                 <Trash2 className="h-4 w-4" /> Delete
               </button>
@@ -314,39 +314,24 @@ export default function TasksPage() {
 
 function TasksSkeleton() {
   return (
-    <div className="space-y-6 pt-2 lg:pt-6 pb-24 lg:pb-8">
-      {/* Mobile skeleton */}
-      <div className="lg:hidden space-y-3 px-3">
-        <div className="skeleton h-6 w-24 mb-2" />
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="skeleton h-10 w-28 rounded-lg shrink-0" />
-          ))}
+    <div className="p-8 space-y-6">
+      <div className="flex items-end justify-between">
+        <div>
+          <div className="h-6 w-32 bg-[var(--surface)] rounded mb-1" />
+          <div className="h-4 w-48 bg-[var(--surface)] rounded" />
         </div>
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="skeleton h-32 rounded-lg" />
-        ))}
+        <div className="h-9 w-24 bg-[var(--surface)] rounded" />
       </div>
-      {/* Desktop skeleton */}
-      <div className="hidden lg:block space-y-6 px-3 lg:px-6">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="skeleton h-3 w-24 mb-2" />
-            <div className="skeleton h-8 w-32" />
-          </div>
-          <div className="skeleton h-9 w-28" />
-        </div>
-        <div className="flex gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex min-w-[270px] flex-1 flex-col">
-              <div className="skeleton h-5 w-24 mb-3" />
-              <div className="flex flex-1 flex-col gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2.5 min-h-[200px]">
-                <div className="skeleton h-24 w-full" />
-                <div className="skeleton h-24 w-full" />
-              </div>
+      <div className="hidden lg:flex gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex min-w-[270px] flex-1 flex-col">
+            <div className="h-5 w-24 bg-[var(--surface)] rounded mb-3" />
+            <div className="flex flex-1 flex-col gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] p-2.5 min-h-[200px]">
+              <div className="h-24 w-full bg-[var(--surface-elevated)] rounded" />
+              <div className="h-24 w-full bg-[var(--surface-elevated)] rounded" />
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

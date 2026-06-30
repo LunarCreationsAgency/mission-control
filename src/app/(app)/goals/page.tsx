@@ -62,31 +62,25 @@ export default function GoalsPage() {
   if (loading) return <GoalsSkeleton />;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Goals</h1>
-          <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Track objectives and milestones</p>
+          <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">Goals</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">Track objectives and milestones</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5">
-            <Target className="h-4 w-4 text-[var(--primary)]" />
-            <span className="text-sm font-semibold text-[var(--foreground)]">{goals.length}</span>
-          </div>
-          <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold px-4 py-2.5 text-sm transition-all"
-          >
-            <Plus className="h-4 w-4" /> New Goal
-          </button>
-        </div>
+        <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
+          className="flex items-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white px-4 py-2 text-sm font-medium transition-colors"
+        >
+          <Plus className="h-4 w-4" /> New Goal
+        </button>
       </div>
 
       {goals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 surface">
-          <Target className="h-10 w-10 text-[var(--foreground-quaternary)] mb-4" />
+          <Target className="h-8 w-8 text-[var(--foreground-quaternary)] mb-3" />
           <p className="text-sm text-[var(--foreground-tertiary)] mb-4">No goals yet</p>
           <button onClick={() => { setEditingGoal(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--background)] hover:bg-[var(--primary-dark)]"
+            className="flex items-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)]"
           >
             <Plus className="h-4 w-4" /> Create Goal
           </button>
@@ -127,24 +121,21 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
     <div className="group surface-hover relative">
       <Link href={`/goals/${goal.id}`} className="block p-5">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-md px-2 py-1 ${status.bg} ${status.color}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-              {status.label}
-            </span>
-          </div>
+          <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-md px-2 py-1 ${status.bg} ${status.color}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+            {status.label}
+          </span>
           <div className="flex items-center gap-1">
             <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--foreground-quaternary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground-secondary)] transition-all"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--foreground-quaternary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground-secondary)] transition-colors"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
             <button onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+              e.preventDefault(); e.stopPropagation();
               if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); }
             }}
-              className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${isDeleting ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : "text-[var(--foreground-quaternary)] hover:bg-[var(--destructive-subtle)] hover:text-[var(--destructive)]"}`}
+              className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${isDeleting ? "bg-[var(--destructive-subtle)] text-[var(--destructive)]" : "text-[var(--foreground-quaternary)] hover:bg-[var(--destructive-subtle)] hover:text-[var(--destructive)]"}`}
             >
               {isDeleting ? <span className="text-[10px] font-bold">OK?</span> : <Trash2 className="h-3.5 w-3.5" />}
             </button>
@@ -162,7 +153,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
             <span className="text-[11px] font-semibold text-[var(--foreground)]">{progress}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-[var(--surface-active)] overflow-hidden">
-            <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
+            <div className={`h-full rounded-full ${progressColor}`} style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -184,17 +175,17 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
 
 function GoalsSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="skeleton h-8 w-24 mb-2" />
-          <div className="skeleton h-4 w-48" />
+          <div className="h-7 w-24 bg-[var(--surface)] rounded-md animate-pulse mb-1" />
+          <div className="h-4 w-48 bg-[var(--surface)] rounded-md animate-pulse" />
         </div>
-        <div className="skeleton h-10 w-28" />
+        <div className="h-9 w-28 bg-[var(--surface)] rounded-md animate-pulse" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="surface skeleton h-40" />
+          <div key={i} className="h-40 bg-[var(--surface)] rounded-md animate-pulse" />
         ))}
       </div>
     </div>

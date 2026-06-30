@@ -39,32 +39,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
-      {/* Background */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, var(--background) 0%, var(--surface) 100%)" }} />
-
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-[380px]">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-[var(--background)]">
+      <div className="w-full max-w-[360px]">
         {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="h-14 w-14 rounded-xl bg-[var(--primary)] flex items-center justify-center mb-4 shadow-lg shadow-[var(--primary)]/20">
-            <Bot className="h-7 w-7 text-[var(--background)]" />
+        <div className="flex flex-col items-center mb-8">
+          <div className="h-12 w-12 rounded-md bg-[var(--primary)] flex items-center justify-center mb-3">
+            <Bot className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-[var(--foreground)]">Mission Control</h1>
-          <p className="text-[13px] text-[var(--foreground-tertiary)] mt-1">Sign in to your workspace</p>
+          <h1 className="text-lg font-semibold text-[var(--foreground)] tracking-tight">Mission Control</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-1">Sign in to your workspace</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="surface-elevated p-6 space-y-4">
+          <div className="surface p-5 space-y-4">
             {error && (
-              <div className="rounded-lg bg-[var(--destructive-subtle)] border border-[var(--destructive-border)] p-3">
+              <div className="rounded-md bg-[var(--destructive-subtle)] border border-[var(--destructive)]/20 p-3">
                 <p className="text-xs text-[var(--destructive)]">{error}</p>
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
+              <label className="text-xs font-medium text-[var(--foreground-tertiary)]">
                 Email
               </label>
               <input
@@ -73,12 +69,12 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
-                className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-all"
+                className="w-full rounded-md bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-colors"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
+              <label className="text-xs font-medium text-[var(--foreground-tertiary)]">
                 Password
               </label>
               <div className="relative">
@@ -88,7 +84,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-all pr-12"
+                  className="w-full rounded-md bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/30 focus:bg-[var(--surface-hover)] transition-colors pr-10"
                 />
                 <button
                   type="button"
@@ -103,7 +99,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-[var(--background)] font-semibold py-3 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg shadow-[var(--primary)]/20"
+              className="w-full flex items-center justify-center gap-2 rounded-md bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-medium py-2.5 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -117,8 +113,7 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Footer */}
-        <p className="text-center text-[11px] text-[var(--foreground-tertiary)] mt-6">
+        <p className="text-center text-xs text-[var(--foreground-quaternary)] mt-6">
           LunarCreationsAgency — AI Agent Orchestration
         </p>
       </div>

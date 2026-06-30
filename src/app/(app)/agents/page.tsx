@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useData } from "@/lib/use-data";
 import { getAgents, updateAgent } from "@/lib/data";
-import { type Agent, type Task } from "@/types";
+import { type Agent } from "@/types";
 import { useRouter } from "next/navigation";
-import { Bot, Play, Pause, Plus } from "lucide-react";
+import { Bot, Play, Pause, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/toast";
 
@@ -31,28 +31,15 @@ export default function AgentsPage() {
   if (loading) return <AgentsSkeleton />;
 
   return (
-    <div className="space-y-6">
-      {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between px-1 mb-2">
-        <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
-        <span className="text-sm text-[var(--foreground-tertiary)]">{agents.length}</span>
-      </div>
-
-      {/* Desktop header */}
-      <div className="hidden lg:flex items-end justify-between">
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">Team</p>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
-        </div>
-        <div className="surface flex items-center gap-2 px-3.5 py-2">
-          <Bot className="h-4 w-4 text-[var(--primary-light)]" />
-          <span className="text-sm font-semibold text-[var(--foreground)]">{agents.length}</span>
-          <span className="text-xs text-[var(--foreground-tertiary)]">team members</span>
+          <h1 className="text-xl font-semibold text-[var(--foreground)] tracking-tight">Agents</h1>
+          <p className="text-sm text-[var(--foreground-tertiary)] mt-0.5">{agents.length} team members</p>
         </div>
       </div>
 
-      {/* Agent Grid */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {agents.map((agent) => (
           <AgentCard
             key={agent.id}
@@ -76,90 +63,77 @@ function AgentCard({
   onTogglePause: (id: string, paused: boolean) => void;
 }) {
   const isUpdating = updatingId === agent.id;
-  const initials = agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
   const deptColors: Record<string, string> = {
-    development: "bg-blue-500/10 text-[var(--primary-light)]",
-    design: "bg-purple-500/10 text-purple-400",
-    ops: "bg-amber-500/10 text-amber-400",
-    strategy: "bg-emerald-500/10 text-[var(--success)]",
+    development: "text-[var(--primary-light)]",
+    design: "text-purple-400",
+    ops: "text-[var(--warning)]",
+    strategy: "text-[var(--success)]",
   };
-  const deptColor = deptColors[agent.department || ""] || "bg-[var(--surface)] text-[var(--foreground-tertiary)]";
+  const deptColor = deptColors[agent.department || ""] || "text-[var(--foreground-tertiary)]";
 
   return (
-    <Link href={`/agents/${agent.id}`} className="block active:scale-[0.98] transition-transform">
-      <div className="bg-[var(--surface-elevated)] rounded-lg p-4">
-        {/* Top row: avatar + name + status toggle */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-light)]">
-            <Bot className="h-6 w-6" />
+    <div className="surface-hover p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-md bg-[var(--surface-hover)] flex items-center justify-center">
+            <Bot className="h-5 w-5 text-[var(--primary)]" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-[var(--foreground)] truncate">{agent.name}</h3>
-              <span className={`inline-flex items-center gap-1 text-[10px] font-medium rounded-lg px-2 py-0.5 ${agent.paused ? "bg-red-500/10 text-[var(--destructive)]" : "bg-[var(--success-subtle)] text-[var(--success)]"}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-red-400" : "bg-[var(--success)]"}`} />
-                {agent.paused ? "Paused" : "Active"}
-              </span>
-            </div>
-            <p className="text-[13px] text-[var(--foreground-tertiary)]">{agent.role}</p>
+          <div>
+            <Link href={`/agents/${agent.id}`} className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--primary-light)] transition-colors">
+              {agent.name}
+            </Link>
+            <p className={`text-xs font-medium mt-0.5 ${deptColor}`}>
+              {agent.department || "General"}
+            </p>
           </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onTogglePause(agent.id, agent.paused);
-            }}
-            disabled={isUpdating}
-            className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
-              agent.paused
-                ? "bg-[var(--success-subtle)] text-[var(--success)] active:bg-[var(--success-subtle)]"
-                : "bg-red-500/10 text-[var(--destructive)] active:bg-red-500/20"
-            }`}
-          >
-            {isUpdating ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            ) : agent.paused ? (
-              <Play className="h-4 w-4" />
-            ) : (
-              <Pause className="h-4 w-4" />
-            )}
-          </button>
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onTogglePause(agent.id, agent.paused);
+          }}
+          disabled={isUpdating}
+          className={`h-7 w-7 rounded-md flex items-center justify-center transition-colors
+            ${agent.paused
+              ? "bg-[var(--success-subtle)] text-[var(--success)] hover:bg-[var(--success)]/15"
+              : "bg-[var(--destructive-subtle)] text-[var(--destructive)] hover:bg-[var(--destructive)]/15"
+            }`}
+        >
+          {isUpdating ? (
+            <div className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+          ) : agent.paused ? (
+            <Play className="h-3.5 w-3.5" />
+          ) : (
+            <Pause className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
 
-        {/* Department */}
-        <span className={`inline-flex text-[11px] font-medium rounded-lg px-2 py-1 ${deptColor}`}>
-          {agent.department}
+      <div className="flex items-center gap-2">
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium
+          ${agent.paused ? "text-[var(--destructive)]" : "text-[var(--success)]"}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${agent.paused ? "bg-[var(--destructive)]" : "bg-[var(--success)]"}`} />
+          {agent.paused ? "Paused" : "Running"}
         </span>
-
-        {/* Skills */}
-        {agent.skills && agent.skills.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {agent.skills.slice(0, 4).map((skill) => (
-              <span key={skill} className="inline-block text-[10px] rounded-lg bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] px-2 py-0.5">
-                {skill}
-              </span>
-            ))}
-            {agent.skills.length > 4 && (
-              <span className="text-[10px] text-[var(--foreground-tertiary)]">+{agent.skills.length - 4}</span>
-            )}
-          </div>
+        {agent.model && (
+          <span className="text-xs text-[var(--foreground-quaternary)]">{agent.model}</span>
         )}
       </div>
-    </Link>
+    </div>
   );
 }
 
 function AgentsSkeleton() {
   return (
-    <div className="space-y-6 pt-2 lg:pt-0 pb-24 lg:pb-0">
-      <div className="lg:hidden skeleton h-6 w-20 rounded-lg mb-2" />
-      <div className="hidden lg:flex items-end justify-between mb-8">
-        <div><div className="skeleton h-3 w-16 mb-2" /><div className="skeleton h-8 w-24" /></div>
-        <div className="skeleton h-9 w-32 rounded-lg" />
-      </div>
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
-        {[1, 2, 3].map((i) => <div key={i} className="bg-[var(--surface-elevated)] rounded-lg h-32 animate-pulse" />)}
+    <div className="p-8">
+      <div className="h-8 w-32 rounded-md bg-[var(--surface)] animate-pulse mb-8" />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-28 rounded-md bg-[var(--surface)] animate-pulse" />
+        ))}
       </div>
     </div>
   );
