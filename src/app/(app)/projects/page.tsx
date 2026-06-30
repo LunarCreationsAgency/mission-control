@@ -159,7 +159,7 @@ export default function ProjectsPage() {
         })}
       </div>
 
-      <ProjectModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleCreate} />
+      <ProjectModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleCreate} />
     </div>
   );
 }
