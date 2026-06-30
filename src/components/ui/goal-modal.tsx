@@ -84,7 +84,7 @@ export default function GoalModal({ isOpen, onClose, onSubmit, goal }: GoalModal
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ isolation: "isolate" }}>
       <div className="absolute inset-0 bg-[#0a0a0f]/95" onClick={onClose} />
       <div className="relative w-full max-w-md z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
-        <div className="overflow-hidden rounded-[24px]" style={{ background: "#16161e", border: "1px solid rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.15)", boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)" }}>
+        <div className="overflow-hidden rounded-xl" style={{ background: "#16161e", border: "1px solid rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.15)", boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)" }}>
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-0">
             <div className="flex items-center gap-3">

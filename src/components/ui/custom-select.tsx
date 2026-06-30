@@ -96,7 +96,7 @@ export default function CustomSelect({
       }}
     >
       <div
-        className="overflow-hidden rounded-[16px] border border-white/[0.08]"
+        className="overflow-hidden rounded-lg border border-[var(--border)]"
         style={{
           background: "#16161e",
           boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",

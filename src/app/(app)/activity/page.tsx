@@ -101,7 +101,7 @@ export default function ActivityPage() {
 
   if (error) {
     return (
-      <div className="space-y-8 page-enter pt-2 lg:pt-0">
+      <div className="space-y-8  pt-2 lg:pt-0">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-widest text-[var(--foreground-tertiary)] mb-2">
             Timeline
@@ -119,7 +119,7 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="space-y-8 page-enter pt-2 lg:pt-0">
+    <div className="space-y-8  pt-2 lg:pt-0">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
@@ -176,7 +176,7 @@ export default function ActivityPage() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.06] transition-all"
+              className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
             >
               <X className="h-3.5 w-3.5" />
               Clear
@@ -272,7 +272,7 @@ function ActivityItem({ log, delay }: { log: ActivityLog; delay: number }) {
 
   return (
     <div
-      className="group flex items-start gap-3 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.04] border-t-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 "
+      className="group flex items-start gap-3 p-3 rounded-2xl bg-white/[0.02] border border-[var(--border)] border-t-white/[0.06] hover:bg-[var(--surface-elevated)] transition-all duration-200 "
       style={{ animationDelay: `${delay}s` }}
     >
       {/* Icon */}

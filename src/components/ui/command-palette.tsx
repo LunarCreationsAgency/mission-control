@@ -129,7 +129,7 @@ export default function CommandPalette() {
       <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
       {/* Palette */}
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[24px]" style={{
+      <div className="relative w-full max-w-xl overflow-hidden rounded-xl" style={{
         background: "#16161e",
         border: "1px solid rgba(255,255,255,0.1)",
         borderTopColor: "rgba(255,255,255,0.15)",

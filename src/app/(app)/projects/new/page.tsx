@@ -1374,7 +1374,7 @@ export default function NewProjectWizard() {
   // NOT STARTED
   if (!session) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center page-enter">
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center ">
         <div className="text-center max-w-md mx-auto px-6">
           <div className="w-20 h-20 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center mx-auto mb-6">
             <Sparkles className="h-10 w-10 text-[var(--primary-light)]" />
@@ -1397,7 +1397,7 @@ export default function NewProjectWizard() {
   if (session.plan) {
     const plan = session.plan;
     return (
-      <div className="min-h-[calc(100vh-64px)] page-enter">
+      <div className="min-h-[calc(100vh-64px)] ">
         <div className="max-w-2xl mx-auto px-5 py-8">
           <div className="flex items-center gap-3 mb-6">
             <button onClick={() => router.push("/projects")} className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"><ArrowLeft className="h-4 w-4" /> Back</button>
@@ -1408,14 +1408,14 @@ export default function NewProjectWizard() {
           <div className="glass-elevated p-5 mb-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">{plan.project_name}</h2>
             <p className="text-sm text-[var(--foreground-secondary)] mt-1">{plan.description}</p>
-            <div className="flex gap-6 mt-4 pt-4 border-t border-white/[0.04]">
+            <div className="flex gap-6 mt-4 pt-4 border-t border-[var(--border)]">
               <div className="text-center"><p className="text-xl font-bold text-[var(--foreground)]">{plan.tasks.length}</p><p className="text-[10px] text-[var(--foreground-tertiary)] uppercase tracking-wider">Tasks</p></div>
               <div className="text-center"><p className="text-xl font-bold text-[var(--foreground)]">{plan.tasks.reduce((a, t) => a + t.estimated_hours, 0)}h</p><p className="text-[10px] text-[var(--foreground-tertiary)] uppercase tracking-wider">Est. Hours</p></div>
             </div>
           </div>
           <div className="space-y-2 mb-8">
             {plan.tasks.map((task, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-[var(--border)]">
                 <span className="text-lg shrink-0">{getTypeIcon(task.type)}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--foreground)]">{task.title}</p>
@@ -1433,7 +1433,7 @@ export default function NewProjectWizard() {
             <button onClick={approvePlan} disabled={creating} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--success)] hover:bg-emerald-600 text-white font-medium px-6 py-4 text-sm transition-all disabled:opacity-50">
               {creating ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating...</> : <><Check className="h-4 w-4" /> Approve & Create Project</>}
             </button>
-            <button onClick={() => router.push("/projects")} className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-4 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06] transition-all">Cancel</button>
+            <button onClick={() => router.push("/projects")} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-6 py-4 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] transition-all">Cancel</button>
           </div>
         </div>
       </div>
@@ -1444,7 +1444,7 @@ export default function NewProjectWizard() {
   if (!currentStep) return null;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] page-enter">
+    <div className="min-h-[calc(100vh-64px)] ">
       <div className="max-w-2xl mx-auto px-5 py-8">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={goBack} className="flex items-center gap-1.5 text-sm text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] transition-colors"><ArrowLeft className="h-4 w-4" /> Back</button>
@@ -1456,7 +1456,7 @@ export default function NewProjectWizard() {
             <span className="text-xs text-[var(--foreground-tertiary)]">Step {progress.current} of {progress.total}</span>
             <span className="text-xs text-[var(--primary-light)] font-medium">{Math.round((progress.current / progress.total) * 100)}%</span>
           </div>
-          <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+          <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
             <div className="h-full rounded-full bg-[var(--primary)] transition-all duration-500" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
           </div>
         </div>
@@ -1475,7 +1475,7 @@ export default function NewProjectWizard() {
               const isSelected = isMulti ? selectedMulti.has(opt.value) : selectedSingle === opt.value;
               return (
                 <button key={opt.value} onClick={() => { if (isMulti) toggleMulti(opt.value); else setSelectedSingle(opt.value); setError(null); }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary)]/10" : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06]"}`}>
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${isSelected ? "border-[var(--primary)]/40 bg-[var(--primary)]/10" : "border-[var(--border)] bg-white/[0.02] hover:bg-[var(--surface-hover)]"}`}>
                   <span className="text-2xl">{opt.icon}</span>
                   <span className="text-sm font-medium text-[var(--foreground)]">{opt.label}</span>
                   {isSelected && <Check className="h-4 w-4 text-[var(--primary-light)] ml-auto shrink-0" />}
@@ -1490,7 +1490,7 @@ export default function NewProjectWizard() {
           <div className="mb-8">
             <input type={currentStep.type === "url" || currentStep.type === "url_multi" ? "url" : "text"} value={textAnswer} onChange={(e) => { setTextAnswer(e.target.value); setError(null); }}
               placeholder={currentStep.placeholder || "Type your answer..."}
-              className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-white/[0.06] transition-all" />
+              className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 focus:bg-[var(--surface-hover)] transition-all" />
           </div>
         )}
 

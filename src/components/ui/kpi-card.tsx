@@ -38,7 +38,7 @@ export default function KpiCard({ title, value, subtitle, icon, accent, delay = 
 
   return (
     <div
-      className="liquid-glass group relative overflow-hidden p-6 hover-lift animated-card"
+      className="glass group relative overflow-hidden p-6 hover-lift animated-card"
       style={{ animationDelay: `${delay}s` }}
     >
       <div
@@ -60,7 +60,7 @@ export default function KpiCard({ title, value, subtitle, icon, accent, delay = 
           )}
         </div>
         <div
-          className="liquid-glass-subtle flex h-11 w-11 shrink-0 items-center justify-center"
+          className="glass flex h-11 w-11 shrink-0 items-center justify-center"
           style={{ color: accent }}
         >
           {icon}

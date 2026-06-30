@@ -186,7 +186,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           </h1>
           <button
             onClick={() => setEditModal(true)}
-            className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-white/[0.06] transition-colors"
+            className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-[var(--surface-hover)] transition-colors"
             title="Edit project"
           >
             <Pencil className="h-3.5 w-3.5 text-[var(--foreground-tertiary)]" />
@@ -221,7 +221,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               className={`snap-start flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px] select-none active:scale-95 ${
                 isActive
                   ? "bg-[var(--primary)]/15 text-[var(--primary-light)]"
-                  : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-white/[0.04]"
+                  : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -247,7 +247,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <h2 className="text-base lg:text-lg font-semibold text-[var(--foreground)]">Progress</h2>
                 <span className="text-2xl font-bold text-[var(--foreground)]">{progress}%</span>
               </div>
-              <div className="h-3 rounded-full bg-white/[0.04] overflow-hidden mb-2">
+              <div className="h-3 rounded-full bg-[var(--surface-elevated)] overflow-hidden mb-2">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor}`}
                   style={{ width: `${progress}%` }}
@@ -288,7 +288,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                       <Link
                         key={task.id}
                         href={`/tasks/${task.id}`}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
                       >
                         <span className="text-lg">{typeConfig.icon}</span>
                         <div className={`h-2 w-2 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -332,7 +332,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">
                   Live URL
                 </h3>
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)]">
                   <Globe className="h-4 w-4 text-[var(--primary-light)]" />
                   <span className="text-xs text-[var(--foreground)] truncate flex-1">{project.deployed_url}</span>
                   <button
@@ -394,7 +394,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                   <Link
                     key={task.id}
                     href={`/tasks/${task.id}`}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-all"
                   >
                     <span className="text-xl">{typeConfig.icon}</span>
                     <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusCfg.dot}`} />
@@ -509,7 +509,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
               <button
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all"
               >
                 <div className="flex gap-0.5">
                   <div className="h-4 w-4 rounded-full" style={{ background: preset.colors.primary }} />
@@ -543,7 +543,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                   type="text"
                   value={c.value}
                   onChange={(e) => setColors({ ...colors, [c.key]: e.target.value })}
-                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[var(--primary)]/40"
+                  className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-[var(--primary)]/40"
                 />
               </div>
             </div>
@@ -577,7 +577,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             <select
               value={fonts.heading}
               onChange={(e) => setFonts({ ...fonts, heading: e.target.value })}
-              className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
+              className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
             >
               {fontOptions.map((f) => (
                 <option key={f} value={f} className="bg-[#1a1a2e] text-white">{f}</option>
@@ -590,7 +590,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             <select
               value={fonts.body}
               onChange={(e) => setFonts({ ...fonts, body: e.target.value })}
-              className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
+              className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40"
             >
               {fontOptions.map((f) => (
                 <option key={f} value={f} className="bg-[#1a1a2e] text-white">{f}</option>
@@ -615,11 +615,11 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
               placeholder="https://..."
-              className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+              className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
             />
           </div>
           {logoUrl && (
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center">
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-[var(--border)] flex items-center justify-center">
               <img src={logoUrl} alt="Logo preview" className="max-h-24 max-w-full object-contain" />
             </div>
           )}
@@ -639,7 +639,7 @@ function DesignTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
             onChange={(e) => setVibe(e.target.value)}
             placeholder="e.g., 'Dark cyberpunk with neon accents. Premium feel, minimal UI, bold typography.'"
             rows={3}
-            className="w-full rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 resize-none"
+            className="w-full rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40 resize-none"
           />
         </div>
       </div>
@@ -813,7 +813,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
         {project.vercel_project_id ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)]">
               <Globe className="h-5 w-5 text-[var(--success)]" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-[var(--foreground-tertiary)]">Vercel Project ID</p>
@@ -823,7 +823,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
 
             {project.deployed_url ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)]">
                   <Globe className="h-5 w-5 text-[var(--success)]" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[var(--foreground-tertiary)]">Live URL</p>
@@ -863,7 +863,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   placeholder="my-awesome-site"
-                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                  className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
                 />
                 <button
                   onClick={handleCreateProject}
@@ -887,7 +887,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
         <div className="space-y-3">
           {project.github_repo ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)]">
                 <ExternalLink className="h-5 w-5 text-[var(--success)]" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-[var(--foreground-tertiary)]">Linked Repository</p>
@@ -922,7 +922,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                     value={githubRepo}
                     onChange={(e) => setGithubRepo(e.target.value)}
                     placeholder="my-awesome-site"
-                    className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                    className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
                   />
                   <button
                     onClick={handleCreateRepo}
@@ -937,9 +937,9 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                 </p>
               </div>
               <div className="flex items-center gap-2 pt-1">
-                <div className="h-px flex-1 bg-white/[0.04]" />
+                <div className="h-px flex-1 bg-[var(--surface-elevated)]" />
                 <span className="text-[10px] text-[var(--foreground-tertiary)]">or link existing</span>
-                <div className="h-px flex-1 bg-white/[0.04]" />
+                <div className="h-px flex-1 bg-[var(--surface-elevated)]" />
               </div>
               <div className="flex gap-2">
                 <input
@@ -947,9 +947,9 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
                   value={githubRepo}
                   onChange={(e) => setGithubRepo(e.target.value)}
                   placeholder="owner/existing-repo"
-                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
+                  className="flex-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] px-3 py-2.5 text-sm text-white placeholder:text-[var(--foreground-tertiary)] focus:outline-none focus:border-[var(--primary)]/40"
                 />
-                <button onClick={handleSaveGithub} className="rounded-lg bg-white/[0.06] text-white px-4 py-2.5 text-sm font-medium hover:bg-white/[0.10] transition-colors">
+                <button onClick={handleSaveGithub} className="rounded-lg bg-[var(--surface-hover)] text-white px-4 py-2.5 text-sm font-medium hover:bg-white/[0.10] transition-colors">
                   Link
                 </button>
               </div>
@@ -973,7 +973,7 @@ function DeployTab({ project, onUpdate }: { project: Project; onUpdate: (u: Part
           ) : (
             <div className="space-y-2">
               {deployments.slice(0, 10).map((d) => (
-                <div key={d.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div key={d.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[var(--border)]">
                   <div className={`h-2 w-2 rounded-full ${statusColors[d.state] || "bg-slate-400"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-[var(--foreground)] truncate">{d.meta?.githubCommitMessage || d.id.slice(0, 8)}</p>

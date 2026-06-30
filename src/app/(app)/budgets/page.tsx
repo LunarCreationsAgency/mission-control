@@ -36,7 +36,7 @@ export default function BudgetsPage() {
   }
 
   return (
-    <div className="space-y-6 page-enter pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-1 mb-2">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Budgets</h1>
@@ -116,7 +116,7 @@ export default function BudgetsPage() {
                           <span className="text-[11px] text-[var(--foreground-tertiary)]">Budget</span>
                           <span className="text-[11px] font-semibold text-[var(--foreground)]">€{project.budget.toLocaleString()}</span>
                         </div>
-                        <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+                        <div className="h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
                           <div className="h-full rounded-full bg-[var(--primary)]" style={{ width: `${pct}%` }} />
                         </div>
                       </div>

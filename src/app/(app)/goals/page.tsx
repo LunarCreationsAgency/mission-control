@@ -62,7 +62,7 @@ export default function GoalsPage() {
   if (loading) return <GoalsSkeleton />;
 
   return (
-    <div className="space-y-6 page-enter pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
       {/* Mobile: compact header */}
       <div className="lg:hidden flex items-center justify-between px-1 mb-2">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Goals</h1>
@@ -148,7 +148,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
             </span>
             <div className="flex gap-1.5 shrink-0">
               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-white/[0.08]"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-white/[0.08]"
               >
                 <Pencil className="h-4 w-4" />
               </button>
@@ -157,7 +157,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
                 e.stopPropagation();
                 if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); setTimeout(() => setDeletingId((prev) => prev === goal.id ? null : prev), 3000); }
               }}
-                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isDeleting ? "bg-red-500/20 text-red-400" : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"}`}
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isDeleting ? "bg-red-500/20 text-red-400" : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"}`}
               >
                 {isDeleting ? <span className="text-[10px] font-bold">OK?</span> : <Trash2 className="h-4 w-4" />}
               </button>
@@ -174,7 +174,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
 
           {/* Row 4: Progress bar + % */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1 h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+            <div className="flex-1 h-1.5 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
               <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
             </div>
             <span className="text-xs font-semibold text-[var(--foreground)] shrink-0">{progress}%</span>
@@ -194,7 +194,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
       <div className="hidden lg:block glass-elevated group p-6   relative">
         <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-white/[0.06] hover:text-white transition-all">
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--foreground-tertiary)] hover:bg-[var(--surface-hover)] hover:text-white transition-all">
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (isDeleting) { onDelete(); setDeletingId(null); } else { setDeletingId(goal.id); } }}
@@ -225,7 +225,7 @@ function GoalCard({ goal, onEdit, onDelete, deletingId, setDeletingId }: {
               <span className="text-[11px] text-[var(--foreground-tertiary)]">Progress</span>
               <span className="text-[11px] font-semibold text-[var(--foreground)]">{progress}%</span>
             </div>
-            <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+            <div className="h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor}`} style={{ width: `${progress}%` }} />
             </div>
           </div>

@@ -110,7 +110,7 @@ export default function ProjectsPage() {
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="glass flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-white/[0.06]"
+            className="glass flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-[var(--surface-hover)]"
           >
             <Plus className="h-4 w-4" />
             New Project
@@ -213,7 +213,7 @@ function ProjectCard({
               className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${
                 isDeleting
                   ? "bg-red-500/20 text-red-400"
-                  : "bg-white/[0.04] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"
+                  : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] active:bg-red-500/20 active:text-red-400"
               }`}
             >
               {isDeleting ? (
@@ -238,7 +238,7 @@ function ProjectCard({
 
           {/* Row 4: Progress bar + % */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="flex-1 h-1.5 rounded-full bg-[var(--surface-hover)] overflow-hidden">
               <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
             </div>
             <span className="text-xs font-semibold text-[var(--foreground)] shrink-0">{progress}%</span>
@@ -265,7 +265,7 @@ function ProjectCard({
           className={`absolute top-3 right-3 z-10 flex items-center justify-center h-7 w-7 rounded-lg transition-all ${
             isDeleting
               ? "bg-red-500/20 text-red-400"
-              : "bg-white/[0.04] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-red-400"
+              : "bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] hover:bg-red-500/20 hover:text-red-400"
           }`}
         >
           {isDeleting ? (
@@ -304,7 +304,7 @@ function ProjectCard({
               <span className="text-[11px] text-[var(--foreground-tertiary)]">Progress</span>
               <span className="text-[11px] font-semibold text-[var(--foreground)]">{progress}%</span>
             </div>
-            <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+            <div className="h-2 rounded-full bg-[var(--surface-elevated)] overflow-hidden">
               <div className={`h-full rounded-full transition-all ${progressColor}`} style={{ width: `${progress}%` }} />
             </div>
           </div>

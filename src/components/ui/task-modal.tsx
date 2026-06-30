@@ -123,7 +123,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialTask, mode
 
       <div className="relative w-full max-w-lg z-10 max-h-[90vh] overflow-y-auto" style={{ animation: "fadeInScale 0.2s ease forwards" }}>
         <div
-          className="overflow-hidden rounded-[24px]"
+          className="overflow-hidden rounded-xl"
           style={{
             background: "#16161e",
             border: "1px solid rgba(255,255,255,0.1)",

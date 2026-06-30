@@ -31,7 +31,7 @@ export default function AgentsPage() {
   if (loading) return <AgentsSkeleton />;
 
   return (
-    <div className="space-y-6 page-enter pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-1 mb-2">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Agents</h1>
@@ -136,7 +136,7 @@ function AgentCard({
         {agent.skills && agent.skills.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {agent.skills.slice(0, 4).map((skill) => (
-              <span key={skill} className="inline-block text-[10px] rounded-lg bg-white/[0.04] text-[var(--foreground-tertiary)] px-2 py-0.5">
+              <span key={skill} className="inline-block text-[10px] rounded-lg bg-[var(--surface-elevated)] text-[var(--foreground-tertiary)] px-2 py-0.5">
                 {skill}
               </span>
             ))}

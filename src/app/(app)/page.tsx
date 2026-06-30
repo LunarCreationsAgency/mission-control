@@ -100,7 +100,7 @@ export default function DashboardPage() {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-5 lg:space-y-8 page-enter pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-5 lg:space-y-8  pt-2 lg:pt-0 pb-24 lg:pb-0">
       {/* Mobile: compact header */}
       <div className="lg:hidden flex items-center justify-between px-1">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Dashboard</h1>

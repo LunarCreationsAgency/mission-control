@@ -78,12 +78,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 page-enter pt-2 lg:pt-0 pb-24 lg:pb-0">
+    <div className="space-y-6  pt-2 lg:pt-0 pb-24 lg:pb-0">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-1">
         <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
         {settings && !editing && (
-          <button onClick={startEditing} className="flex items-center gap-1.5 rounded-xl bg-white/[0.04] px-3 py-2 text-sm text-[var(--foreground-secondary)]">
+          <button onClick={startEditing} className="flex items-center gap-1.5 rounded-xl bg-[var(--surface-elevated)] px-3 py-2 text-sm text-[var(--foreground-secondary)]">
             <Pencil className="h-3.5 w-3.5" /> Edit
           </button>
         )}
@@ -96,7 +96,7 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Settings</h1>
         </div>
         {settings && !editing && (
-          <button onClick={startEditing} className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-white/[0.06]">
+          <button onClick={startEditing} className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]">
             <Pencil className="h-3.5 w-3.5" /> Edit
           </button>
         )}
@@ -119,30 +119,30 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Company Name</label>
-                <input type="text" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="text" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Currency</label>
-                  <input type="text" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                  <input type="text" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Timezone</label>
-                  <input type="text" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                  <input type="text" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">Vercel Token</label>
-                <input type="password" value={form.vercel_token} onChange={(e) => setForm({ ...form, vercel_token: e.target.value })} placeholder="vc_..." className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="password" value={form.vercel_token} onChange={(e) => setForm({ ...form, vercel_token: e.target.value })} placeholder="vc_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
                 <p className="text-[10px] text-[var(--foreground-tertiary)]">vercel.com/account/tokens</p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-tertiary)]">GitHub Token</label>
-                <input type="password" value={form.github_token} onChange={(e) => setForm({ ...form, github_token: e.target.value })} placeholder="ghp_..." className="w-full rounded-xl bg-white/[0.04] border border-white/[0.08] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
+                <input type="password" value={form.github_token} onChange={(e) => setForm({ ...form, github_token: e.target.value })} placeholder="ghp_..." className="w-full rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--primary)]/40" />
                 <p className="text-[10px] text-[var(--foreground-tertiary)]">github.com/settings/tokens</p>
               </div>
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setEditing(false)} className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)]">Cancel</button>
+                <button onClick={() => setEditing(false)} className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--foreground-secondary)]">Cancel</button>
                 <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-white font-medium px-4 py-2.5 text-sm disabled:opacity-50">
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   <Check className="h-4 w-4" /> Save
